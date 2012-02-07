@@ -4,12 +4,12 @@
 Dynamic Host Configuration (DHC)                       T. Mrugalski, Ed.
 Internet-Draft                                                       ISC
 Intended status: Informational                                K. Kinnear
-Expires: December 28, 2011                                         Cisco
-                                                           June 26, 2011
+Expires: April 19, 2012                                            Cisco
+                                                        October 17, 2011
 
 
                       DHCPv6 Failover Requirements
-          draft-mrugalski-dhc-dhcpv6-failover-requirements-00
+             draft-ietf-dhc-dhcpv6-failover-requirements-00
 
 Abstract
 
@@ -40,7 +40,7 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 28, 2011.
+   This Internet-Draft will expire on April 19, 2012.
 
 Copyright Notice
 
@@ -52,9 +52,9 @@ Copyright Notice
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 1]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 1]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    (http://trustee.ietf.org/license-info) in effect on the date of
@@ -108,9 +108,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 2]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 2]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
 Table of Contents
@@ -119,7 +119,7 @@ Table of Contents
    2.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
    3.  Definitions  . . . . . . . . . . . . . . . . . . . . . . . . .  4
    4.  Scope of work  . . . . . . . . . . . . . . . . . . . . . . . .  5
-     4.1.  Failover alternatives  . . . . . . . . . . . . . . . . . .  6
+     4.1.  Alternatives to Failover . . . . . . . . . . . . . . . . .  6
        4.1.1.  Short-lived addresses  . . . . . . . . . . . . . . . .  6
    5.  Failover Scenarios . . . . . . . . . . . . . . . . . . . . . .  6
      5.1.  Hot Standby Model  . . . . . . . . . . . . . . . . . . . .  6
@@ -150,8 +150,8 @@ Table of Contents
    11. Security Considerations  . . . . . . . . . . . . . . . . . . . 17
    12. IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 17
    13. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 17
-   14. References . . . . . . . . . . . . . . . . . . . . . . . . . . 17
-     14.1. Normative References . . . . . . . . . . . . . . . . . . . 17
+   14. References . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+     14.1. Normative References . . . . . . . . . . . . . . . . . . . 18
      14.2. Informative References . . . . . . . . . . . . . . . . . . 18
    Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 18
 
@@ -164,9 +164,9 @@ Table of Contents
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 3]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 3]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
 1.  Requirements Language
@@ -220,9 +220,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 4]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 4]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
       Failover - an ability of one partner to continue offering services
@@ -276,16 +276,16 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 5]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 5]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    Additional documents describing extensions may also be defined.
 
    DHCPv6 Failover requirements are presented in Section 8.
 
-4.1.  Failover alternatives
+4.1.  Alternatives to Failover
 
    There are many scenarios when it seems that a failover capability
    would be useful.  However, there are often much simpler approaches
@@ -332,9 +332,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 6]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 6]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    the network is functional.  This assumption may affect its operation.
@@ -388,9 +388,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 7]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 7]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
 5.6.  Long lived connections
@@ -444,9 +444,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 8]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 8]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    When the two servers are located physically close to each other,
@@ -500,9 +500,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011               [Page 9]
+Mrugalski & Kinnear      Expires April 19, 2012                 [Page 9]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    To make sure that its partner maintains a consistent database, it
@@ -556,9 +556,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 10]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 10]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    protocol.  IPv6 also introduced the concept of deprecated addresses
@@ -612,9 +612,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 11]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 11]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
         'lease stability'.  The failure of either failover partner
@@ -668,9 +668,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 12]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 12]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    protocol, but rather defined as an extension.  The primary reason for
@@ -724,9 +724,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 13]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 13]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
 9.1.2.  Goals lead to Concepts
@@ -780,9 +780,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 14]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 14]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    expired and then also waits until the MCLT has passed, it knows that
@@ -836,9 +836,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 15]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 15]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
 9.1.4.  Network Partition Events
@@ -892,9 +892,9 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 16]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 16]
 
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
 
 
    DHCPv4 failover protocol is an optional extension to the failover
@@ -937,21 +937,26 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
    Sheng, Yu Fu, Greg Gabil and Bernie Volz for their comments and
    feedback.
 
+   This work has been partially supported by Gdansk University of
+   Technology and the Polish Ministry of Science and Higher Education
+   under the European Regional Development Fund, Grant No.
+   POIG.01.01.02-00-045/09-00 (Future Internet Engineering Project).
+
 
 14.  References
+
+
+
+
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 17]
+
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
+
 
 14.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
-
-
-
-
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 17]
-
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
-
 
    [RFC2131]  Droms, R., "Dynamic Host Configuration Protocol",
               RFC 2131, March 1997.
@@ -976,8 +981,8 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
    [I-D.ietf-dhc-dhcpv6-redundancy-consider]
               Brzozowski, J., Tremblay, J., Chen, J., and T. Mrugalski,
               "DHCPv6 Redundancy Deployment Considerations",
-              draft-ietf-dhc-dhcpv6-redundancy-consider-00 (work in
-              progress), April 2011.
+              draft-ietf-dhc-dhcpv6-redundancy-consider-01 (work in
+              progress), August 2011.
 
    [RFC2136]  Vixie, P., Thomson, S., Rekhter, Y., and J. Bound,
               "Dynamic Updates in the Domain Name System (DNS UPDATE)",
@@ -990,6 +995,20 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
               March 2003.
 
 
+
+
+
+
+
+
+
+
+
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 18]
+
+Internet-Draft        DHCPv6 Failover Requirements          October 2011
+
+
 Authors' Addresses
 
    Tomasz Mrugalski (editor)
@@ -1000,13 +1019,6 @@ Authors' Addresses
 
    Phone: +1 650 423 1345
    Email: tomasz.mrugalski@gmail.com
-
-
-
-
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 18]
-
-Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
    Kim Kinnear
@@ -1048,17 +1060,5 @@ Internet-Draft        DHCPv6 Failover Requirements             June 2011
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Mrugalski & Kinnear     Expires December 28, 2011              [Page 19]
+Mrugalski & Kinnear      Expires April 19, 2012                [Page 19]
 
