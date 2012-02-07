@@ -1,0 +1,591 @@
+<?xml version='1.0' ?>
+
+<?rfc toc="yes"?>
+<?rfc sortrefs="yes"?>
+
+<?rfc compact="yes"?> <?rfc subcompact="no"?>
+
+<?rfc symrefs="yes"?>
+
+<!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
+]>
+<rfc ipr="trust200902" category="std"
+     docName="draft-mrugalski-dhc-dhcpv6-failover-design-00">
+  <front>
+    <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Design</title>
+
+    <author fullname="Tomasz Mrugalski" initials="T." surname="Mrugalski">
+      <organization abbrev="ISC">Internet Systems Consortium, Inc.
+      </organization>
+      <address>
+	<postal>
+	  <street>950 Charter Street</street>
+	  <city>Redwood City</city>
+	  <region>CA</region>
+	  <code>94063</code>
+	  <country>USA</country>
+	</postal>
+	<phone>+1 650 423 1345</phone>
+	<email>tomasz.mrugalski@gmail.com</email>
+      </address>
+    </author>
+    <author fullname="Kim Kinnear" initials="K." surname="Kinnear">
+      <organization abbrev="Cisco">Cisco Systems, Inc.</organization>
+      <address>
+	<postal>
+	  <street>1414 Massachusetts Ave.</street>
+	  <city>Boxborough</city>
+	  <region>Massachusetts</region>
+	  <code>01719</code>
+	  <country>USA</country>
+	</postal>
+	<phone>+1 (978) 936-0000</phone>
+	<email>kkinear@cisco.com</email>
+      </address>
+    </author>
+
+    <date day="17" month="August" year="2011"/>
+
+    <area>Internet</area>
+    <workgroup>Dynamic Host Configuration (DHC)</workgroup>
+    <keyword>DHCPv6</keyword>
+    <keyword>Failover</keyword>
+
+    <abstract>
+      <t>TBD This is DHCPv6 Failover design document, it is not
+      protocol specification document. Protocol specification document
+      will follow.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Requirements Language">
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+      NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
+      "OPTIONAL" in this document are to be interpreted as described in
+      <xref target="RFC2119">RFC 2119</xref>.</t>
+    </section>
+
+
+
+<section title="Glossary">
+  <list style="symbols">
+    <t>Primary Server</t>
+    <t>Secondary Server</t>
+    <t>Proportional Allocation</t>
+    <t>Independent Allocation</t>
+    <t>Resource - an IPv6 address or IPv6 prefix</t>
+    <t>Failover endpoint - The failover protocol allows for there to
+    be a unique failover endpoint per partner per role per
+    relationship (where role is primary or secondary and the
+    relationship is defined by the relationship-name option).  This
+    failover endpoint can take actions and hold unique states.
+    Typically, there is a one fail- over endpoint per partner,
+    although there may be more.</t>
+    <t>Failover transmission - all messages exchanged between
+    partners.</t>
+  </list>
+</section>
+
+<section title="Goals">
+
+  <t>Failover protocol is for designed to provide lease stability for
+  reasonably lived leases. Due to additional overhead failover is not
+  suitable for leases shorter than 30 seconds. DHCPv6 Failover
+  protocol MUST NOT be used for leases shorter than 30 seconds.</t>
+  <cref source="tomek">Otherwise we would spawn a nice packet storm
+  between partners. Even though 30 seconds it reasonable minimum, we
+  may also add something about recommendations. Something like: Lease
+  lifetime of at least 30 minutes SHOULD be used if possible.</cref>
+  
+  <section title="Fulfill Requirements from Requirements Draft">
+  </section>
+
+  <section title="Minimize Asymmetry">
+  </section>
+  
+</section>
+
+<section title="Protocol Overview">
+  <t>DHCPv6 Failover Protocol is defined as communication between
+  failover partners with all associated algorithms and mechanisms.</t>
+  <t>Failover Protocol is conducted over TCP connection, established
+  between partners. It reuses framing format specified in Section 5.1
+  of <xref target="RFC5460">DHCPv6 Bulk Leasequery</xref>, but does
+  not use leasequery message types. Additional failover-specific
+  message types are going to be defined. All parameters are sent over
+  wire as typical DHCPv6 Options, as defined in Section 22.1 of <xref 
+  target="RFC3315"/>.</t>
+</section>
+
+<section title="Connection Management">
+
+  <section title="Creating Connections">
+    <t>Every server implementing the failover protocol SHOULD attempt to
+    connect to all of its partners periodically, where the period is
+    implementation dependent and SHOULD be configurable.  In the event
+    that a connection has been rejected by a CONNECTACK message with a
+    reject-reason option contained in it or a DISCONNECT message, a
+    server SHOULD reduce the frequency with which it attempts to connect
+    to that server but it SHOULD continue to attempt to connect
+    periodically.</t>
+
+    <t>When a connection attempt succeeds, if the server generating the
+    connection attempt is a primary server for that relationship, then
+    it MUST send a CONNECT message down the connection.  If it is not
+    a primary server for the relationship, then it MUST just drop the
+    connection and wait for the primary server to connect to it.</t>
+
+    <t>When a connection attempt is received, the only information that
+    the receiving server has is the IP address of the partner initiating
+    a connection.  It also knows whether it has the primary role for
+    any failover relationships with the connecting server.  If it has
+    any relationships for which it is a primary server, it should
+    initiate a connection of its own to the partner server, one for
+    each primary relationship it has with that server.</t>
+    
+    <t>If it has any relationships with the connecting server for which
+    it is a seconary server, it should just await the CONNECT message
+    to determine which relationship this connection is to serve.</t>
+
+    <t>If it has no secondary relationships with the connecting server, it
+    SHOULD drop the connection.</t>
+
+    <t>To summarize -- a primary server MUST use a connection that it has
+    initiated in order to send a CONNECT message.  Every server that
+    is a secondary server in a relationship attempts to create a
+    connection to the server which is primary in the relationship, but
+    that connection is only used to stimulate the primary server into
+    recognizing that the secondary server is ready for operation.  The
+    reason behind this is that the secondary server has no way to
+    communicate to the primary server which relationship a connection
+    is designed to serve.</t>
+
+    <t>A server which has multiple secondary relationships with a primary
+    server SHOULD only send one stimulus connection attempt to the
+    primary server.</t>
+
+    <t>Once a connection is established, the primary server MUST send
+    a CONNECT message across the connection.  A secondary server MUST
+    wait for the CONNECT message from a primary server.  If the
+    secondary server doesn't receive a CONNECT message from the
+    primary server in an installation dependent amount of time, it MAY
+    drop the connection and send another stimulus connection attempt
+    to the primary server.</t>
+    
+    <t>Every CONNECT message includes a TLS-request option, and if the
+    CONNECTACK message does not reject the CONNECT message and the
+    TLS-reply option says TLS MUST be used, then the servers will
+    immediately enter into TLS negotiation.</t>
+    
+    <t>Once TLS negotiation is complete, the primary server MUST
+    resend the CONNECT message on the newly secured TLS connection and
+    then wait for the CONNECTACK message in response.  The TLS-request
+    and TLS-reply options MUST NOT appear in either this second
+    CONNECT or its associated CONNECTACK message as they had in the
+    first messages.</t>
+
+    <t>The second message sent over a new connection (either a bare
+    TCP connection or a connection utilizing TLS) is a STATE message.
+    Upon the receipt of this message, the receiver can consider
+    communications up.</t>
+
+    <t>It is entirely possible that two servers will attempt to make
+    connections to each other essentially simultaneously, and in this
+    case the secondary server will be waiting for a CONNECT message on
+    each connection.  The primary server MUST send a CONNECT message
+    over one connection and it MUST close the other connection.</t>
+
+    <t>A secondary server MUST NOT respond to the closing of a TCP
+    connection with a blind attempt to reconnect -- there may be
+    another TCP connection to the same failover partner already in
+    use.</t>
+
+  </section>
+
+  <section title="Endpoint Identification">
+    <t>The proper operation of the failover protocol requires more than
+    the transmission of messages between one server and the other.  Each
+    end- point might seem to be a single DHCP server, but in fact there
+    are many situations where additional flexibility in configuration
+    is useful.</t>
+
+    <t>The failover protocol  SHOULD be configured with one failover
+    relationship between each pair of failover servers. In this case
+    there is one failover endpoint for that relationship on each partner.
+    This failover relationship MUST have a unique name.</t>
+    
+    <t>There is typically little need for addtional relationships between
+    any two servers but there MAY be more than one failover relationship
+    between two servers -- however each MUST have a unique relationship
+    name.</t>
+
+    <t>Any failover endpoint can take actions and hold unique states.</t>
+
+    <t>This document frequently describes the behavior of the protocol in
+    terms of primary and secondary servers, not primary and secondary
+    failover endpoints.  However, it is important to remember that every
+    'server' described in this document is in reality a failover endpoint
+    that resides in a particular process, and that many failover
+    end-points may reside in the same server process.</t>
+
+    <t>It is not the case that there is a unique failover endpoint for
+    each prefix that participates in a failover relationship.  On one
+    server, there is (typically) one failover endpoint per partner,
+    regardless of how many prefixes are managed by that combination of
+    partner and role.  Conversely, on a particular server, any given
+    prefix will be associated with exactly one failover endpoint.</t>
+
+    <t>When a connection is received from the partner, the unique failover
+    endpoint to which the message is directed is determined solely by
+    the IP address of the partner, the relationship-name, and the role
+    of the receiving server.</t>
+
+  </section>
+</section>
+
+<section title="Resource Allocation">
+  <t>Currently there are two allocation algorithms defined for
+  resources (addresses or prefixes). Additional allocation schemes
+  may be defined as future extensions.</t>
+  
+  <list style="numbers">
+    <t>Apprortioned Allocation - This allocation algorithm is a direct
+    application of algorithm defined in <xref
+    target="dhcpv4-failover"/> to DHCPv6. Available resources are
+    split between primary and secondary server. Released resources are
+    always returned to primary server.  Primary and secondary servers
+    may initiate rebalancing procedure, when disparity between
+    resources available to each server is detected. Only unleased
+    resources are "owned" by one of the servers. This algorithm is
+    particularly well suited for scenarios, where amount of available
+    resources is limited. See <xref target="alloc-classic"/> for
+    details.</t>
+    <t>Independent Allocation - This allocation algorithm assumes that
+    available resources are split between primary and secondary
+    servers.  Resources are assigned to specific server all time,
+    regardless if they are available or currently used. This algorithm
+    is much simpler than proportional allocation, because resource
+    inbanance doesn't have to be checked. There is no rebalancing for
+    independent allocation. This algorithm is particularly well suited
+    for scenarios, where amount of available resources is significant.
+    See <xref target="alloc-separated"/> for details.</t>
+  </list>
+
+  <section anchor="alloc-classic" title="Proportional Allocation">
+    <cref source='tomek'>
+      Maybe we could rename it to Proportional allocation?
+    </cref>
+
+    <t>In this allocation scheme, each server has its own pool of
+    available resources.  Note that a resource is not "owned" by a
+    particular server throughout its entire lifetime.  Only a resource
+    which is available is "owned" by a particular server -- once it
+    has been leased to a client, it is not owned by either failover
+    partner.  When it finally becomes available again, it will be
+    owned initially by the primary server, and it may or may not be
+    allocated to the secondary server by the primary server.</t>
+
+    <t>So, the flow of a resource is as follows: initially a resource
+    is owned by the primary server.  It may be allocated to the
+    secondary server if it is available, and then it is owned by the
+    secondary server.  Either server can allocate available resource
+    which they own to clients, in which case they cease
+    to own them.  When the client releases the resource or the
+    lease on it expires, it will again become available and will be
+    owned by the primary.</t>
+    
+    <t>A resource will not become owned by the server which allocated
+    it initially when it is released or the lease expires because, in
+    gen- eral, that server will have had to replenish its pool of
+    available resources well in advance of any likely lease
+    expirations.  Thus, having a particular resource cycle back to the
+    secondary might well put the secondary more out of balance with
+    respect to the primary instead of enhancing the balance of
+    available addresses between them.</t>
+    
+    <t>TODO: Need to rework this v4-specific vocabulary to v6, once we
+    decide how things will look like in v6.</t>
+    
+    <t>These address pools are used when in COMMUNICATIONS-INTERRUPTED
+    state and while waiting for the MCLT expiration in PARTNER-DOWN
+    state.  In addition these pools are used when in NORMAL state as
+    well. This allocation and maintenance of these address pools is an
+    area of some sensitivity, since the goal is to maintain a more or
+    less con- stant ratio of available addresses between the two
+    servers.</t>
+    <t>TODO: Reuse rest of the description from section 5.4 from <xref
+    target="dhcpv4-failover"/> here.</t>
+
+  </section>
+  
+  <section anchor="alloc-separated" title="Independent Allocation">
+    <t>In this allocation scheme, available resources are split
+    between servers. Available resources are split between primary and
+    secondary server as part of initial connection establishment. Once
+    resources are allocated to each server, there is no need to
+    reassign them.  This algorithm is simpler than proportional
+    allocation due to lack of rebalancing mechanism, but it assumes
+    that pool assigned to each server will never deplete. That is
+    often a reasonable assumption for IPv6 addresses (e.g. servers are
+    often assigned a /64 pool that many more addresses than existing
+    electronic devices on Earth). This allocation mechanism SHOULD be
+    used for IPv6 addresses, unless configured address pool is small
+    or is otherwise administratively limited.</t>
+    
+    <t>Once each server is assigned a resource pool during initial
+    connection establishment, it may allocate assigned resources to
+    clients. Once client release a resource or its lease is expired,
+    returned resource returns to pool for the same server. Resource
+    never changes servers.</t>
+    
+    <t>During COMMUNICATION-INTERRUPTED events, a partner MAY continue
+    extending existing leases when requested by clients. A healthy
+    partner MUST NOT lease resources that were assigned to its downed
+    partner and later released by client.
+    </t>
+  </section>
+
+  <section title="Determining Allocation Approach">
+
+    <section title="IPv6 Addresses">
+    </section>
+    
+    <section title="IPv6 Prefixes">
+    </section>
+  </section> <!-- determining allocation approach -->
+</section> <!-- address allocation -->
+<section title="Partner Update">
+  <t>This section lays out overview of communication between partners.
+  As this is a design document only, not a protocol specification, a
+  high level ideas are presented only, without implementation specific
+  details (e.g. on-wire formats). </t>
+  <section anchor="time-skew" title="Time Skew">
+    <t>Partners exchange information about known lease states. To
+    reliably compare known lease with an update received from a
+    partner, servers must be aware of time differences. Although
+    simple approach would to to require both partners to use
+    synchronized time, e.g. by using NTP, such service may become
+    unavailable in some scenarios that failover expects to cover, e.g.
+    network partition. Therefore a mechanism to measure and track
+    relative time differences between servers is necessary. To do so,
+    each message MUST contain FO_TIMESTAMP option that contains
+    timestamp of the transmission as measured by
+    transmitter. Transmitting server MUST set this as close to the
+    actual transmission as possible. Receiving partner MUST store its
+    own timestamp of reception event. Received timestamp information
+    is then compared with local timestamp.</t>
+    <t>To account for packet delay variation (jitter), measured
+    difference is not used directly, but rather moving average of last
+    TIME_SKEW_PKTS_AVG packets difference is calculated. This averaged
+    value is referred to as time skew. Note that time skew algorithm
+    allows cooperation between clients with completely desynchronized
+    clocks.</t>
+  </section>
+  <section title="Time expression">
+    <t>Timestamps are expressed as number of seconds since midnight
+    (UTC), January 1, 2000, modulo 2^32. Note: that is the same
+    approach as used in creation of DUID-LLT (see Section 9.2 of <xref
+    target="RFC3315"/>).</t>
+    <t>Time differences are expressed in seconds and are signed.</t>
+  </section>
+    
+  <section title="Lazy updates">
+  </section>
+
+  <section title="Sending Data">
+    <t>Server updates its partner about recent changes in lease states.
+    Each update must include following information:
+    <list style="numbers">
+      <t>resource type - non-temporary address or a prefix</t>
+      <t>resource information - actual address or prefix</t>
+      <t>valid life time requested by client</t>
+      <t>IAID - Identity Association used by client, while obtaining
+      this lease. (Note1: one client may use many IAID
+      simulatenously. Note2: IAID for IA, TA and PD are orthogonal.)</t>
+      <t>valid life time sent to client</t> 
+      <t>preferred life time requested by client</t> 
+      <t>preferred life time sent to client</t> 
+      <t>CLTT - Client Last Transmission Time, a timestamp
+      of the last received transmission from a client</t> 
+      <t>assigned FQDN names, if any (optional)</t>
+    </list>
+    Discussion: Do we need T1 as well? Something like next expected
+    client transmission?</t>
+    <t>Q: Maybe we could reusa IA_NA and IA_PD options here?</t>
+    <t>Q: Do we care about preferred lifetime? (presumably no)</t>
+    <t>Q: Do we care about IAID? (presumably yes)</t>
+    
+    <section title="Required Data">
+    </section>
+    
+    <section title="Optional Data">
+    </section>
+  </section> <!-- sending data -->
+  
+  <section title="Receiving Data">
+
+    <section title="Conflict Resolution">
+      <t>TODO: This is just a loose collection of notes. This section
+      will probably need to be rewritten as a a flowchart of some kind.</t>
+
+      <t>Server receiving lease update from its partner must evaluate
+      if received lease is consistent with already known state and
+      decide which information - previously known or just received -
+      is "better". Server should take into consideration following
+      aspects: if the lease is already assigned to specific client,
+      who had contact with client recently, start time of the lease, etc.
+      </t>
+      <t>Lease may be accepted or rejected. Known state for rejected
+      least update MUST be sent during next lazy update. Known state
+      MUST NOT be sent back immediately, to avoid packet storms in an
+      unlikely event when there are leases that both partners refuse
+      to update.
+      </t>
+      <t>
+	Discussion: we may possibly define different types of update
+	rejections. Server should treat differently a case when receiving
+	new lease that it previously haven't seen than a case when partner
+	sents old version of a lease that newer state is known.
+      </t>
+      
+    </section>
+
+    <section title="Acknowledging Reception">
+    </section>
+
+  </section> <!-- receiving data -->
+</section> <!-- partner update -->
+
+  <section anchor="states" title="Endpoint States">
+
+    <section title="State Descriptions">
+    </section>
+
+    <section title="State Machine Initialization">``
+    </section>
+
+    <section title="State Transitions">
+    </section>
+  </section>
+
+  <section title="Failure recovery">
+    <t>Discussion: although following sections may be somewhat
+    redundant, given desciptions in <xref target="states"/>, but
+    it should be described here for clarity.</t>
+    
+    <section title="Partner-down event recovery">
+    </section>
+    <section title="Network partition event recovery">
+    </section>
+  </section>
+
+  <section anchor="protocol-skeleton" title="Protocol entities">
+    <t>Discussion: It is unclear if following sections belong to
+    design or protocol draft. It is currently kept here as a
+    scratchbook with list of things that will have to be defined
+    eventually. If it will stay in this document or will be moved to
+    protocol spec document is TBD.</t>
+    
+    <section anchor="options" title="Failover Protocol">
+      <t>This section enumerates list of options that will be defined in
+      failover protocol specification. Rough description of purpose and
+      content for each option is specified. Exact on wire format will be
+      defined in protocol specification.</t>
+      <t><list style="numbers">
+	<t>OPTION_FO_TIMESTAMP - convey information about timestamp. It
+	is used by time skew measurement algorithm (see <xref
+	target="time-skew"/>).</t>
+      </list></t>
+    </section>
+
+    <section anchor="defines" title="Protocol constants">
+      <t>This section enumerates various constants that have to be defined
+      in actual protocol specification.</t>
+      <t><list style="numbers">
+	<t>TIME_SKEW_PKTS_AVG - number of packets that are used to calculate
+	average time skew between partners. See (see <xref
+	target="time-skew"/>).</t>
+      </list></t>
+    </section>
+      
+  </section>
+
+  <section title="Open questions">
+    <t>This is scratchbook. This section will be removed once questions are answered.</t>
+    <t>Q: Do we want to support temporary addresses? I think not. They
+    are short-lived by definition, so clients should not mind getting new temporary
+    addresses.</t>
+    <t>Q: Do we want to support CGA-registered addresses? There is currently
+    work in DHC WG about this, but I haven't looked at it yet. If that is complicated,
+    we may not define it heere, but rather as an extension.</t>
+  </section>
+
+  <section title="Security Considerations">
+    <t>TBD...</t>
+  </section>
+  
+  <section title="IANA Considerations">
+    <t>IANA is not requested to perform any actions at this
+    time.</t>
+  </section>
+
+  <section title="Acknowledgements">
+    <t>This document extensively uses concepts, definitions and other
+    parts of <xref target="dhcpv4-failover"/> document.  Authors would
+    like to thank Greg Rabil, Bernie Volz and Shawn Routhier for their
+    significant involvement and contributions.</t>
+  </section>
+</middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='reference.RFC.2119'?>
+      <?rfc include='reference.RFC.2131'?>
+      <?rfc include='reference.RFC.3074'?>
+      <?rfc include='reference.RFC.3315'?>
+      <?rfc include='reference.RFC.3633'?>
+      <?rfc include='reference.RFC.4704'?>
+      <?rfc include="reference.RFC.5460"?>
+    </references> <references title="Informative References">
+
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.mrugalski-dhc-dhcpv6-failover-requirements.xml'?>
+
+      <reference anchor="dhcpv4-failover">
+	<front>
+	  <title>DHCP Failover Protocol</title> <author fullname="Ralph
+	  Droms" initials="R." surname="Droms">
+	    <organization>Cisco Systems</organization>
+	  </author> <author fullname="Kim Kinnear" initials="K."
+	  surname="Kinnear">
+	    <organization>Cisco Systems</organization>
+	  </author> <author fullname="Mark Stapp" initials="M."
+	  surname="Stapp">
+	    <organization>Cisco Systems</organization>
+	  </author> <author fullname="Bernie Volz" initials="B."
+	  surname="Volz">
+	    <organization>Ericsson</organization>
+	  </author> <author fullname="Steve Gonczi" initials="S."
+	  surname="Gonczi">
+	    <organization>Relicore</organization>
+	  </author> <author fullname="Greg Rabil" initials="G."
+	  surname="Rabil">
+	    <organization>Lucent Technologies</organization>
+	  </author> <author fullname="Michael Dooley" initials="M."
+	  surname="Dooley">
+	    <organization>Diamond IP Technologies</organization>
+	  </author> <author fullname="Arun Kapur" initials="A."
+	  surname="Kapur">
+	    <organization>K5 Networks</organization>
+	  </author> <date month="March" year='2003'/>
+	</front> <seriesInfo name="Internet-Draft"
+	value="draft-ietf-dhc-failover-12"/>
+      </reference> <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-redundancy-consider.xml'?>
+
+    </references>
+  </back>
+</rfc>
