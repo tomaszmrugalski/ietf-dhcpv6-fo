@@ -4,8 +4,8 @@
 Dynamic Host Configuration (DHC)                            T. Mrugalski
 Internet-Draft                                                       ISC
 Intended status: Standards Track                              K. Kinnear
-Expires: February 18, 2012                                         Cisco
-                                                         August 17, 2011
+Expires: September 6, 2012                                         Cisco
+                                                           March 5, 2012
 
 
                          DHCPv6 Failover Design
@@ -13,8 +13,14 @@ Expires: February 18, 2012                                         Cisco
 
 Abstract
 
-   TBD This is DHCPv6 Failover design document, it is not protocol
-   specification document.  Protocol specification document will follow.
+   DHCPv6 defined in [RFC3315] does not offer server redundancy.  This
+   document defines design for DHCPv6 failover, a mechanism for running
+   two servers on the same network with capability for taking over
+   clients' leases in case of server failure or network partition.  This
+   is a DHCPv6 Failover design document, it is not protocol
+   specification document.  It is a second document in a planned series
+   of three documents.  DHCPv6 failover requirements are specified in
+   [requirements].  Protocol specification document will follow.
 
 Status of this Memo
 
@@ -31,11 +37,11 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on February 18, 2012.
+   This Internet-Draft will expire on September 6, 2012.
 
 Copyright Notice
 
-   Copyright (c) 2011 IETF Trust and the persons identified as the
+   Copyright (c) 2012 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -43,74 +49,124 @@ Copyright Notice
    (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 1]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
    to this document.  Code Components extracted from this document must
    include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
 
 
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 1]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
 Table of Contents
 
-   1.  Requirements Language  . . . . . . . . . . . . . . . . . . . .  3
-   2.  Glossary . . . . . . . . . . . . . . . . . . . . . . . . . . .  3
-   3.  Goals  . . . . . . . . . . . . . . . . . . . . . . . . . . . .  3
-     3.1.  Fulfill Requirements from Requirements Draft . . . . . . .  3
-     3.2.  Minimize Asymmetry . . . . . . . . . . . . . . . . . . . .  3
-   4.  Protocol Overview  . . . . . . . . . . . . . . . . . . . . . .  3
-   5.  Connection Management  . . . . . . . . . . . . . . . . . . . .  4
-     5.1.  Creating Connections . . . . . . . . . . . . . . . . . . .  4
-     5.2.  Endpoint Identification  . . . . . . . . . . . . . . . . .  5
-   6.  Resource Allocation  . . . . . . . . . . . . . . . . . . . . .  6
-     6.1.  Proportional Allocation  . . . . . . . . . . . . . . . . .  7
-     6.2.  Independent Allocation . . . . . . . . . . . . . . . . . .  8
-     6.3.  Determining Allocation Approach  . . . . . . . . . . . . .  8
-       6.3.1.  IPv6 Addresses . . . . . . . . . . . . . . . . . . . .  8
-       6.3.2.  IPv6 Prefixes  . . . . . . . . . . . . . . . . . . . .  8
-   7.  Partner Update . . . . . . . . . . . . . . . . . . . . . . . .  8
-     7.1.  Time Skew  . . . . . . . . . . . . . . . . . . . . . . . .  8
-     7.2.  Time expression  . . . . . . . . . . . . . . . . . . . . .  9
-     7.3.  Lazy updates . . . . . . . . . . . . . . . . . . . . . . .  9
-     7.4.  Sending Data . . . . . . . . . . . . . . . . . . . . . . .  9
-       7.4.1.  Required Data  . . . . . . . . . . . . . . . . . . . . 10
-       7.4.2.  Optional Data  . . . . . . . . . . . . . . . . . . . . 10
-     7.5.  Receiving Data . . . . . . . . . . . . . . . . . . . . . . 10
-       7.5.1.  Conflict Resolution  . . . . . . . . . . . . . . . . . 10
-       7.5.2.  Acknowledging Reception  . . . . . . . . . . . . . . . 10
-   8.  Endpoint States  . . . . . . . . . . . . . . . . . . . . . . . 10
-     8.1.  State Descriptions . . . . . . . . . . . . . . . . . . . . 10
-     8.2.  State Machine Initialization . . . . . . . . . . . . . . . 10
-     8.3.  State Transitions  . . . . . . . . . . . . . . . . . . . . 11
-   9.  Failure recovery . . . . . . . . . . . . . . . . . . . . . . . 11
-     9.1.  Partner-down event recovery  . . . . . . . . . . . . . . . 11
-     9.2.  Network partition event recovery . . . . . . . . . . . . . 11
-   10. Protocol entities  . . . . . . . . . . . . . . . . . . . . . . 11
-     10.1. Failover Protocol  . . . . . . . . . . . . . . . . . . . . 11
-     10.2. Protocol constants . . . . . . . . . . . . . . . . . . . . 11
-   11. Open questions . . . . . . . . . . . . . . . . . . . . . . . . 11
-   12. Security Considerations  . . . . . . . . . . . . . . . . . . . 12
-   13. IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 12
-   14. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 12
-   15. References . . . . . . . . . . . . . . . . . . . . . . . . . . 12
-     15.1. Normative References . . . . . . . . . . . . . . . . . . . 12
-     15.2. Informative References . . . . . . . . . . . . . . . . . . 13
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 13
+   1.  Requirements Language  . . . . . . . . . . . . . . . . . . . .  4
+   2.  Glossary . . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+   3.  Goals  . . . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     3.1.  Additional requirements  . . . . . . . . . . . . . . . . .  5
+   4.  Protocol Overview  . . . . . . . . . . . . . . . . . . . . . .  5
+   5.  Connection Management  . . . . . . . . . . . . . . . . . . . .  6
+     5.1.  Creating Connections . . . . . . . . . . . . . . . . . . .  6
+     5.2.  Endpoint Identification  . . . . . . . . . . . . . . . . .  8
+   6.  Resource Allocation  . . . . . . . . . . . . . . . . . . . . .  9
+     6.1.  Proportional Allocation  . . . . . . . . . . . . . . . . .  9
+     6.2.  Independent Allocation . . . . . . . . . . . . . . . . . . 10
+     6.3.  Determining Allocation Approach  . . . . . . . . . . . . . 11
+       6.3.1.  IPv6 Addresses . . . . . . . . . . . . . . . . . . . . 11
+       6.3.2.  IPv6 Prefixes  . . . . . . . . . . . . . . . . . . . . 11
+   7.  Partner Update . . . . . . . . . . . . . . . . . . . . . . . . 11
+     7.1.  Time Skew  . . . . . . . . . . . . . . . . . . . . . . . . 11
+     7.2.  Time expression  . . . . . . . . . . . . . . . . . . . . . 11
+     7.3.  Lazy updates . . . . . . . . . . . . . . . . . . . . . . . 12
+     7.4.  MCLT concept . . . . . . . . . . . . . . . . . . . . . . . 12
+     7.5.  Unreachability detection . . . . . . . . . . . . . . . . . 12
+     7.6.  Sending Data . . . . . . . . . . . . . . . . . . . . . . . 12
+       7.6.1.  Required Data  . . . . . . . . . . . . . . . . . . . . 13
+       7.6.2.  Optional Data  . . . . . . . . . . . . . . . . . . . . 13
+     7.7.  Receiving Data . . . . . . . . . . . . . . . . . . . . . . 13
+       7.7.1.  Conflict Resolution  . . . . . . . . . . . . . . . . . 13
+       7.7.2.  Acknowledging Reception  . . . . . . . . . . . . . . . 13
+   8.  Endpoint States  . . . . . . . . . . . . . . . . . . . . . . . 13
+     8.1.  State Descriptions . . . . . . . . . . . . . . . . . . . . 13
+     8.2.  State Machine Initialization . . . . . . . . . . . . . . . 13
+     8.3.  State Transitions  . . . . . . . . . . . . . . . . . . . . 13
+   9.  Failure recovery . . . . . . . . . . . . . . . . . . . . . . . 14
+     9.1.  Partner-down event recovery  . . . . . . . . . . . . . . . 14
+     9.2.  Network partition event recovery . . . . . . . . . . . . . 14
+   10. Proposed extensions  . . . . . . . . . . . . . . . . . . . . . 14
+     10.1. Pseudo-Active-active mode  . . . . . . . . . . . . . . . . 14
+   11. Protocol entities  . . . . . . . . . . . . . . . . . . . . . . 14
+     11.1. Failover Protocol  . . . . . . . . . . . . . . . . . . . . 15
+     11.2. Protocol constants . . . . . . . . . . . . . . . . . . . . 15
+   12. Open questions . . . . . . . . . . . . . . . . . . . . . . . . 15
+   13. Security Considerations  . . . . . . . . . . . . . . . . . . . 15
 
 
 
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 2]
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 2]
 
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
+   14. IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 15
+   15. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 16
+   16. References . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+     16.1. Normative References . . . . . . . . . . . . . . . . . . . 16
+     16.2. Informative References . . . . . . . . . . . . . . . . . . 16
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 17
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 3]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
 
 
 1.  Requirements Language
@@ -121,6 +177,9 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
 
 2.  Glossary
+
+   This is a supplemental glossary that combined with definitions in
+   Section 3 [requirements].
 
    o  Primary Server
 
@@ -144,35 +203,118 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
 3.  Goals
 
+   Defined failover protocol provides means for protecting assigned
+   leases against server unreachability, including server failure and
+   network partition.  It is possible to deploy exactly two servers that
+   are able to continue handling a lease (an IPv6 address or an IPv6
+   prefix), without lease expiration or a reassignment to a different
+   client.
+
+   This protocol defines active-passive mode, sometimes also called hot
+   standby model.  This means that during normal operation one server is
+   active (i.e. actively responds to clients' requests) while the second
+   is passive (i.e. does receive clients' requests, but does not respond
+   to them and only maintains copy of lease database and it ready to
+   take over incoming queries in case of primary server failure).
+   Active-active mode (i.e. both servers actively handling clients'
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 4]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
+   requests) is currently not supported for the sake of simplicity.
+   Such mode may be defined as an exension at a later time.
+
    Failover protocol is for designed to provide lease stability for
    reasonably lived leases.  Due to additional overhead failover is not
    suitable for leases shorter than 30 seconds.  DHCPv6 Failover
    protocol MUST NOT be used for leases shorter than 30 seconds.
 
-3.1.  Fulfill Requirements from Requirements Draft
+   This design attempts to fulfill all DHCPv6 failover requirements
+   defined in [requirements].
 
-3.2.  Minimize Asymmetry
+3.1.  Additional requirements
+
+   The following requirements are not related to failover mechanism in
+   general, but rather to this particular design.
+
+   1.  Minimize Asymmetry - while there are two distinct roles in
+       failover (primary and secondary server), the idea is that
+       differences between those two roles should be as small as
+       possible.  Two primary reasons are simpler implementation and
+       similar hardware utilization (it is envisaged that primary and
+       secondary server will be run on a similar hardware).
 
 
 4.  Protocol Overview
 
    DHCPv6 Failover Protocol is defined as communication between failover
-   partners with all associated algorithms and mechanisms.
+   partners with all associated algorithms and mechanisms.  Failover
+   communication is conducted over TCP connection, established between
+   partners.  It reuses framing format specified in Section 5.1 of
+   DHCPv6 Bulk Leasequery [RFC5460], but does not use leasequery message
+   types.  Additional failover-specific message types are going to be
+   defined.  All parameters are sent over wire as typical DHCPv6
+   Options, following format defined in Section 22.1 of [RFC3315].
 
-   Failover Protocol is conducted over TCP connection, established
-   between partners.  It reuses framing format specified in Section 5.1
+   After initialization, primary server establishes TCP connection with
+   its partner.  Primary server sends CONNECT message with initial
+   parameters.  Secondary server responds with CONNECTACK.
+
+   Depending on state in which both partners are, they MUST initiate one
+   of the binding update procedures.  Each server MAY send UPDREQ
+   message to request its partner to send all update has not been sent
+   yet (this case applies when partner has existing database and wants
+   to update it).  Alternatively, server MAY choose to send UPDREQALL to
+   request full lease database transmission including all leases (this
+   case applies in case of booting up new server after installation,
+   corruption or complete loss of database, or other catastrophic
+   failure).
 
 
 
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 3]
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 5]
 
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
 
 
-   of DHCPv6 Bulk Leasequery [RFC5460], but does not use leasequery
-   message types.  Additional failover-specific message types are going
-   to be defined.  All parameters are sent over wire as typical DHCPv6
-   Options, as defined in Section 22.1 of [RFC3315].
+   Servers exchange lease information by using BNDUPD message.
+   Depending on local and remote state of a lease, server may either
+   accept or reject the update.  Reception of lease update information
+   is confirmed by responding with BNDACK message with appropriate
+   status.
+
+   A subset of available resources (addresses or prefixes) is reserved
+   for secondary server use.  That is required for handling a case where
+   both servers are able to communicate with clients, but unable to
+   communicate with each other.  After initial communication is
+   established, secondary server requests a pool by sending POOLREQ
+   message.  Primary server assigns a pool by transmitting POOLRESP
+   message.  Secondary server may initiate such pool request at any time
+   when maintaining communication with primary server.
+
+   Servers use lazy update mechanism to maintain their databases.  After
+   a server performs any modifications to lease database (assign new
+   lease, extend existing one, release or expire), it sends response to
+   client first (following "regular" DHCPv6 operation) and then informs
+   its partner using BNDUPD message.
+
+   The major problem with lazy update mechanism is case when server
+   crashes after sending response to client, but before sending update
+   to its partner (or when communication between partners is
+   interrupted).  To solve this problem, a MCLT mechanism known from
+   DHCPv4 failover is reused.  An additional configuration parameter
+   called Maximum Client Lead Time is introduced.  It is the maximum
+   amount of time that one server can extend a lease for a client's
+   binding beyond the time known by the partner server.  See Section 7.4
+   for detailed desciption how MCLT affects assigned lease times.
+
+   Servers verify each others availability by periodically exchanging
+   CONTACT messages.  See Section 7.5 for discussion about detecting
+   partner's unreachability.
 
 
 5.  Connection Management
@@ -187,6 +329,13 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    server SHOULD reduce the frequency with which it attempts to connect
    to that server but it SHOULD continue to attempt to connect
    periodically.
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 6]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
 
    When a connection attempt succeeds, if the server generating the
    connection attempt is a primary server for that relationship, then it
@@ -218,13 +367,6 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    is that the secondary server has no way to communicate to the primary
    server which relationship a connection is designed to serve.
 
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 4]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
    A server which has multiple secondary relationships with a primary
    server SHOULD only send one stimulus connection attempt to the
    primary server.
@@ -243,6 +385,14 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
    Once TLS negotiation is complete, the primary server MUST resend the
    CONNECT message on the newly secured TLS connection and then wait for
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 7]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
    the CONNECTACK message in response.  The TLS-request and TLS-reply
    options MUST NOT appear in either this second CONNECT or its
    associated CONNECTACK message as they had in the first messages.
@@ -273,14 +423,6 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    The failover protocol SHOULD be configured with one failover
    relationship between each pair of failover servers.  In this case
    there is one failover endpoint for that relationship on each partner.
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 5]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
    This failover relationship MUST have a unique name.
 
    There is typically little need for addtional relationships between
@@ -299,6 +441,14 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
    It is not the case that there is a unique failover endpoint for each
    prefix that participates in a failover relationship.  On one server,
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 8]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
    there is (typically) one failover endpoint per partner, regardless of
    how many prefixes are managed by that combination of partner and
    role.  Conversely, on a particular server, any given prefix will be
@@ -329,14 +479,6 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
    2.  Independent Allocation - This allocation algorithm assumes that
        available resources are split between primary and secondary
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 6]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
        servers.  Resources are assigned to specific server all time,
        regardless if they are available or currently used.  This
        algorithm is much simpler than proportional allocation, because
@@ -355,6 +497,13 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    it finally becomes available again, it will be owned initially by the
    primary server, and it may or may not be allocated to the secondary
    server by the primary server.
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012               [Page 9]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
 
    So, the flow of a resource is as follows: initially a resource is
    owned by the primary server.  It may be allocated to the secondary
@@ -385,14 +534,6 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    TODO: Reuse rest of the description from section 5.4 from
    [dhcpv4-failover] here.
 
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 7]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
 6.2.  Independent Allocation
 
    In this allocation scheme, available resources are split between
@@ -412,6 +553,14 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    connection establishment, it may allocate assigned resources to
    clients.  Once client release a resource or its lease is expired,
    returned resource returns to pool for the same server.  Resource
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 10]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
    never changes servers.
 
    During COMMUNICATION-INTERRUPTED events, a partner MAY continue
@@ -441,14 +590,6 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    to require both partners to use synchronized time, e.g. by using NTP,
    such service may become unavailable in some scenarios that failover
    expects to cover, e.g. network partition.  Therefore a mechanism to
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 8]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
    measure and track relative time differences between servers is
    necessary.  To do so, each message MUST contain FO_TIMESTAMP option
    that contains timestamp of the transmission as measured by
@@ -468,13 +609,35 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
    Timestamps are expressed as number of seconds since midnight (UTC),
    January 1, 2000, modulo 2^32.  Note: that is the same approach as
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 11]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
    used in creation of DUID-LLT (see Section 9.2 of [RFC3315]).
 
    Time differences are expressed in seconds and are signed.
 
 7.3.  Lazy updates
 
-7.4.  Sending Data
+7.4.  MCLT concept
+
+   TODO: Copy description from page 21 of [dhcpv4-failover].
+
+7.5.  Unreachability detection
+
+   Each partner maintains a FO_SEND timer for each partner connection.
+   FO_SEND timer is reset every time any message is transmitted.  If
+   timer reaches FO_SEND_MAX value, an CONTACT message is transmitted
+   and timer is reset.  CONTACT message may be transmitted at any time.
+
+   Discussion: Perhaps it would be more reasonable to use echo-reply
+   approach, rather than periodic transmissions?
+
+7.6.  Sending Data
 
    Server updates its partner about recent changes in lease states.
    Each update must include following information:
@@ -487,7 +650,7 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
    4.  IAID - Identity Association used by client, while obtaining this
        lease.  (Note1: one client may use many IAID simulatenously.
-       Note2: IAID for IA, TA and PD are orthogonal.)
+       Note2: IAID for IA, TA and PD are orthogonal number spaces.)
 
    5.  valid life time sent to client
 
@@ -498,17 +661,17 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    8.  CLTT - Client Last Transmission Time, a timestamp of the last
        received transmission from a client
 
-
-
-Mrugalski & Kinnear     Expires February 18, 2012               [Page 9]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
    9.  assigned FQDN names, if any (optional)
 
    Discussion: Do we need T1 as well?  Something like next expected
    client transmission?
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 12]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
 
    Q: Maybe we could reusa IA_NA and IA_PD options here?
 
@@ -516,13 +679,13 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
    Q: Do we care about IAID? (presumably yes)
 
-7.4.1.  Required Data
+7.6.1.  Required Data
 
-7.4.2.  Optional Data
+7.6.2.  Optional Data
 
-7.5.  Receiving Data
+7.7.  Receiving Data
 
-7.5.1.  Conflict Resolution
+7.7.1.  Conflict Resolution
 
    TODO: This is just a loose collection of notes.  This section will
    probably need to be rewritten as a a flowchart of some kind.
@@ -544,7 +707,7 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    new lease that it previously haven't seen than a case when partner
    sents old version of a lease that newer state is known.
 
-7.5.2.  Acknowledging Reception
+7.7.2.  Acknowledging Reception
 
 
 8.  Endpoint States
@@ -553,15 +716,17 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
 8.2.  State Machine Initialization
 
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012              [Page 10]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
 8.3.  State Transitions
+
+
+
+
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 13]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
 
 
 9.  Failure recovery
@@ -575,14 +740,55 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 9.2.  Network partition event recovery
 
 
-10.  Protocol entities
+10.  Proposed extensions
+
+   The following section discusses possible extensions to proposed
+   failover mechanism.  Listed extensions must be sufficiently simple to
+   not further complicate failover protocol.  Any proposals that are
+   considered complex will be defined as stand-alone extensions in
+   separate documents.
+
+10.1.  Pseudo-Active-active mode
+
+   A very simple way to achieve active-active mode is to remove the
+   restriction that seconary server MUST NOT respond to SOLICIT and
+   REQUEST messages.  Instead it could respond, but MUST have lower
+   preference than primary server.  Clients discovering available
+   servers will receive ADVERTISE messages from both servers, but are
+   expected to select primary server as it has higher preference value
+   configured.  Following REQUEST message will be directed to primary
+   servers.
+
+   The benefit of this approach, compared to "basic" active--passive
+   solution is that there is no delay between primary failure and the
+   moment when secondary starts serving requests.
+
+   Discussion: Possibility of setting both servers preference to an
+   equal value could theoretically work as a crude attempt to provide
+   load balancing.  It wouldn't do much good on its own, as one (faster)
+   server could be chosen more frequently (assuming that with equal
+   preference sets clients will pick first responding server, which is
+   not mandated by DHCPv6).  We could design a simple mechanism of
+   dynamically updating preference depending on usage of available
+   resources.  This concept haven't been investigated yet.
+
+
+11.  Protocol entities
 
    Discussion: It is unclear if following sections belong to design or
    protocol draft.  It is currently kept here as a scratchbook with list
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 14]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
    of things that will have to be defined eventually.  If it will stay
    in this document or will be moved to protocol spec document is TBD.
 
-10.1.  Failover Protocol
+11.1.  Failover Protocol
 
    This section enumerates list of options that will be defined in
    failover protocol specification.  Rough description of purpose and
@@ -592,7 +798,7 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    1.  OPTION_FO_TIMESTAMP - convey information about timestamp.  It is
        used by time skew measurement algorithm (see Section 7.1).
 
-10.2.  Protocol constants
+11.2.  Protocol constants
 
    This section enumerates various constants that have to be defined in
    actual protocol specification.
@@ -601,7 +807,7 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
        average time skew between partners.  See (see Section 7.1).
 
 
-11.  Open questions
+12.  Open questions
 
    This is scratchbook.  This section will be removed once questions are
    answered.
@@ -610,40 +816,48 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
    short-lived by definition, so clients should not mind getting new
    temporary addresses.
 
-
-
-Mrugalski & Kinnear     Expires February 18, 2012              [Page 11]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
    Q: Do we want to support CGA-registered addresses?  There is
    currently work in DHC WG about this, but I haven't looked at it yet.
    If that is complicated, we may not define it heere, but rather as an
    extension.
 
 
-12.  Security Considerations
+13.  Security Considerations
 
    TBD...
 
 
-13.  IANA Considerations
+14.  IANA Considerations
 
    IANA is not requested to perform any actions at this time.
 
 
-14.  Acknowledgements
+
+
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 15]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
+15.  Acknowledgements
 
    This document extensively uses concepts, definitions and other parts
-   of [dhcpv4-failover] document.  Authors would like to thank Greg
-   Rabil, Bernie Volz and Shawn Routhier for their significant
+   of [dhcpv4-failover] document.  Authors would like to thank Shawn
+   Routher, Greg Rabil, and Bernie Volz for their significant
    involvement and contributions.
 
+   This work has been partially supported by Department of Computer
+   Communications (a division of Gdansk University of Technology) and
+   the Polish Ministry of Science and Higher Education under the
+   European Regional Development Fund, Grant No.  POIG.01.01.02-00-045/
+   09-00 (Future Internet Engineering Project).
 
-15.  References
 
-15.1.  Normative References
+16.  References
+
+16.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -666,29 +880,24 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
               IPv6 (DHCPv6) Client Fully Qualified Domain Name (FQDN)
               Option", RFC 4704, October 2006.
 
-
-
-Mrugalski & Kinnear     Expires February 18, 2012              [Page 12]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
-
-
    [RFC5460]  Stapp, M., "DHCPv6 Bulk Leasequery", RFC 5460,
               February 2009.
 
-15.2.  Informative References
+16.2.  Informative References
 
    [I-D.ietf-dhc-dhcpv6-redundancy-consider]
-              Brzozowski, J., Tremblay, J., Chen, J., and T. Mrugalski,
+              Tremblay, J., Brzozowski, J., Chen, J., and T. Mrugalski,
               "DHCPv6 Redundancy Deployment Considerations",
-              draft-ietf-dhc-dhcpv6-redundancy-consider-01 (work in
-              progress), August 2011.
+              draft-ietf-dhc-dhcpv6-redundancy-consider-02 (work in
 
-   [I-D.mrugalski-dhc-dhcpv6-failover-requirements]
-              Mrugalski, T. and K. Kinnear, "DHCPv6 Failover
-              Requirements",
-              draft-mrugalski-dhc-dhcpv6-failover-requirements-00 (work
-              in progress), June 2011.
+
+
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 16]
+
+Internet-Draft        DHCPv6 Failover Requirements            March 2012
+
+
+              progress), October 2011.
 
    [RFC2136]  Vixie, P., Thomson, S., Rekhter, Y., and J. Bound,
               "Dynamic Updates in the Domain Name System (DNS UPDATE)",
@@ -699,6 +908,12 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
               Rabil, G., Dooley, M., and A. Kapur, "DHCP Failover
               Protocol", draft-ietf-dhc-failover-12 (work in progress),
               March 2003.
+
+   [requirements]
+              Mrugalski, T. and K. Kinnear, "DHCPv6 Failover
+              Requirements",
+              draft-ietf-dhc-dhcpv6-failover-requirements-00 (work in
+              progress), October 2011.
 
 
 Authors' Addresses
@@ -711,22 +926,6 @@ Authors' Addresses
 
    Phone: +1 650 423 1345
    Email: tomasz.mrugalski@gmail.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012              [Page 13]
-
-Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
 
    Kim Kinnear
@@ -749,36 +948,5 @@ Internet-Draft        DHCPv6 Failover Requirements           August 2011
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Mrugalski & Kinnear     Expires February 18, 2012              [Page 14]
+Mrugalski & Kinnear     Expires September 6, 2012              [Page 17]
 
