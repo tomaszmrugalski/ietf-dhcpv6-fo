@@ -1,0 +1,3 @@
+These are archival DHCPv4 Failover drafts. They are here for reference
+only. There is no will to resume work on v4 failover. That work has
+been abandoned in 2003.
