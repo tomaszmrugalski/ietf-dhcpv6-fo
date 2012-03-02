@@ -527,7 +527,7 @@
   </section> <!-- determining allocation approach -->
 </section> <!-- address allocation -->
 
-  <section title="Failover Mmechanisms">
+  <section title="Failover Mechanisms">
     <t>This section lays out overview of communication between
     partners and other mechanisms required for failover operation. As
     this is a design document only, not a protocol specification, a
@@ -564,23 +564,173 @@
       <t>Time differences are expressed in seconds and are signed.</t>
     </section>
 
-    <section title="Lazy updates">
+    <section anchor="lazy-updates" title="Lazy updates">
+      <t>Lazy update refers to the requirement placed on a server
+      implementing a failover protocol to update its failover partner
+      when- ever the binding database changes.  A failover protocol
+      which didn't support lazy update would require the failover
+      partner update to be complete before a DHCP server could respond
+      to a DHCP client request. Lazy update mechanism allows a server
+      to allocate a new or extend existing lease and then update its
+      failover partner as time permits.</t>
+      <t>Although lazy updates mechanism does not introduce additional
+      delays in server response times, it introduces other
+      difficulties.  The key problem with lazy update is that when a
+      server fails after updating a client with a particular lease
+      time and before updating its partner, the partner will believe
+      that a lease has expired even though the client still retains a
+      valid lease on that address or prefix.</t>
     </section>
 
     <section anchor="mclt" title="MCLT concept">
-      <t>TODO: Copy description from page 21 of <xref target="dhcpv4-failover"/>.</t>
-    </section>
+      <t>In order to handle problem introduced by lazy updates (see
+      <xref target="lazy-updates"/>), a period of time known as the
+      "Maximum Client Lead Time" (MCLT) is defined and must be known
+      to both the primary and secondary servers.  Proper use of this
+      time interval places an upper bound on the difference allowed
+      between the lease time provided to a DHCP client by a server and
+      the lease time known by that server's partner.</t>
 
-    <section anchor="reachability" title="Unreachability detection">
-      <t>Each partner maintains a FO_SEND timer for each partner
-      connection. FO_SEND timer is reset every time any message is
-      transmitted.  If timer reaches FO_SEND_MAX value, an CONTACT
-      message is transmitted and timer is reset. CONTACT message may be
-      transmitted at any time.</t>
+      <t>The MCLT is typically much less than the lease time that a
+      server has been configured to offer a client, and so some
+      strategy must exist to allow a server to offer the configured
+      lease time to a client.  During a lazy update the updating
+      server typically updates its partner with a potential expiration
+      time which is longer than the lease time previously given to the
+      client and which is longer than the lease time that the server
+      has been configured to give a client.  This allows that server
+      to give a longer lease time to the client the next time the
+      client renews its lease, since the time that it will give to the
+      client will not exceed the MCLT beyond the potential expiration
+      time acknowledged by its partner.</t>
 
-      <t>Discussion: Perhaps it would be more reasonable to use
-      echo-reply approach, rather than periodic transmissions?</t>
-    </section>
+      <t>The fundamental relationship on which much of the correctness
+      of this protocol depends is that the lease expiration time known
+      to a DHCP client MUST NOT be more than the maximum client lead
+      time greater than the potential expiration time known to a
+      server's partner.</t>
+
+      <t>The remainder of this section makes the above fundamental
+      relation- ship more explicit.</t>
+
+      <t>This protocol requires a DHCP server to deal with several
+      different lease intervals and places specific restrictions on
+      their relation- ships. The purpose of these restrictions is to
+      allow the other server in the pair to be able to make certain
+      assumptions in the absence of an ability to communicate between
+      servers.</t>
+
+      <t>The different lease times are:
+      <list style="hanging">
+        <t hangText="desired lease interval:">
+          <vspace/>
+          The desired lease interval is the lease interval that a DHCP
+          server would like to give to a DHCP client in the absence of
+          any restric- tions imposed by the Failover protocol.  Its
+          determination is out- side of the scope of this
+          protocol. Typically this is the result of external
+          configuration of a DHCP server.
+        </t>
+        <t hangText="actual lease interval:">
+          <vspace/>
+          The actual lease internal is the lease interval that a DHCP server
+          gives out to a DHCP client in the dhcp-lease-time option of a
+          REPLY packet.  It may be shorter than the desired client lease
+          interval (as explained below).
+        </t>
+        <t hangText="potential lease interval:">
+          <vspace/>
+          The potential lease interval is the lease expiration interval the
+          local server tells to its partner in the potential-expiration-time
+          option of a BNDUPD message.
+        </t>
+        <t hangText="acknowledged potential lease interval:">
+          <vspace/>
+          The acknowledged potential lease interval is the potential lease
+          interval the partner server has most recently acknowledged in the
+          potential-expiration-time option of a BNDACK message.
+        </t>
+      </list>
+      </t>
+
+   <section title="MCLT example">
+     <t>Following example demonstrates MCLT concept in practice. Used
+     values are arbitrarily chosen are anre not a recommendation for
+     actual values. The MCLT in this case is 1 hour.  The desired lease
+     interval is 3 days, and its renewal time is half the lease inter-
+     val.</t>
+
+     <t>When a server makes an offer for a new lease on an IP address to a
+     DHCP client, it determines the desired lease interval (in this
+     case, 3 days).  It then examines the acknowledged potential lease
+     interval (which in this case is zero) and determines the remainder
+     of the time left to run, which is also zero.  To this it adds the
+     MCLT.  Since the actual lease interval cannot be allowed to exceed
+     the remainder of the current acknowledged potential lease interval
+     plus the MCLT, the offer made to the client is for the remainder
+     of the current acknowledged potential lease interval (i.e., zero)
+     plus the MCLT.  Thus, the actual lease interval is 1 hour.</t>
+
+     <t>Once the server has sent the REPLY to the DHCP client, it
+     will update the secondary server with the lease information. How-
+     ever, the desired potential lease interval will be composed of one
+     half of the current actual lease interval added to the desired
+     lease interval. Thus, the secondary server is updated with a
+     BNDUPD with a lease interval of 3 days + 1/2 hour specified in the
+     potential-expiration-time option.</t>
+
+     <t>When the primary server receives a BNDACK to its update of the
+     secondary server's (partner's) potential lease interval, it records
+     that as the acknowledged potential lease interval.  A server MUST
+     NOT send a BNDACK in response to a BNDUPD message until it is sure
+     that the information in the BNDUPD message has been updated in its
+     lease database.  Thus, the primary server in this case can be sure
+     that the secondary server has recorded the poten- tial lease
+     interval in its stable storage when the primary server receives a
+     BNDACK message from the secondary server.</t>
+
+     <t>When the DHCP client attempts to renew at T1 (approximately one
+     half an hour from the start of the lease), the primary server
+     again determines the desired lease interval, which is still 3
+     days.  It then compares this with the remaining acknowledged
+     potential lease interval (3 days + 1/2 hour) and adjusts for the
+     time passed since the secondary was last updated (1/2 hour).  Thus
+     the time remaining of the acknowledged potential lease interval is
+     3 days.  Adding the MCLT to this yields 3 days plus 1 hour, which
+     is more than the desired lease interval of 3 days.  So the client
+     is renewed for the desired lease interval -- 3 days.</t>
+
+     <t>When the primary DHCP server updates the secondary DHCP server
+     after the DHCP client's renewal ACK is complete, it will calculate
+     the desired potential lease interval as the T1 fraction of the
+     actual client lease interval (1/2 of 3 days this time = 1.5 days).
+     To this it will add the desired client lease interval of 3 days,
+     yielding a total desired partner server lease interval of 4.5
+     days.  In this way, the primary attempts to have the secondary
+     always "lead" the client in its understanding of the client's
+     lease interval so as to be able to always offer the client the
+     desired client lease interval.</t>
+
+     <t>Once the initial actual client lease interval of the MCLT is past,
+     the protocol operates effectively like the DHCPv6 protocol does
+     today in its behavior concerning lease intervals. However, the
+     guarantee that the actual client lease interval will never exceed
+     the remaining acknowledged partner server lease interval by more
+     than the MCLT allows full recovery from a variety of failures.</t>
+   </section>
+
+ </section>
+
+ <section anchor="reachability" title="Unreachability detection">
+   <t>Each partner maintains a FO_SEND timer for each partner
+   connection. FO_SEND timer is reset every time any message is
+   transmitted.  If timer reaches FO_SEND_MAX value, an CONTACT
+   message is transmitted and timer is reset. CONTACT message may be
+   transmitted at any time.</t>
+
+   <t>Discussion: Perhaps it would be more reasonable to use
+   echo-reply approach, rather than periodic transmissions?</t>
+ </section>
 
     <section title="Sending Data">
       <t>Server updates its partner about recent changes in lease states.
@@ -648,14 +798,30 @@
 </section> <!-- partner update -->
 
   <section anchor="states" title="Endpoint States">
-
-    <section title="State Descriptions">
+    <t>The following sections contain detailed description of all
+    possible states of failover endpoint.</t>
+    <section anchor="state-init" title="State Machine Initialization">
+      <t>TODO</t>
     </section>
 
-    <section title="State Machine Initialization">``
+    <section anchor="state-normal" title="NORMAL State Operation">
+      <t>TODO</t>
+    </section>
+
+    <section anchor="state-comm-inter" title="COMMUNICATION-INTERRUPTED State Operation">
+      <t>TODO</t>
+    </section>
+
+    <section anchor="state-partner-down" title="PARTNET-DOWN State Operation">
+      <t>TODO</t>
+    </section>
+
+    <section anchor="state-recovering" title="RECOVERING State Operation">
+      <t>TODO</t>
     </section>
 
     <section title="State Transitions">
+      <t>TODO</t>
     </section>
   </section>
 
@@ -703,6 +869,16 @@
     </section>
   </section>
 
+  <section anchor="DDNS" title="Dynamic DNS Considerations">
+    <t>TODO: Descibe DNS Updates challenges in failover environment.
+    It is nicely described in Section 5.12 of <xref
+    target="dhcpv4-failover"/>.</t>
+  </section>
+
+  <section anchor="reserve" title="Reservations and failover">
+    <t>TODO: Describe how lease reservation works with failover. See
+    Section 5.13 in <xref target="dhcpv4-failover"/>.</t>
+  </section>
 
   <section anchor="protocol-skeleton" title="Protocol entities">
     <t>Discussion: It is unclear if following sections belong to
@@ -746,7 +922,9 @@
   </section>
 
   <section title="Security Considerations">
-    <t>TBD...</t>
+    <t>TODO: Security considerations section will contain loose notes
+    and will be transformed into consistent text once the core design
+    solidifies.</t>
   </section>
 
   <section title="IANA Considerations">
@@ -784,10 +962,10 @@
       <front>
         <title>DHCPv6 Failover Requirements</title>
         <author initials="T" surname="Mrugalski" fullname="Tomasz Mrugalski">
-          <organization/>
+          <organization abbrv="ISC">Internet Systems Consortium</organization>
         </author>
         <author initials="K" surname="Kinnear" fullname="Kim Kinnear">
-          <organization/>
+          <organization abbrev="Cisco">Cisco Systems</organization>
         </author>
         <date month="October" day="18" year="2011"/>
       </front>
