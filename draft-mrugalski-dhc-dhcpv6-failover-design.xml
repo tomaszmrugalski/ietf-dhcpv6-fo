@@ -18,29 +18,29 @@
       <organization abbrev="ISC">Internet Systems Consortium, Inc.
       </organization>
       <address>
-	<postal>
-	  <street>950 Charter Street</street>
-	  <city>Redwood City</city>
-	  <region>CA</region>
-	  <code>94063</code>
-	  <country>USA</country>
-	</postal>
-	<phone>+1 650 423 1345</phone>
-	<email>tomasz.mrugalski@gmail.com</email>
+        <postal>
+          <street>950 Charter Street</street>
+          <city>Redwood City</city>
+          <region>CA</region>
+          <code>94063</code>
+          <country>USA</country>
+        </postal>
+        <phone>+1 650 423 1345</phone>
+        <email>tomasz.mrugalski@gmail.com</email>
       </address>
     </author>
     <author fullname="Kim Kinnear" initials="K." surname="Kinnear">
       <organization abbrev="Cisco">Cisco Systems, Inc.</organization>
       <address>
-	<postal>
-	  <street>1414 Massachusetts Ave.</street>
-	  <city>Boxborough</city>
-	  <region>Massachusetts</region>
-	  <code>01719</code>
-	  <country>USA</country>
-	</postal>
-	<phone>+1 (978) 936-0000</phone>
-	<email>kkinear@cisco.com</email>
+        <postal>
+          <street>1414 Massachusetts Ave.</street>
+          <city>Boxborough</city>
+          <region>Massachusetts</region>
+          <code>01719</code>
+          <country>USA</country>
+        </postal>
+        <phone>+1 (978) 936-0000</phone>
+        <email>kkinear@cisco.com</email>
       </address>
     </author>
 
@@ -79,39 +79,39 @@
 
       <list style="symbols">
         <t>Server - A DHCPv6 server that implements DHCPv6
-        failover. 'Server' is not the most appropriate term and 
+        failover. 'Server' is not the most appropriate term and
         'failover endpoint' should be used instead. 'Server' and
         'failover endpoint' as synonymous only if server participates
         in only one failover relationship. However, for the sake of
         simplicity 'server' is used throughout the document.</t>
-        
-        <t>Primary Server</t> 
-        
+
+        <t>Primary Server</t>
+
         <t>Secondary Server</t>
-        
+
         <t>Proportional Allocation - First of defined algorithms that
         splits available free leases between primary and secondary
         servers that is particularly well suited for limited
         resources.  See <xref target="alloc-classic"/> for
-        details.</t> 
-        
+        details.</t>
+
         <t>Independent Allocation - Second of defined
         algorithms that splits available pool of resources between
         primary and secondary servers that is particularly well suited
         for vast pools (i.e. when available resources are not expected
         to deplete). See <xref target="alloc-separated"/> for
-        details.</t> 
-        
+        details.</t>
+
         <t>Resource - an IPv6 address or a IPv6
-        prefix.</t> 
-        
+        prefix.</t>
+
         <t>Failover endpoint - The failover protocol allows for there
         to be a unique failover endpoint per partner per role per
         relationship (where role is primary or secondary and the
         relationship is defined by the relationship-name option).
         This failover endpoint can take actions and hold unique
         states.  Typically, there is a one fail- over endpoint per
-        partner, although there may be more.</t> 
+        partner, although there may be more.</t>
 
         <t>Failover transmission - all messages exchanged between
         partners.</t>
@@ -138,7 +138,7 @@
       handling clients' requests) is currently not supported for the
       sake of simplicity. Such mode may be defined as an exension at a
       later time.</t>
-      
+
       <t>Failover protocol is for designed to provide lease stability for
       reasonably lived leases. Due to additional overhead failover is not
       suitable for leases shorter than 30 seconds. DHCPv6 Failover
@@ -165,7 +165,7 @@
         </list>
         </t>
       </section>
-      
+
     </section>
 
 <section title="Protocol Overview">
@@ -199,7 +199,7 @@
   accept or reject the update. Reception of lease update information
   is confirmed by responding with BNDACK message with appropriate
   status.</t>
-  
+
   <t>A subset of available resources (addresses or prefixes) is
   reserved for secondary server use. That is required for handling a
   case where both servers are able to communicate with clients, but
@@ -240,7 +240,7 @@
     primary server and secondary server receives appropriate updates.
     While operating in NORMAL state server may switch to
     COMMUNICATIONS-INTERRUPTED if communication with its partner is
-    severed. If its partner closes connection using DISCONNECT message, 
+    severed. If its partner closes connection using DISCONNECT message,
     server moves to PARTNER-DOWN state.</t>
   </section>
 
@@ -278,7 +278,7 @@
     connection with its partner is established, both partners switch to
     RECOVERING state.</t>
   </section>
-    
+
   <!-- RECOVERING -->
   <section anchor="recovering-overview" title="RECOVERING State Overview">
     <t>This transitional state represents a state, where two servers
@@ -317,7 +317,7 @@
     any relationships for which it is a primary server, it should
     initiate a connection of its own to the partner server, one for
     each primary relationship it has with that server.</t>
-    
+
     <t>If it has any relationships with the connecting server for which
     it is a seconary server, it should just await the CONNECT message
     to determine which relationship this connection is to serve.</t>
@@ -346,12 +346,12 @@
     primary server in an installation dependent amount of time, it MAY
     drop the connection and send another stimulus connection attempt
     to the primary server.</t>
-    
+
     <t>Every CONNECT message includes a TLS-request option, and if the
     CONNECTACK message does not reject the CONNECT message and the
     TLS-reply option says TLS MUST be used, then the servers will
     immediately enter into TLS negotiation.</t>
-    
+
     <t>Once TLS negotiation is complete, the primary server MUST
     resend the CONNECT message on the newly secured TLS connection and
     then wait for the CONNECTACK message in response.  The TLS-request
@@ -388,7 +388,7 @@
     relationship between each pair of failover servers. In this case
     there is one failover endpoint for that relationship on each partner.
     This failover relationship MUST have a unique name.</t>
-    
+
     <t>There is typically little need for addtional relationships between
     any two servers but there MAY be more than one failover relationship
     between two servers -- however each MUST have a unique relationship
@@ -422,7 +422,7 @@
   <t>Currently there are two allocation algorithms defined for
   resources (addresses or prefixes). Additional allocation schemes
   may be defined as future extensions.</t>
-  
+
   <list style="numbers">
     <t>Proportional Allocation - This allocation algorithm is a direct
     application of algorithm defined in <xref
@@ -465,7 +465,7 @@
     to own them.  When the client releases the resource or the
     lease on it expires, it will again become available and will be
     owned by the primary.</t>
-    
+
     <t>A resource will not become owned by the server which allocated
     it initially when it is released or the lease expires because, in
     gen- eral, that server will have had to replenish its pool of
@@ -474,10 +474,10 @@
     secondary might well put the secondary more out of balance with
     respect to the primary instead of enhancing the balance of
     available addresses between them.</t>
-    
+
     <t>TODO: Need to rework this v4-specific vocabulary to v6, once we
     decide how things will look like in v6.</t>
-    
+
     <t>These address pools are used when in COMMUNICATIONS-INTERRUPTED
     state and while waiting for the MCLT expiration in PARTNER-DOWN
     state.  In addition these pools are used when in NORMAL state as
@@ -489,7 +489,7 @@
     target="dhcpv4-failover"/> here.</t>
 
   </section>
-  
+
   <section anchor="alloc-separated" title="Independent Allocation">
     <t>In this allocation scheme, available resources are split
     between servers. Available resources are split between primary and
@@ -503,13 +503,13 @@
     electronic devices on Earth). This allocation mechanism SHOULD be
     used for IPv6 addresses, unless configured address pool is small
     or is otherwise administratively limited.</t>
-    
+
     <t>Once each server is assigned a resource pool during initial
     connection establishment, it may allocate assigned resources to
     clients. Once client release a resource or its lease is expired,
     returned resource returns to pool for the same server. Resource
     never changes servers.</t>
-    
+
     <t>During COMMUNICATION-INTERRUPTED events, a partner MAY continue
     extending existing leases when requested by clients. A healthy
     partner MUST NOT lease resources that were assigned to its downed
@@ -521,7 +521,7 @@
 
     <section title="IPv6 Addresses">
     </section>
-    
+
     <section title="IPv6 Prefixes">
     </section>
   </section> <!-- determining allocation approach -->
@@ -563,25 +563,25 @@
       target="RFC3315"/>).</t>
       <t>Time differences are expressed in seconds and are signed.</t>
     </section>
-  
+
     <section title="Lazy updates">
     </section>
-    
+
     <section anchor="mclt" title="MCLT concept">
       <t>TODO: Copy description from page 21 of <xref target="dhcpv4-failover"/>.</t>
     </section>
-    
+
     <section anchor="reachability" title="Unreachability detection">
       <t>Each partner maintains a FO_SEND timer for each partner
       connection. FO_SEND timer is reset every time any message is
       transmitted.  If timer reaches FO_SEND_MAX value, an CONTACT
       message is transmitted and timer is reset. CONTACT message may be
       transmitted at any time.</t>
-      
+
       <t>Discussion: Perhaps it would be more reasonable to use
       echo-reply approach, rather than periodic transmissions?</t>
     </section>
-    
+
     <section title="Sending Data">
       <t>Server updates its partner about recent changes in lease states.
       Each update must include following information:
@@ -593,11 +593,11 @@
         this lease. (Note1: one client may use many IAID
         simulatenously. Note2: IAID for IA, TA and PD are orthogonal
         number spaces.)</t>
-        <t>valid life time sent to client</t> 
-        <t>preferred life time requested by client</t> 
-        <t>preferred life time sent to client</t> 
+        <t>valid life time sent to client</t>
+        <t>preferred life time requested by client</t>
+        <t>preferred life time sent to client</t>
         <t>CLTT - Client Last Transmission Time, a timestamp
-        of the last received transmission from a client</t> 
+        of the last received transmission from a client</t>
         <t>assigned FQDN names, if any (optional)</t>
       </list>
       Discussion: Do we need T1 as well? Something like next expected
@@ -605,14 +605,14 @@
       <t>Q: Maybe we could reusa IA_NA and IA_PD options here?</t>
       <t>Q: Do we care about preferred lifetime? (presumably no)</t>
       <t>Q: Do we care about IAID? (presumably yes)</t>
-    
+
     <section title="Required Data">
     </section>
-    
+
     <section title="Optional Data">
     </section>
   </section> <!-- sending data -->
-  
+
   <section title="Receiving Data">
 
     <section title="Conflict Resolution">
@@ -633,12 +633,12 @@
       to update.
       </t>
       <t>
-	Discussion: we may possibly define different types of update
-	rejections. Server should treat differently a case when receiving
-	new lease that it previously haven't seen than a case when partner
-	sents old version of a lease that newer state is known.
+        Discussion: we may possibly define different types of update
+        rejections. Server should treat differently a case when receiving
+        new lease that it previously haven't seen than a case when partner
+        sents old version of a lease that newer state is known.
       </t>
-      
+
     </section>
 
     <section title="Acknowledging Reception">
@@ -664,7 +664,7 @@
     <t>Discussion: although following sections may be somewhat
     redundant, given desciptions in <xref target="states"/>, but
     it should be described here for clarity.</t>
-    
+
     <section title="Partner-down event recovery">
     </section>
     <section title="Network partition event recovery">
@@ -677,7 +677,7 @@
     not further complicate failover protocol. Any proposals that are
     considered complex will be defined as stand-alone extensions in
     separate documents.</t>
-    
+
     <section title="Active-active mode">
       <t>A very simple way to achieve active-active mode is to remove
       the restriction that seconary server MUST NOT respond to SOLICIT
@@ -702,7 +702,7 @@
       been investigated yet.</t>
     </section>
   </section>
-  
+
 
   <section anchor="protocol-skeleton" title="Protocol entities">
     <t>Discussion: It is unclear if following sections belong to
@@ -710,16 +710,16 @@
     scratchbook with list of things that will have to be defined
     eventually. If it will stay in this document or will be moved to
     protocol spec document is TBD.</t>
-    
+
     <section anchor="options" title="Failover Protocol">
       <t>This section enumerates list of options that will be defined in
       failover protocol specification. Rough description of purpose and
       content for each option is specified. Exact on wire format will be
       defined in protocol specification.</t>
       <t><list style="numbers">
-	<t>OPTION_FO_TIMESTAMP - convey information about timestamp. It
-	is used by time skew measurement algorithm (see <xref
-	target="time-skew"/>).</t>
+        <t>OPTION_FO_TIMESTAMP - convey information about timestamp. It
+        is used by time skew measurement algorithm (see <xref
+        target="time-skew"/>).</t>
       </list></t>
     </section>
 
@@ -727,12 +727,12 @@
       <t>This section enumerates various constants that have to be defined
       in actual protocol specification.</t>
       <t><list style="numbers">
-	<t>TIME_SKEW_PKTS_AVG - number of packets that are used to calculate
-	average time skew between partners. See (see <xref
-	target="time-skew"/>).</t>
+        <t>TIME_SKEW_PKTS_AVG - number of packets that are used to calculate
+        average time skew between partners. See (see <xref
+        target="time-skew"/>).</t>
       </list></t>
     </section>
-      
+
   </section>
 
   <section title="Open questions">
@@ -748,7 +748,7 @@
   <section title="Security Considerations">
     <t>TBD...</t>
   </section>
-  
+
   <section title="IANA Considerations">
     <t>IANA is not requested to perform any actions at this time.</t>
   </section>
@@ -796,34 +796,34 @@
     </reference>
 
       <reference anchor="dhcpv4-failover">
-	<front>
-	  <title>DHCP Failover Protocol</title> <author fullname="Ralph
-	  Droms" initials="R." surname="Droms">
-	    <organization>Cisco Systems</organization>
-	  </author> <author fullname="Kim Kinnear" initials="K."
-	  surname="Kinnear">
-	    <organization>Cisco Systems</organization>
-	  </author> <author fullname="Mark Stapp" initials="M."
-	  surname="Stapp">
-	    <organization>Cisco Systems</organization>
-	  </author> <author fullname="Bernie Volz" initials="B."
-	  surname="Volz">
-	    <organization>Ericsson</organization>
-	  </author> <author fullname="Steve Gonczi" initials="S."
-	  surname="Gonczi">
-	    <organization>Relicore</organization>
-	  </author> <author fullname="Greg Rabil" initials="G."
-	  surname="Rabil">
-	    <organization>Lucent Technologies</organization>
-	  </author> <author fullname="Michael Dooley" initials="M."
-	  surname="Dooley">
-	    <organization>Diamond IP Technologies</organization>
-	  </author> <author fullname="Arun Kapur" initials="A."
-	  surname="Kapur">
-	    <organization>K5 Networks</organization>
-	  </author> <date month="March" year='2003'/>
-	</front> <seriesInfo name="Internet-Draft"
-	value="draft-ietf-dhc-failover-12"/>
+        <front>
+          <title>DHCP Failover Protocol</title> <author fullname="Ralph
+          Droms" initials="R." surname="Droms">
+            <organization>Cisco Systems</organization>
+          </author> <author fullname="Kim Kinnear" initials="K."
+          surname="Kinnear">
+            <organization>Cisco Systems</organization>
+          </author> <author fullname="Mark Stapp" initials="M."
+          surname="Stapp">
+            <organization>Cisco Systems</organization>
+          </author> <author fullname="Bernie Volz" initials="B."
+          surname="Volz">
+            <organization>Ericsson</organization>
+          </author> <author fullname="Steve Gonczi" initials="S."
+          surname="Gonczi">
+            <organization>Relicore</organization>
+          </author> <author fullname="Greg Rabil" initials="G."
+          surname="Rabil">
+            <organization>Lucent Technologies</organization>
+          </author> <author fullname="Michael Dooley" initials="M."
+          surname="Dooley">
+            <organization>Diamond IP Technologies</organization>
+          </author> <author fullname="Arun Kapur" initials="A."
+          surname="Kapur">
+            <organization>K5 Networks</organization>
+          </author> <date month="March" year='2003'/>
+        </front> <seriesInfo name="Internet-Draft"
+        value="draft-ietf-dhc-failover-12"/>
       </reference> <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
       <?rfc
