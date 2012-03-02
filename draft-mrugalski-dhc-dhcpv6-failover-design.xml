@@ -74,21 +74,45 @@
     </section>
 
     <section title="Glossary">
-      <t>This is a supplemental glossary that combined with definitions in
-      Section 3 <xref target="requirements"/>.
+      <t>This is a supplemental glossary that combined with
+      definitions in Section 3 <xref target="requirements"/>.
+
       <list style="symbols">
-        <t>Primary Server</t>
+        <t>Server - A DHCPv6 server that implements DHCPv6
+        failover. 'Server' is not the most appropriate term and 
+        'failover endpoint' should be used instead. 'Server' and
+        'failover endpoint' as synonymous only if server participates
+        in only one failover relationship. However, for the sake of
+        simplicity 'server' is used throughout the document.</t>
+        
+        <t>Primary Server</t> 
+        
         <t>Secondary Server</t>
-        <t>Proportional Allocation</t>
-        <t>Independent Allocation</t>
-        <t>Resource - an IPv6 address or IPv6 prefix</t>
-        <t>Failover endpoint - The failover protocol allows for there to
-        be a unique failover endpoint per partner per role per
+        
+        <t>Proportional Allocation - First of defined algorithms that
+        splits available free leases between primary and secondary
+        servers that is particularly well suited for limited
+        resources.  See <xref target="alloc-classic"/> for
+        details.</t> 
+        
+        <t>Independent Allocation - Second of defined
+        algorithms that splits available pool of resources between
+        primary and secondary servers that is particularly well suited
+        for vast pools (i.e. when available resources are not expected
+        to deplete). See <xref target="alloc-separated"/> for
+        details.</t> 
+        
+        <t>Resource - an IPv6 address or a IPv6
+        prefix.</t> 
+        
+        <t>Failover endpoint - The failover protocol allows for there
+        to be a unique failover endpoint per partner per role per
         relationship (where role is primary or secondary and the
-        relationship is defined by the relationship-name option).  This
-        failover endpoint can take actions and hold unique states.
-        Typically, there is a one fail- over endpoint per partner,
-        although there may be more.</t>
+        relationship is defined by the relationship-name option).
+        This failover endpoint can take actions and hold unique
+        states.  Typically, there is a one fail- over endpoint per
+        partner, although there may be more.</t> 
+
         <t>Failover transmission - all messages exchanged between
         partners.</t>
       </list>
@@ -127,7 +151,7 @@
       <t>This design attempts to fulfill all DHCPv6 failover requirements
       defined in <xref target="requirements"/>.</t>
 
-      <section title="Additional requirements">
+      <section title="Additional Requirements">
         <t>The following requirements are not related to failover
         mechanism in general, but rather to this particular design.
 
@@ -205,11 +229,71 @@
   <t>Servers verify each others availability by periodically
   exchanging CONTACT messages. See <xref target="reachability"/> for
   discussion about detecting partner's unreachability.</t>
+
+  <t>Server that is being shut down transmits DISCONNECT message, closes
+  connection with its partner and stops operation. Server MUST transmit
+  any pending lease updates before transmitting DISCONNECT message.</t>
+
+  <section anchor="normal-overview" title="NORMAL State Overview">
+    <t>During normal operation when two partners are communicating, both
+    remain in NORMAL state. All incoming requests are processed by
+    primary server and secondary server receives appropriate updates.
+    While operating in NORMAL state server may switch to
+    COMMUNICATIONS-INTERRUPTED if communication with its partner is
+    severed. If its partner closes connection using DISCONNECT message, 
+    server moves to PARTNER-DOWN state.</t>
+  </section>
+
+  <!-- COMMUNICATION interrupted -->
+  <section anchor="comm-inter-overview" title="COMMUNICATION-INTERRUPTED State Overview">
+    <t>When a server discovers that its partner is not reachable, it
+    switches into COMMUNICATIONS-INTERRUPTED state. In that state a
+    server MUST extend known leases on only by MCLT time. A server will
+    extend leases that it previously assigned using regular RENEW
+    mechanism as clients will send their communication to this server
+    (using multicasted RENEW message with server's DUID or using
+    unicasted RENEW message if configured). A server MUST also extend
+    leases assigned by its partner. This is accomplished by replying to
+    clients' REBIND messages. Again, server MUST NOT extend lease by
+    more than configured MCLT value. While in COMMUNICATIONS-INTERRUPTED
+    state, each server MUST assign new leases from its own pool. If
+    server is operating in COMMUNICATION-INTERRUPTED state and
+    establishes connection with its partner (either by successfully
+    completing periodic connection attempt or receiving incoming
+    connection from its partner), server moves into RECOVERING
+    state. Server may be also administratively switched to PARTNER-DOWN
+    state.</t>
+  </section>
+
+  <!-- PARTNER-DOWN -->
+  <section anchor="partner-down-overview" title="PARTNER-DOWN State Overview">
+    <t>While in PARTNER-DOWN state, server has a guarantee that its
+    partner is not serving any leases. In such case, it MUST extend
+    existing leases that he knows about and MUST assign new leases from
+    its own pool. Since it knows that its partner is not extending any
+    lease and does not assign new leases, it may extend leases by time
+    longer than MCLT. This mode of operation is an equivalent of a
+    stand-alone DHCPv6 server and it does not offer any redundancy. In
+    this state server MAY attempt connection attempts periodically. Once
+    connection with its partner is established, both partners switch to
+    RECOVERING state.</t>
+  </section>
+    
+  <!-- RECOVERING -->
+  <section anchor="recovering-overview" title="RECOVERING State Overview">
+    <t>This transitional state represents a state, where two servers
+    established connection, but still need to exchange lease
+    information. Upon entering the state, servers transmit UPDREQ or
+    UPDREQALL (depending on state of its local lease database). Once all
+    lease information is exchanges, both servers switch to NORMAL
+    state. While recovering, both servers are allowed to extend existing
+    known leases by MCLT only. Each server MAY assign new leases from
+    its own assigned pool.</t>
+  </section>
 </section>
 
 
 <section title="Connection Management">
-
   <section title="Creating Connections">
     <t>Every server implementing the failover protocol SHOULD attempt to
     connect to all of its partners periodically, where the period is
@@ -340,17 +424,17 @@
   may be defined as future extensions.</t>
   
   <list style="numbers">
-    <t>Apprortioned Allocation - This allocation algorithm is a direct
+    <t>Proportional Allocation - This allocation algorithm is a direct
     application of algorithm defined in <xref
     target="dhcpv4-failover"/> to DHCPv6. Available resources are
     split between primary and secondary server. Released resources are
     always returned to primary server.  Primary and secondary servers
     may initiate rebalancing procedure, when disparity between
-    resources available to each server is detected. Only unleased
-    resources are "owned" by one of the servers. This algorithm is
-    particularly well suited for scenarios, where amount of available
-    resources is limited. See <xref target="alloc-classic"/> for
-    details.</t>
+    resources available to each server reaches a preconfigured
+    threshold. Only resources that are not leased to any clients are
+    "owned" by one of the servers. This algorithm is particularly well
+    suited for scenarios, where amount of available resources is
+    limited. See <xref target="alloc-classic"/> for details.</t>
     <t>Independent Allocation - This allocation algorithm assumes that
     available resources are split between primary and secondary
     servers.  Resources are assigned to specific server all time,
@@ -363,9 +447,6 @@
   </list>
 
   <section anchor="alloc-classic" title="Proportional Allocation">
-    <cref source='tomek'>
-      Maybe we could rename it to Proportional allocation?
-    </cref>
 
     <t>In this allocation scheme, each server has its own pool of
     available resources.  Note that a resource is not "owned" by a
@@ -446,11 +527,13 @@
   </section> <!-- determining allocation approach -->
 </section> <!-- address allocation -->
 
-  <section title="Partner Update">
-    <t>This section lays out overview of communication between partners.
-    As this is a design document only, not a protocol specification, a
-    high level ideas are presented only, without implementation specific
-    details (e.g. on-wire formats). </t>
+  <section title="Failover Mmechanisms">
+    <t>This section lays out overview of communication between
+    partners and other mechanisms required for failover operation. As
+    this is a design document only, not a protocol specification, a
+    high level ideas are presented only, without implementation
+    specific details (e.g. lack of on-wire formats). Implementation details
+    will be specified in a separate draft.</t>
     <section anchor="time-skew" title="Time Skew">
       <t>Partners exchange information about known lease states. To
       reliably compare known lease with an update received from a
@@ -576,6 +659,7 @@
     </section>
   </section>
 
+  <!--
   <section title="Failure recovery">
     <t>Discussion: although following sections may be somewhat
     redundant, given desciptions in <xref target="states"/>, but
@@ -585,7 +669,7 @@
     </section>
     <section title="Network partition event recovery">
     </section>
-  </section>
+  </section>-->
 
   <section title="Proposed extensions">
     <t>The following section discusses possible extensions to proposed
@@ -594,7 +678,7 @@
     considered complex will be defined as stand-alone extensions in
     separate documents.</t>
     
-    <section title="Pseudo-Active-active mode">
+    <section title="Active-active mode">
       <t>A very simple way to achieve active-active mode is to remove
       the restriction that seconary server MUST NOT respond to SOLICIT
       and REQUEST messages. Instead it could respond, but MUST have
@@ -658,7 +742,7 @@
     addresses.</t>
     <t>Q: Do we want to support CGA-registered addresses? There is currently
     work in DHC WG about this, but I haven't looked at it yet. If that is complicated,
-    we may not define it heere, but rather as an extension.</t>
+    we may not define it here, but rather as an extension.</t>
   </section>
 
   <section title="Security Considerations">
@@ -666,8 +750,7 @@
   </section>
   
   <section title="IANA Considerations">
-    <t>IANA is not requested to perform any actions at this
-    time.</t>
+    <t>IANA is not requested to perform any actions at this time.</t>
   </section>
 
   <section title="Acknowledgements">
