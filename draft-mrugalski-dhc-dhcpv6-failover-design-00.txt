@@ -21,7 +21,7 @@ Abstract
    not protocol specification document.  It is a second document in a
    planned series of three documents.  DHCPv6 failover requirements are
    specified in [requirements].  A protocol specification document is
-   planned follow this document.
+   planned to follow this document.
 
 Status of this Memo
 
@@ -347,7 +347,7 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
    server crashes after sending response to client, but before sending
    the lazy update to its partner (or when communication between
    partners is interrupted).  To solve this problem, concept known as
-   the Maximum Client Lead Time (MCLT) (initially designe for DHCPv4
+   the Maximum Client Lead Time (MCLT) (initially designed for DHCPv4
    failover) is used.  The MCLT is the maximum amount of time that one
    server can extend a lease for a client's binding beyond the time
    known by its failover partner.  See Section 7.4 for detailed
@@ -529,12 +529,12 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
 
    The proper operation of the failover protocol requires more than the
    transmission of messages between one server and the other.  Each
-   endpoint might seem to be a single DHCP server, but in fact there are
-   situations where additional flexibility in configuration is useful.
-   A failover endpoint is always associated with a set of DHCPv6
-   prefixes that are configured on the DHCPv6 server where the endpoint
-   appears.  A DHCPv6 prefix MUST NOT be associated with more than one
-   failover endpoint.
+   endpoint might seem to be a single DHCPv6 server, but in fact there
+   are situations where additional flexibility in configuration is
+   useful.  A failover endpoint is always associated with a set of
+   DHCPv6 prefixes that are configured on the DHCPv6 server where the
+   endpoint appears.  A DHCPv6 prefix MUST NOT be associated with more
+   than one failover endpoint.
 
    The failover protocol SHOULD be configured with one failover
    relationship between each pair of failover servers.  In this case
@@ -602,9 +602,9 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
        proportional allocation, because resource imbalance doesn't have
        to be checked and there is no rebalancing for independent
        allocation.  This algorithm is particularly well suited for
-       scenarios where the there is an abundance of available IPv6
-       addresses which is typically the case for DHCPv6 address
-       allocation.  See Section 6.2 for details.
+       scenarios where the there is an abundance of available resources
+       which is typically the case for DHCPv6 address allocation.  See
+       Section 6.2 for details.
 
 
 
@@ -652,7 +652,7 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
    when in every state but PARTNER-DOWN state.  In PARTNER-DOWN state a
    failover server can allocate from either pool.  This allocation and
    maintenance of these address pools is an area of some sensitivity,
-   since the goal is to maintain a more or less con- stant ratio of
+   since the goal is to maintain a more or less constant ratio of
    available addresses between the two servers.
 
    TODO: Reuse rest of the description from section 5.4 from
@@ -716,7 +716,7 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
    compare a known lease state with an update received from a partner,
    servers must be able to reliably compare the times stored in the
    known lease state with the times received in the update.  Although a
-   simple approach would to to require both partners to use synchronized
+   simple approach would be to require both partners to use synchronized
    time, e.g. by using NTP, such a service may become unavailable in
    some scenarios that failover expects to cover, e.g. network
    partition.  Therefore a mechanism to measure and track relative time
@@ -803,8 +803,8 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
    The fundamental relationship on which much of The correctness of this
    protocol depends is that the lease expiration time known to a DHCPv6
    client MUST NOT under any circumstances be more than the maximum
-   client lead time greater than the potential expiration time known to
-   a server's partner.
+   client lead time (MCLT) greater than the potential expiration time
+   known to a server's partner.
 
    The remainder of this section makes the above fundamental
    relationship more explicit.
@@ -848,7 +848,7 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
 
 7.4.1.  MCLT example
 
-   THe following example demonstrates the MCLT concept in practice.  The
+   The following example demonstrates the MCLT concept in practice.  The
    values used are arbitrarily chosen are and not a recommendation for
    actual values.  The MCLT in this case is 1 hour.  The desired valid
    lifetime is 3 days, and its renewal time is half the valid lifetime.
@@ -967,7 +967,7 @@ Internet-Draft           DHCPv6 Failover Design               March 2012
    Discussion: Do we need T1 as well?  Something like next expected
    client transmission?
 
-   Q: Maybe we could reusa IA_NA and IA_PD options here?  Yes.
+   Q: Maybe we could reuse IA_NA and IA_PD options here?  Yes.
 
    Q: Do we care about preferred lifetime? (presumably no).  Certainly
    not what was requested by the client.
