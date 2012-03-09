@@ -773,6 +773,11 @@
    echo-reply approach, rather than periodic transmissions?</t>
  </section>
 
+ <section anchor="reallocation" title="Re-allocating Leases">
+   <t>TODO: Describe controlled re-allocation of released/expired leases to different clients.</t>
+   <!-- see section 5.2.2 in v4 failover -->
+ </section>
+
     <section title="Sending Data">
       <t>Each server updates its failover partner about recent changes in lease states.
       Each update must include following information:
@@ -1335,9 +1340,103 @@
     </section> <!-- recover-done state -->
 
     <section anchor="state-normal" title="NORMAL State">
+      <t>NORMAL state is the state used by a server when it is communicating
+      with the other server, and any required resynchronization has been
+      performed. While some bindings database synchronization is performed
+      in NORMAL state, potential conflicts are resolved prior to entry into
+      NORMAL state as is binding database data loss.</t>
+
+      <t>When entering NORMAL state, a server will send to the other server
+      all currently unacknowledged binding updates as BNDUPD messages.</t>
+
+      <t>When the above process is complete, if the server entering NORMAL
+      state is a secondary server, then it will request IP addresses for
+      allocation using the POOLREQ message.</t>
+
       <section anchor="operation-in-normal-state" title="Operation in NORMAL State">
+
+      <!-- Secondary is unresponsive in NORMAL state. -->
+
+	<t>When in NORMAL state a server will operate in the following manner:
+      <list style="hanging">
+	<t hangText="Lease time calculations"> <vspace/>
+	As discussed in <xref target="mclt"/>, the
+	lease interval given to a DHCP client can never be more than the
+	MCLT greater than the most recently received potential-
+	expiration-time from the failover partner or the current time,
+	whichever is later.
+	<vspace blankLines="1"/>
+	As long as a server adheres to this constraint, the specifics of
+	the lease interval that it gives to a DHCP client or the value
+	of the potential-expiration-time sent to its failover partner
+	are implementation dependent.</t>
+	
+	<t hangText="Lazy update of partner server"> <vspace/>
+	After sending an REPLY that includes lease update to a client,
+	the server servicing a DHCP client request attempts to update
+	its partner with the new binding information. Server transmits both
+	desired valid lifetime and actual valid lifetime.
+
+	<!-- v4 text: The lease time used in the partner update, a
+	     server MUST be at least that given to the DHCP client in
+	     the DHCPACK, and the potential-expiration-time MUST be at
+	     least the lease time, and SHOULD be considerably longer. --></t>
+
+	<t hangText="Reallocation of IP addresses between clients"> <vspace/>
+
+	Whenever a client binding is released or expires, a BNDUPD mes-
+        sage must be sent to the partner, setting the binding state to
+        RELEASED or EXPIRED.  However, until a BNDACK is received for
+        this message, the IP address cannot be allocated to another
+        client.  It cannot be allocated to the same client again if a
+        BNDUPD was sent, otherwise it can.  See <xref target="reallocation"/>.</t>
+      </list>
+      </t>
+
+      <t>In normal state, each server receives binding updates from
+      its partner server in BNDUPD messages. It records these in its
+      client binding database in stable storage and then sends a
+      corresponding BNDACK message to its partner server.</t>
+
       </section> <!-- operation-in-normal-state -->
       <section anchor="transition-out-of-normal-state" title="Transition Out of NORMAL State">
+	<t>If an external command is received by a server in NORMAL
+	state informing it that its partner is down, then transition
+	into PARTNER- DOWN state.  Generally, this would be an unusual
+	situation, where some external agency knew the partner server
+	was down.  Using the command in this case would be appropriate
+	if the polling interval and timeout were long.</t>
+	<!-- Does it make sense? That is at least strange - server maintain
+	connection with its parner and suddenly operator states that that
+	partner is down. -->
+
+	<t>If a server in NORMAL state fails to receive acks to messages sent to
+	its partner for an implementation dependent period of time, it MAY
+	move into COMMUNICATIONS-INTERRUPTED state.  This situation might
+	occur if the partner server was capable of maintaining the TCP con-
+	nection between the server and also capable of sending a CONTACT mes-
+	sage every tSend seconds, but was (for some reason) incapable of pro-
+	cessing BNDUPD messages.</t>
+
+	<t>If the communications is determined to not be "ok" (as
+	defined in <xref target="reachability"/>), then transition
+	into COMMUNICATIONS-INTERRUPTED state.</t>
+
+	<t>If a server in NORMAL state receives any messages from its partner
+	where the partner has changed state from that expected by the server
+	in NORMAL state, then the server should transition into
+	COMMUNICATIONS-INTERRUPTED state and take the appropriate state tran-
+	sition from there.  For example, it would be expected for the partner
+	to transition from POTENTIAL-CONFLICT into NORMAL state, but not for
+	the partner to transition from NORMAL into POTENTIAL-CONFLICT state.</t>
+
+	<t><!-- we don't need PAUSED If a server in NORMAL state
+	receives any messages from its partner where the PARTNER has
+	changed into PAUSED state, the server should transition into
+	COMMUNICATIONS-INTERRUPTED state. -->If a server in NORMAL
+	state receives any messages from its partner where the PARTNER
+	has changed into SHUTDOWN state, the server should transition
+	into PARTNER-DOWN state.</t>
       </section> <!-- transition-out-of-normal-state -->
     </section> <!-- normal state -->
 
