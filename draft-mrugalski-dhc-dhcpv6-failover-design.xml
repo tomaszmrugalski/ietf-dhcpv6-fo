@@ -1305,7 +1305,7 @@
 
       </section> <!-- transition-out-of-recover-wait-state -->
 
-    </section> <! -- recover-wait state>
+    </section> <!-- recover-wait state -->
 
     <section anchor="state-recover-done" title="RECOVER-DONE State">
 
@@ -1332,15 +1332,69 @@
 
       </section> <!-- transition-out-of-recover-done-state -->
 
-    </section> <! -- recover-wait state>
+    </section> <!-- recover-done state -->
 
-    <section anchor="state-normal" title="NORMAL State Operation">
-      <t>TODO</t>
-    </section>
+    <section anchor="state-normal" title="NORMAL State">
+      <section anchor="operation-in-normal-state" title="Operation in NORMAL State">
+      </section> <!-- operation-in-normal-state -->
+      <section anchor="transition-out-of-normal-state" title="Transition Out of NORMAL State">
+      </section> <!-- transition-out-of-normal-state -->
+    </section> <!-- normal state -->
 
-    <section anchor="state-comm-inter" title="COMMUNICATION-INTERRUPTED State Operation">
-      <t>TODO</t>
-    </section>
+    <section anchor="state-comm-interrrupted" title="COMMUNICATIONS-INTERRUPTED State">
+      <section anchor="operation-in-comm-interrupted-state" 
+	       title="Operation in COMMUNICATIONS-INTERRUPTED State">
+      </section> <!-- operation-in-comm-interrrupted-state -->
+      <section anchor="transition-out-of-comm-interrrupted-state" 
+	       title="Transition Out of COMMUNICATIONS-INTERRUPTED State">
+      </section> <!-- transition-out-of-comm-interrrupted-state -->
+    </section> <!-- comm-interrrupted state -->
+
+    <section anchor="state-potential-conflict" title="POTENTIAL-CONFLICT State">
+      <section anchor="operation-in-potential-conflict-state"
+	       title="Operation in POTENTIAL-CONFLICT State">
+      </section> <!-- operation-in-potential-conflict-state -->
+      <section anchor="transition-out-of-potential-conflict-state"
+	       title="Transition Out of POTENTIAL-CONFLICT State">
+      </section> <!-- transition-out-of-potential-conflict-state -->
+    </section> <!-- potential-conflict state -->
+
+    <section anchor="state-resolution-interrupted" title="RESOLUTION-INTERRUPTED State">
+      <section anchor="operation-in-resolution-interrupted-state"
+	       title="Operation in RESOLUTION-INTERRUPTED State">
+      </section> <!-- operation-in-resolution-interrupted-state -->
+      <section anchor="transition-out-of-resolution-interrupted-state"
+	       title="Transition Out of RESOLUTION-INTERRUPTED State">
+      </section> <!-- transition-out-of-resolution-interrupted-state -->
+    </section> <!-- resolution-interrupted state -->
+
+    <section anchor="state-conflict-done" title="CONFLICT-DONE State">
+      <section anchor="operation-in-conflict-done-state"
+	       title="Operation in CONFLICT-DONE State">
+      </section> <!-- operation-in-conflict-done-state -->
+      <section anchor="transition-out-of-conflict-done-state"
+	       title="Transition Out of CONFLICT-DONE State">
+      </section> <!-- transition-out-of-conflict-done-state -->
+    </section> <!-- conflict-done state -->
+
+    <section anchor="state-paused" title="PAUSED State">
+      <section anchor="operation-in-paused-state"
+	       title="Operation in PAUSED State">
+      </section> <!-- operation-in-paused-state -->
+      <section anchor="transition-out-of-paused-state"
+	       title="Transition Out of PAUSED State">
+      </section> <!-- transition-out-of-paused-state -->
+    </section> <!-- paused state -->
+
+    <section anchor="state-shutdown" title="SHUTDOWN State">
+      <section anchor="operation-in-shutdown-state"
+	       title="Operation in SHUTDOWN State">
+      </section> <!-- operation-in-shutdown-state -->
+      <section anchor="transition-out-of-shutdown-state"
+	       title="Transition Out of SHUTDOWN State">
+      </section> <!-- transition-out-of-shutdown-state -->
+    </section> <!-- shutdown state -->
+
 
     <section title="State Transitions">
       <t>TODO</t>
