@@ -912,7 +912,6 @@
       its otherwise current state, which then becomes the previous state
       upon server restart.</t>
 
-
     <figure anchor="state-machine" title="Failover Endpoint State Machine"> 
     <artwork><![CDATA[
         +---------------+  V  +--------------+
@@ -1071,7 +1070,7 @@
 
       </section> <!-- transition-out-of-startup-state -->
 
-    </section> <! -- end of STARTUP state>
+    </section> <!-- end of STARTUP state -->
 
     <section anchor="state-partner-down" title="PARTNER-DOWN State">
 
@@ -1160,9 +1159,9 @@
 
       </section> <!-- transition-out-of-partner-down-state -->
 
-    </section> <! -- end of partner-down state>
+    </section> <!-- end of partner-down state -->
 
-    <section anchor="state-recover" title="Recover State">
+    <section anchor="state-recover" title="RECOVER State">
 
       <t>This state indicates that the server has no information
       in its stable storage or that it is re-integrating with a
@@ -1441,11 +1440,137 @@
     </section> <!-- normal state -->
 
     <section anchor="state-comm-interrrupted" title="COMMUNICATIONS-INTERRUPTED State">
+      <t>A server goes into COMMUNICATIONS-INTERRUPTED state whenever it is
+      unable to communicate with its partner. Primary and secondary
+      servers cycle automatically (without administrative intervention)
+      between NORMAL and COMMUNICATIONS-INTERRUPTED state as the network
+      connection between them fails and recovers, or as the partner server
+      cycles between operational and non-operational.  No duplicate IP
+      address allocation can occur while the servers cycle between these
+      states.</t>
+
+      <t>When a server enters COMMUNICATIONS-INTERRUPTED state, if it has been
+      configured to support an automatic transition out of COMMUNICATIONS-
+      INTERRUPTED state and into PARTNER-DOWN state (i.e., a "safe period"
+      has been configured, see section 10), then a timer MUST be started
+      for the length of the configured safe period.</t>
+
+      <t>A server transitioning into the COMMUNICATIONS-INTERRUPTED
+      state from the NORMAL state SHOULD raise some alarm condition to
+      alert administrative staff to a potential problem in the DHCP
+      subsystem.</t>
+
       <section anchor="operation-in-comm-interrupted-state" 
 	       title="Operation in COMMUNICATIONS-INTERRUPTED State">
+
+	<t>In this state a server MUST respond to all DHCP client
+	requests.  When allocating new lease, each server allocates
+	from its own pool, where the primary MUST allocate only FREE
+	resources (addresses or prefixes), and the secondary MUST
+	allocate only BACKUP resources (addresses or prefixes).  When
+	responding to RENEW messages, each server will allow continued
+	renewal of a DHCP client's current lease on an IP address or
+	prefix irrespective of whether that lease was given out by the
+	receiving server or not, although the renewal period MUST NOT
+	exceed the maximum client lead time (MCLT) beyond the latest
+	of: 1) the potential valid lifetime already acknowledged by
+	the other server, or 2) the lease- expiration-time <!-- what
+	is this? -->, or 3) the potential valid lifetime received from
+	the partner server.</t>
+
+	<t>However, since the server cannot communicate with its
+	partner in this state, the acknowledged potential valid
+	lifetime will not be updated in any new bindings.  This is
+	likely to eventually cause the actual valid lifetimes to be
+	the current time plus the MCLT (unless this is greater than
+	the desired-client-lease- time).</t>
+
+	<t>The server should continue to try to establish a connection
+	with its partner.</t>
+
       </section> <!-- operation-in-comm-interrrupted-state -->
       <section anchor="transition-out-of-comm-interrrupted-state" 
 	       title="Transition Out of COMMUNICATIONS-INTERRUPTED State">
+
+	<t>If the safe period timer expires while a server is in the
+	COMMUNICATIONS-INTERRUPTED state, it will transition immediately into
+	PARTNER-DOWN state.</t>
+
+	<t>If an external command is received by a server in COMMUNICATIONS-
+	INTERRUPTED state informing it that its partner is down, it will
+	transition immediately into PARTNER-DOWN state.</t>
+
+	<t>If communications is restored with the other server, then the server
+	in COMMUNICATIONS-INTERRUPTED state will transition into another
+	state based on the state of the partner:
+
+	<list style="symbols">
+	  <t>NORMAL or COMMUNICATIONS-INTERRUPTED: Transition into the
+	  NORMAL state.</t>
+	  <!-- The partner SHOULD NOT be in NORMAL state here, since upon res-
+	  toration of communications it MUST have created a new TCP con-
+	  nection which would have forced it into COMMUNICATIONS-
+	  INTERRUPTED state.  Still, we should account for every state
+	  just in case. -->
+
+	  <t>RECOVER: Stay in COMMUNICATIONS-INTERRUPTED state.</t>
+
+	  <t>RECOVER-DONE: Transition into NORMAL state.</t>
+
+	  <t>PARTNER-DOWN, POTENTIAL-CONFLICT, CONFLICT-DONE, or
+	  RESOLUTION-INTERRUPTED: Transition into POTENTIAL-CONFLICT
+	  state.</t>
+
+	  <t>SHUTDOWN: Transition into PARTNER-DOWN state.</t>
+	</list></t>
+
+	<t>The following figure illustrates the transition from NORMAL
+	to COMMUNICATIONS-INTERRUPTED state and then back to NORMAL
+	state again.</t>
+
+	<figure anchor="state-change-example" title="Transition from NORMAL to COMMUNICATIONS-INTERRUPTED and back (example with 2 addresses allocated to secondary)">
+	  <artwork><![CDATA[
+   Primary                                Secondary
+    Server                                  Server
+
+    NORMAL                                  NORMAL
+      | >--CONTACT------------------->         |
+      |        <--------------------CONTACT--< |
+      |         [TCP connection broken]        |
+ COMMUNICATIONS          :              COMMUNICATIONS
+   INTERRUPTED           :                INTERRUPTED
+      |      [attempt new TCP connection]      |
+      |         [connection succeeds]          |
+      |                                        |
+      | >--CONNECT------------------->         |
+      |        <-----------------CONNECTACK--< |
+      |                                     NORMAL
+      |        <-------------------STATE-----< |
+    NORMAL                                     |
+      | >--STATE--------------------->         |
+      |
+      | >--BNDUPD-------------------->         |
+      |        <---------------------BNDACK--< |
+      |                                        |
+      |        <---------------------BNDUPD--< |
+      | >------BNDACK---------------->         |
+     ...                                      ...
+      |                                        |
+      |        <--------------------POOLREQ--< |
+      | >--POOLRESP-(2)-------------->         |
+      |                                        |
+      | >--BNDUPD-(#1)--------------->         |
+      |        <---------------------BNDACK--< |
+      |                                        |
+      |        <--------------------POOLREQ--< |
+      | >--POOLRESP-(0)-------------->         |
+      |                                        |
+      | >--BNDUPD-(#2)--------------->         |
+      |        <---------------------BNDACK--< |
+      |                                        |]]></artwork></figure>
+
+
+
       </section> <!-- transition-out-of-comm-interrrupted-state -->
     </section> <!-- comm-interrrupted state -->
 
