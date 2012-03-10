@@ -183,21 +183,19 @@
         </t>
       </section>
 
-      <section title="Features out of Scope">
-	<section title="Load balancing">
-	  <t>It may be tempting to extend DHCPv6 failover mechanism to
-	  also offer load balancing, as DHCPv4 failover did. Here is
-	  the reasoning for this decision. In general case (not
-	  related to failover) load balancing solutions are used when
-	  each server is not able to handle total incoming traffic.
-	  However, by the very definition, DHCPv6 failover is supposed
-	  to assume service availability despite failure of one
-	  server. That leads to conclusion that each server must be
-	  able to handle whole traffic. Therefore in properly provisioned
-	  setup, load balancing is not needed.</t>
-	</section> <!-- load balancing -->
+      <section title="Features out of Scope: Load Balancing">
+	<t>It may be tempting to extend DHCPv6 failover mechanism to
+	also offer load balancing, as DHCPv4 failover did. Here is
+	the reasoning for this decision. In general case (not
+	related to failover) load balancing solutions are used when
+	each server is not able to handle total incoming traffic.
+	However, by the very definition, DHCPv6 failover is supposed
+	to assume service availability despite failure of one
+	server. That leads to conclusion that each server must be
+	able to handle whole traffic. Therefore in properly provisioned
+	setup, load balancing is not needed.</t>
       </section> <!-- features out of Scope -->
-
+      
     </section> <!-- Goals -->
 
 <section title="Protocol Overview">
@@ -1838,6 +1836,8 @@ CONFLICT-DONE                                  |
       </section> <!-- transition-out-of-shutdown-state -->
     </section> <!-- shutdown state -->
 
+  </section> <!-- endpoint states -->
+
   <section title="Proposed extensions">
     <t>The following section discusses possible extensions to the proposed
     failover mechanism. Listed extensions must be sufficiently simple to
@@ -1952,6 +1952,7 @@ CONFLICT-DONE                                  |
     No. POIG.01.01.02-00-045/09-00 (Future Internet Engineering
     Project).</t>
   </section>
+
 </middle>
 
   <back>
