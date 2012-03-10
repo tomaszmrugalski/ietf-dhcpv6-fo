@@ -130,7 +130,7 @@
       </t>
     </section>
 
-    <section title="Goals">
+    <section title="Introduction">
       <t>The failover protocol design provides a means for cooperating
       DHCPv6 servers to work together to provide a DHCPv6 service
       with availability that is increased beyond that which could
@@ -183,7 +183,22 @@
         </t>
       </section>
 
-    </section>
+      <section title="Features out of Scope">
+	<section title="Load balancing">
+	  <t>It may be tempting to extend DHCPv6 failover mechanism to
+	  also offer load balancing, as DHCPv4 failover did. Here is
+	  the reasoning for this decision. In general case (not
+	  related to failover) load balancing solutions are used when
+	  each server is not able to handle total incoming traffic.
+	  However, by the very definition, DHCPv6 failover is supposed
+	  to assume service availability despite failure of one
+	  server. That leads to conclusion that each server must be
+	  able to handle whole traffic. Therefore in properly provisioned
+	  setup, load balancing is not needed.</t>
+	</section> <!-- load balancing -->
+      </section> <!-- features out of Scope -->
+
+    </section> <!-- Goals -->
 
 <section title="Protocol Overview">
 
@@ -1252,7 +1267,7 @@
 
       </section> <!-- transition-out-of-recover-state -->
 
-    </section> <! -- end of recover state>
+    </section> <!-- end of recover state -->
 
     <section anchor="state-recover-wait" title="RECOVER-WAIT State">
 
@@ -1715,49 +1730,113 @@ CONFLICT-DONE                                  |
     </section> <!-- resolution-interrupted state -->
 
     <section anchor="state-conflict-done" title="CONFLICT-DONE State">
+      <t>This state indicates that during the process where the two
+      servers are attempting to re-integrate with each other, the
+      primary server has received all of the updates from the
+      secondary server.  It make a transition into CONFLICT-DONE state
+      in order that it may be totally responsive to the client load,
+      as opposed to NORMAL state where it would be in a "balanced"
+      responsive state, running the load balancing algorithm.</t>
+      <t>TODO: We do not support load balancing, so CONFLICT-DONE is
+      actually equal to NORMAL. Need to remove CONFLICT-DONE and
+      replace all its references to NORMAL.</t>
       <section anchor="operation-in-conflict-done-state"
 	       title="Operation in CONFLICT-DONE State">
+	<t>A primary server in CONFLICT-DONE state is fully responsive
+	to all DHCP clients (similar to the situation in
+	COMMUNICATIONS-INTERRUPTED state).</t>
+	
+	<t>If communications fails, remain in CONFLICT-DONE state.  If
+	communications becomes OK, remain in CONFLICT-DONE state until
+	the conditions for transition out become satisfied.</t>
       </section> <!-- operation-in-conflict-done-state -->
       <section anchor="transition-out-of-conflict-done-state"
 	       title="Transition Out of CONFLICT-DONE State">
+	<t>If communications fails with the partner while in
+	CONFLICT-DONE state, then the server will remain in
+	CONFLICT-DONE state.</t>
+	
+	<t>When a primary server determines that the secondary
+	server has made a transition into NORMAL state, the primary
+	server will also transition into NORMAL state.</t>
       </section> <!-- transition-out-of-conflict-done-state -->
     </section> <!-- conflict-done state -->
-
+    
     <section anchor="state-paused" title="PAUSED State">
+      <t>TODO: Remove PAUSED state completely</t>
+
+      <t>This state exists to allow one server to inform another that
+      it will be out of service for what is predicted to be a
+      relatively short time, and to allow the other server to
+      transition to COMMUNICATIONS- INTERRUPTED state immediately and
+      to begin servicing all DHCP clients with no interruption in
+      service to new DHCP clients.</t>
+
+      <t>A server which is aware that it is shutting down temporarily
+      SHOULD send a STATE message with the server-state option
+      containing PAUSED state and close the TCP connection.</t>
+
+      <t>While a server may or may not transition internally into
+      PAUSED state, the 'previous' state determined when it is
+      restarted MUST be the state the server was in prior to receiving
+      the command to shut- down and restart and which precedes its
+      entry into the PAUSED state.  See <xref
+      target="transition-out-of-startup-state"/> concerning the use of
+      the previous state upon server restart.</t>
+
+      <t>When entering PAUSED state, the server MUST store the
+      previous state in stable storage, and use that state as the
+      previous state when it is restarted.</t>
+
       <section anchor="operation-in-paused-state"
 	       title="Operation in PAUSED State">
+	<t>Server MUST NOT perform any operation while in PAUSED
+	state.</t>
       </section> <!-- operation-in-paused-state -->
       <section anchor="transition-out-of-paused-state"
 	       title="Transition Out of PAUSED State">
+	<t>A server makes a transition out of PAUSED state by being
+	restarted.  At that time, the previous state MUST be the state
+	the server was in prior to entering the PAUSED state.</t>
       </section> <!-- transition-out-of-paused-state -->
     </section> <!-- paused state -->
-
+    
     <section anchor="state-shutdown" title="SHUTDOWN State">
+      <t>This state exists to allow one server to inform another that
+      it will be out of service for what is predicted to be a
+      relatively long time, and to allow the other server to
+      transition immediately to PARTNER-DOWN state, and take over
+      completely for the server going down.</t>
+
+      <t>When entering SHUTDOWN state, the server MUST record the
+      previous state in stable storage for use when the server is
+      restarted. It also MUST record the current time as the last
+      time operational.</t>
+
+      <t>A server which is aware that it is shutting down SHOULD send
+      a STATE message with the server-state field containing
+      SHUTDOWN.</t>
       <section anchor="operation-in-shutdown-state"
 	       title="Operation in SHUTDOWN State">
+	<t>A server in SHUTDOWN state MUST NOT respond to any DHCP
+	client input.</t>
+
+	<t>If a server receives any message indicating that the
+	partner has moved to PARTNER-DOWN state while it is in
+	SHUTDOWN state then it MUST record RECOVER state as the
+	previous state to be used when it is restarted.</t>
+
+	<t>A server SHOULD wait for a few seconds after informing the
+	partner of entry into SHUTDOWN state (if communications are
+	okay) to determine if the partner entered PARTNER-DOWN state.</t>
       </section> <!-- operation-in-shutdown-state -->
       <section anchor="transition-out-of-shutdown-state"
 	       title="Transition Out of SHUTDOWN State">
+	<t>A server makes a transition out of SHUTDOWN state by being
+	restarted.</t>
+
       </section> <!-- transition-out-of-shutdown-state -->
     </section> <!-- shutdown state -->
-
-
-    <section title="State Transitions">
-      <t>TODO</t>
-    </section>
-  </section>
-
-  <!--
-  <section title="Failure recovery">
-    <t>Discussion: although following sections may be somewhat
-    redundant, given desciptions in <xref target="states"/>, but
-    it should be described here for clarity.</t>
-
-    <section title="Partner-down event recovery">
-    </section>
-    <section title="Network partition event recovery">
-    </section>
-  </section>-->
 
   <section title="Proposed extensions">
     <t>The following section discusses possible extensions to the proposed
