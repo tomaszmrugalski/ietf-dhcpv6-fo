@@ -1575,20 +1575,142 @@
     </section> <!-- comm-interrrupted state -->
 
     <section anchor="state-potential-conflict" title="POTENTIAL-CONFLICT State">
+      <t>This state indicates that the two servers are attempting to
+      reintegrate with each other, but at least one of them was
+      running in a state that did not guarantee automatic
+      reintegration would be possible.  In POTENTIAL-CONFLICT state
+      the servers may determine that the same resource has been
+      offered and accepted by two different clients.</t>
+
+      <t>It is a goal of this protocol to minimize the possibility that
+      POTENTIAL-CONFLICT state is ever entered.</t>
+
+      <t>When a primary server enters POTENTIAL-CONFLICT state it should
+      request that the secondary send it all updates of which it is
+      currently unaware by sending an UPDREQ message to the secondary
+      server.</t>
+
+      <t>A secondary server entering POTENTIAL-CONFLICT state will wait for
+      the primary to send it an UPDREQ message.</t>
+
       <section anchor="operation-in-potential-conflict-state"
 	       title="Operation in POTENTIAL-CONFLICT State">
+	<t>Any server in POTENTIAL-CONFLICT state MUST NOT process any
+	incoming DHCP requests.</t>
       </section> <!-- operation-in-potential-conflict-state -->
       <section anchor="transition-out-of-potential-conflict-state"
 	       title="Transition Out of POTENTIAL-CONFLICT State">
+
+	<t>If communications fails with the partner while in
+	POTENTIAL-CONFLICT state, then the server will transition to
+	RESOLUTION-INTERRUPTED state.</t>
+
+	<t>Whenever either server receives an UPDDONE message from its
+	partner while in POTENTIAL-CONFLICT state, it MUST transition
+	to a new state.  The primary MUST transition to CONFLICT-DONE
+	state, and the secondary MUST transition to NORMAL state.
+	This will cause the primary server to leave POTENTIAL-CONFLICT
+	state prior to the secondary, since the primary sends an
+	UPDREQ message and receives an UPDDONE before the secondary
+	sends an UPDREQ message and receives its UPDDONE message.</t>
+
+	<t>When a secondary server receives an indication that the primary
+	server has made a transition from POTENTIAL-CONFLICT to CONFLICT-DONE
+	state, it SHOULD send an UPDREQ message to the primary server.</t>
+
+<figure anchor="out-of-potential-conflict" 
+	title="Transition out of POTENTIAL-CONFLICT"> 
+    <artwork><![CDATA[
+    Primary                                Secondary
+    Server                                  Server
+
+      |                                        |
+POTENTIAL-CONFLICT                    POTENTIAL-CONFLICT
+      |                                        |
+      | >--UPDREQ-------------------->         |
+      |                                        |
+      |        <---------------------BNDUPD--< |
+      | >--BNDACK-------------------->         |
+     ...                                      ...
+      |                                        |
+      |        <---------------------BNDUPD--< |
+      | >--BNDACK-------------------->         |
+      |                                        |
+      |        <--------------------UPDDONE--< |
+CONFLICT-DONE                                  |
+      | >--STATE--(CONFLICT-DONE)---->         |
+      |        <---------------------UPDREQ--< |
+      |                                        |
+      | >--BNDUPD-------------------->         |
+      |        <---------------------BNDACK--< |
+     ...                                      ...
+      | >--BNDUPD-------------------->         |
+      |        <---------------------BNDACK--< |
+      |                                        |
+      | >--UPDDONE------------------->         |
+      |                                     NORMAL
+      |        <------------STATE--(NORMAL)--< |
+   NORMAL                                      |
+      | >--STATE--(NORMAL)----------->         |
+      |                                        |
+      |        <--------------------POOLREQ--< |
+      | >------POOLRESP-(n)---------->         |
+      |              addresses                 |]]></artwork></figure>
+
+
+
       </section> <!-- transition-out-of-potential-conflict-state -->
     </section> <!-- potential-conflict state -->
 
     <section anchor="state-resolution-interrupted" title="RESOLUTION-INTERRUPTED State">
+      <t>This state indicates that the two servers were attempting to
+      reintegrate with each other in POTENTIAL-CONFLICT state, but
+      communications failed prior to completion of re-integration.</t>
+
+      <t>If the servers remained in POTENTIAL-CONFLICT while
+      communications was interrupted, neither server would be
+      responsive to DHCP client requests, and if one server had
+      crashed, then there might be no server able to process DHCP
+      requests.</t>
+
+      <t>When a server enters RESOLUTION-INTERRUPTED state it SHOULD raise an
+      alarm condition to alert administrative staff of a problem in the
+      DHCP subsystem.</t>
+
       <section anchor="operation-in-resolution-interrupted-state"
 	       title="Operation in RESOLUTION-INTERRUPTED State">
-      </section> <!-- operation-in-resolution-interrupted-state -->
+	<t>In this state a server MUST respond to all DHCP client
+	requests. When allocating new resources (addresses or
+	prefixes), each server SHOULD allocate from its own pool (if
+	that can be determined), where the primary SHOULD allocate
+	only FREE resources, and the secondary SHOULD allocate only
+	BACKUP resources. When responding to renewal requests, each
+	server will allow continued renewal of a DHCP client's current
+	lease irrespective of whether that lease was given out by the
+	receiving server or not, although the renewal period MUST not
+	exceed the maximum client lead time (MCLT) beyond the latest
+	of: 1) the potential valid lifetime already acknowledged by
+	the other server or 2) the lease-expiration-time <!-- what is
+	this? --> or 3) potential valid lifetime received from the
+	partner server.</t>
+
+	<t>However, since the server cannot communicate with its
+	partner in this state, the acknowledged potential valid
+	lifetime will not be updated in any new bindings.</t>
+      </section> <!--
+	operation-in-resolution-interrupted-state -->
       <section anchor="transition-out-of-resolution-interrupted-state"
 	       title="Transition Out of RESOLUTION-INTERRUPTED State">
+
+	<t>If an external command is received by a server in
+	RESOLUTION-INTERRUPTED state informing it that its partner is
+	down, it will transition immediately into PARTNER-DOWN
+	state.</t>
+
+	<t>If communications is restored with the other server, then
+	the server in RESOLUTION-INTERRUPTED state will transition
+	into POTENTIAL-CONFLICT state.</t>
+
       </section> <!-- transition-out-of-resolution-interrupted-state -->
     </section> <!-- resolution-interrupted state -->
 
