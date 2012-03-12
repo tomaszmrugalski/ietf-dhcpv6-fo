@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
 ]>
 <rfc ipr="trust200902" category="std"
-     docName="draft-mrugalski-dhc-dhcpv6-failover-design-00">
+     docName="draft-mrugalski-dhc-dhcpv6-failover-design-01">
   <front>
     <title abbrev="DHCPv6 Failover Design">DHCPv6 Failover Design</title>
 
@@ -44,7 +44,7 @@
       </address>
     </author>
 
-    <date day="5" month="March" year="2012"/>
+    <date day="12" month="March" year="2012"/>
 
     <area>Internet</area>
     <workgroup>Dynamic Host Configuration (DHC)</workgroup>
@@ -74,7 +74,7 @@
     </section>
 
     <section title="Glossary">
-      <t>This is a supplemental glossary that combined with
+      <t>This is a supplemental glossary that should be combined with
       definitions in Section 3 <xref target="requirements"/>.
 
       <list style="symbols">
@@ -125,7 +125,6 @@
 	<t>Unresponsive - A server that is unresponsive will not
 	respond to DHCPv6 client requests.</t>
 
-
       </list>
       </t>
     </section>
@@ -155,11 +154,11 @@
       sake of simplicity. Such mode may be defined as an exension at a
       later time.</t>
 
-      <t>The failover protocol is designed to provide lease stability for
-      leases with lease times beyond a short period.
-      Due to the additional overhead required, failover is not
-      suitable for leases shorter than 30 seconds. The DHCPv6 Failover
-      protocol MUST NOT be used for leases shorter than 30 seconds.</t>
+      <t>The failover protocol is designed to provide lease stability
+      for leases with lease times beyond a short period.  Due to the
+      additional overhead required, failover is not suitable for
+      leases shorter than 30 seconds. The DHCPv6 Failover protocol
+      MUST NOT be used for leases shorter than 30 seconds.</t>
 
       <cref source="tomek">Otherwise we would spawn a nice packet storm
       between partners. Even though 30 seconds it reasonable minimum, we
@@ -275,15 +274,24 @@
   transmitting DISCONNECT message.</t>
 
   <section anchor="states-overview" title="Failover Machine Sate Overview">
+    <t>The following section provides simplified description of all
+    states. For the sake of clarity and simplicity, it omits important 
+    details. For complete description, see <xref target="states"/>.
+    In case of a disagreement between simplified and complete description,
+    please follow <xref target="states"/>.</t>
+
     <t>Each server may be in one of well defines states. In each state
     server may be either responsive (responds to clients' queries) or
     unresponsive (clients' queries are ignored).</t>
+
     <t>A server starts its operation in short-lived STARTUP state. A
     server determines its partner reachibility and state and usually
     returns back to the state it was in before shutdown.</t>
+
     <t>During typical operation when servers maintain communication,
     both are in NORMAL state. In that state only primary responds to
     clients' requests.</t>
+
     <t>If a server discovers that its partner is no longer reachable,
     it goes to COMMUNICATIONS-INTERRUPTED state. Server must be extra
     cautious as it can't distingush if its partner is down or just
@@ -296,6 +304,7 @@
     Once communication is reestablished, server may go into NORMAL, 
     POTENTIAL-CONFLICT or PARTNER-DOWN state. It may also stay in
     COMMUNICATIONS-INTERRUPTED if certain conditions are met.</t>
+
     <t>Once a server is switched into PARTNER-DOWN (when
     auto-partner-down is used or as a result of administrative
     action), it can extend leases, regardless of the original server
@@ -305,10 +314,29 @@
     in this mode is less demanding for the server that remains operational, 
     than in COMMUNICATIONS-INTERRUPTED state, but PARTNER-DOWN does
     not offer any kind of redundancy.</t>
+
+    <t>When server loses its database (e.g. due to first time run or
+    catastrophic failure) or detects that is partner is in
+    PARTNER-DOWN state and additional conditions are met, it switches
+    to RECOVER state. In that state server acknowledges that content
+    of its database is doubtful and needs to refresh its database
+    from its partner. Once this operation is done, it switches to
+    RECOVER-WAIT and later to RECOVER-DONE.</t>
+
     <t>Once servers reestablish connection, they discover each others'
     state. Depending on the conditions, they may return to NORMAL or
-    move to POTENTINAL-CONFLICT. In that latter state, a server's expectation
-    about its partner state is different than the actual state. 
+    move to POTENTINAL-CONFLICT in case of unexpected partner's
+    state. It is a goal of this protocol to minimize the possibility
+    that POTENTIAL-CONFLICT state is ever entered. Servers running in
+    POTENTIAL-CONFLICT do not respond to clients' requests and work on
+    resolving potential conflicts. Once outstanding lease updates are
+    exchanged, servers move to CONFLICT-DONE or NORMAL states.</t>
+    <t>Servers that are recovering from potential conflict and loose
+    communication, switch to RESOLUTION-INTERRUPTED.</t>
+
+    <t>Server that is being shut down, switches briefly to SHUTDOWN
+    state and communicates its state to its partner before actual
+    termination.</t>
   </section>
 </section>
 
