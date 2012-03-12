@@ -269,10 +269,47 @@
   exchanging CONTACT messages. See <xref target="reachability"/> for
   discussion about detecting partner's unreachability.</t>
 
-  <t>A server that is being shut down transmits a DISCONNECT message, closes
-  the connection with its failover partner and stops operation. A Server SHOULD transmit
-  any pending lease updates before transmitting DISCONNECT message.</t>
+  <t>A server that is being shut down transmits a DISCONNECT message,
+  closes the connection with its failover partner and stops
+  operation. A Server SHOULD transmit any pending lease updates before
+  transmitting DISCONNECT message.</t>
 
+  <section anchor="states-overview" title="Failover Machine Sate Overview">
+    <t>Each server may be in one of well defines states. In each state
+    server may be either responsive (responds to clients' queries) or
+    unresponsive (clients' queries are ignored).</t>
+    <t>A server starts its operation in short-lived STARTUP state. A
+    server determines its partner reachibility and state and usually
+    returns back to the state it was in before shutdown.</t>
+    <t>During typical operation when servers maintain communication,
+    both are in NORMAL state. In that state only primary responds to
+    clients' requests.</t>
+    <t>If a server discovers that its partner is no longer reachable,
+    it goes to COMMUNICATIONS-INTERRUPTED state. Server must be extra
+    cautious as it can't distingush if its partner is down or just
+    communication between servers is interrupted. Since communication
+    between partners is not possible, a server must act on the assumtion
+    that if its partner is up, it follows defined procedure. In particular,
+    not extend any lease beyond its partner knowledge by at most MCLT.
+    That imposes additional burden on the server. Therefore it is not
+    recommended to operate for prolonged periods in this state.
+    Once communication is reestablished, server may go into NORMAL, 
+    POTENTIAL-CONFLICT or PARTNER-DOWN state. It may also stay in
+    COMMUNICATIONS-INTERRUPTED if certain conditions are met.</t>
+    <t>Once a server is switched into PARTNER-DOWN (when
+    auto-partner-down is used or as a result of administrative
+    action), it can extend leases, regardless of the original server
+    that initially granted the lease. In that state server handles
+    leases from its own pool, but is albo able to serve pool from
+    its downed partner. MCLT restrictions no longer apply. Operation
+    in this mode is less demanding for the server that remains operational, 
+    than in COMMUNICATIONS-INTERRUPTED state, but PARTNER-DOWN does
+    not offer any kind of redundancy.</t>
+    <t>Once servers reestablish connection, they discover each others'
+    state. Depending on the conditions, they may return to NORMAL or
+    move to POTENTINAL-CONFLICT. In that latter state, a server's expectation
+    about its partner state is different than the actual state. 
+  </section>
 </section>
 
 
@@ -1502,7 +1539,7 @@
       |                                        |
       |        <--------------------POOLREQ--< |
       | >--POOLRESP-(2)-------------->         |
-      |                                        |
+t>      |                                        |
       | >--BNDUPD-(#1)--------------->         |
       |        <---------------------BNDACK--< |
       |                                        |
