@@ -75,7 +75,7 @@
 
     <section title="Glossary">
       <t>This is a supplemental glossary that should be combined with
-      definitions in Section 3 <xref target="requirements"/>.
+      definitions in Section 3 of <xref target="requirements"/>.
 
       <list style="symbols">
 
@@ -280,9 +280,9 @@
     In case of a disagreement between simplified and complete description,
     please follow <xref target="states"/>.</t>
 
-    <t>Each server may be in one of well defines states. In each state
-    server may be either responsive (responds to clients' queries) or
-    unresponsive (clients' queries are ignored).</t>
+    <t>Each server may be in one of the well defines states. In each
+    state a server may be either responsive (responds to clients'
+    queries) or unresponsive (clients' queries are ignored).</t>
 
     <t>A server starts its operation in short-lived STARTUP state. A
     server determines its partner reachibility and state and usually
@@ -290,7 +290,7 @@
 
     <t>During typical operation when servers maintain communication,
     both are in NORMAL state. In that state only primary responds to
-    clients' requests.</t>
+    clients' requests. A secondary server in unresponsive.</t>
 
     <t>If a server discovers that its partner is no longer reachable,
     it goes to COMMUNICATIONS-INTERRUPTED state. Server must be extra
