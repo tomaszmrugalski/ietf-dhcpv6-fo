@@ -10,11 +10,11 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-00">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-01">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
-    <author fullname="Tomasz Mrugalski" initials="T" role="editor" surname="Mrugalski">
+    <author fullname="Tomasz Mrugalski" initials="T" surname="Mrugalski">
       <organization abbrev="ISC">Internet Systems Consortium, Inc.
       </organization>
       <address>
@@ -44,7 +44,7 @@
       </address>
     </author>
 
-    <date day="17" month="October" year="2011"/>
+    <date/>
 
     <area>Internet</area>
     <workgroup>Dynamic Host Configuration (DHC)</workgroup>
@@ -178,7 +178,7 @@
 	  <t>There are cases when IPv6 addresses are used only for a
 	  short time, but there is a need to have high degree of
 	  confidence that those addresses will be served. A notable
-	  example is a scenario where hosts require an address during
+	  example is a PXE scenario where hosts require an address during
 	  boot. Address and possibly other configuration parameters
 	  are used during boot process and are discarded
 	  afterwards. Any lack of available DHCPv6 service at this
@@ -190,8 +190,18 @@
 	  and 20). Both will answer to a client's request. The client
 	  should choose the one with larger preference value. In case
 	  of failure of the most preferred server, the next server
-	  will keep responding to clients' queries.</t>
+	  will keep responding to clients' queries. This approach is
+          simple to deploy, but does not offer lease stability, i.e.
+          in case of server failure, clients' addresses and prefixes
+          will change.</t>
 	</section>
+        <section title="Redundant servers">
+          <!-- describe <xref target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/> here -->
+        </section>
+        <section title="Distributted databases">
+          <!-- there's proposal that two or more servers could use
+          distributted database. This approach should be commented on. -->
+        </section>
       </section>
     </section>
 
@@ -267,6 +277,20 @@
 	approaches do not generally provide for stable IPv6 addresses
 	for DHCPv6 clients should the server with which the client is
 	interacting become unavailable.</t>
+      </section>
+
+      <section title="Partial server communication loss">
+        <!-- by Prasad: http://www.ietf.org/mail-archive/web/dhcwg/current/msg12104.html -->
+        <t>There is a scenario where the DHCP server may be
+        configured to serve clients on one network adapter and
+        communicate with partner server (server-2-server traffic) on a
+        different network adapter. In this scenario, if the server
+        loses connectivity on the network adapter used to communicate
+        with the clients because of network adapter (hardware)
+        failure, there is no intimation of the loss of service to the
+        partner in the DHCPv4 failover protocol. Since the servers are
+        able to communicate with each other, the partner remains
+        ignorant of the loss of service to clients.</t>
       </section>
     </section>
 
@@ -505,20 +529,29 @@
       for both IPv4 and IPv6, like DNS Update mechanism SHOULD
       be taken into consideration.</t>
 
-      <t>A Load Balancing capability 
-      is considered an extension and MAY be defined in a
-      separate document. It MUST NOT be part of the core protocol, 
-      but rather defined as an extension. The primary reason for this 
-      the desire to limit core protocol complexity.</t>
-
-      <t>Following features and capabilities are outside of scope of
-      this document:
-      <list>
-	<t>m-to-m model (see section <xref target="1-to-1"/>)</t>
-	<t>servers participating in multiple failover relationships</t>
-	<t>load balancing</t>
-      </list>
-      </t>
+      <section anchor="out-of-scope" title="Features out of scope">
+        <t>The following features are explictly out of scope.
+        <list style="numbers">
+          <t>Load Balancing - a capability is considered an extension
+          and MAY be defined in a separate document. It MUST NOT be
+          part of the core protocol, but rather defined as an
+          extension. The primary reason for this the desire to limit
+          core protocol complexity.</t>
+          <t>Configuration synchronization - two failover partners are
+          expected to maintain the same configuration. Mismatched
+          configuration between partners is a frequent problem in
+          failover solutions. Unfortunately, that is an open-ended
+          problem, since different servers have very different config
+          data models.</t>
+          <!-- tomek: I was thinking about something like defining
+          DCP - DHCP control protocol. But that is a huge undertaking
+          that I'm not willing to start at this time. -->
+          <t>m-to-m model (see section <xref target="1-to-1"/>)</t>
+          <t>servers participating in multiple failover
+          relationships for any given pool.</t>
+        </list>
+        </t>
+      </section>
 
     </section>
 
@@ -751,12 +784,13 @@
 	implemented DHCPv6 standards.</t>
       </section>
 
+      <!--
       </section> <section title="DHCP Best Practices">
 	<t>
 	  TODO: Qin Wu provided this best practices link. Describe
 	  it briefly.
 	  http://technet.microsoft.com/en-us/library/cc780311(WS.10).aspx
-	</t>
+	</t> -->
 
     </section>
 
@@ -774,7 +808,8 @@
       other parts of <xref target="dhcpv4-failover"/> document.
       Authors would like to thank Shawn Routhier, Qin Wu,
       Jean-Francois Tremblay, Frank Sweetser, Jiang Sheng, Yu Fu, Greg
-      Gabil and Bernie Volz for their comments and feedback.</t>
+      Rabil, Bernie Volz, and Vithalprasad Gaitonde for their comments
+      and feedback.</t>
 
       <t>This work has been partially supported by Gdansk University of
       Technology and the Polish Ministry of Science and Higher Education

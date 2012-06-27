@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
 ]>
 <rfc ipr="trust200902" category="std"
-     docName="draft-mrugalski-dhc-dhcpv6-failover-design-01">
+     docName="draft-ietf-dhc-dhcpv6-failover-design-00">
   <front>
     <title abbrev="DHCPv6 Failover Design">DHCPv6 Failover Design</title>
 
@@ -44,7 +44,7 @@
       </address>
     </author>
 
-    <date day="12" month="March" year="2012"/>
+    <date />
 
     <area>Internet</area>
     <workgroup>Dynamic Host Configuration (DHC)</workgroup>
@@ -579,6 +579,21 @@
   </section> <!-- determining allocation approach -->
 </section> <!-- address allocation -->
 
+<section title="Information model">
+
+  <t>TODO: Describe information model here. In particular, we need to
+  describe lease lifecycle here.</t>
+
+  <t>TODO: In case of Active-Passive model, while majority of
+  addresses are owned by the primary server, secondary server will
+  need a portion of addresses to serve new clients while operating in
+  communication-interrupted state as also in partner down state before
+  it can take over the entire address pool (expiry of MCLT). The
+  concept of a percentage of pool reserved for secondary should be
+  described here.</t>
+
+</section>
+
   <section title="Failover Mechanisms">
     <t>This section lays out an overview of the communication between
     partners and other mechanisms required for failover operation. As
@@ -1106,20 +1121,31 @@
 	beyond the entry into PARTNER-DOWN state has elapsed.</t>
 
 	<t>A server in PARTNER-DOWN state MUST NOT allocate an IP
-	address to a DHCP client different from that to which it
-	was allocated at the entrance to PARTNER-DOWN state until
-	the maximum-client-lead-time beyond the maximum of the
-	following times: client expiration time, most recently
-	transmitted potential-expiration-time, most recently received
-	ack of potential-expiration-time from the partner, and most
-	recently acked potential-expiration-time to the partner.
-	See section 7.1.5 for details.  If this time would be earlier
-	than the current time plus the maximum-client-lead-time,
-	then the time the server entered PARTNER-DOWN state plus
-	the maximum-client-lead-time is used.</t>
+	address to a DHCP client different from that to which it was
+	allocated at the entrance to PARTNER-DOWN state until the
+	maximum-client-lead-time beyond the maximum of the following
+	times: client expiration time, most recently transmitted
+	potential-expiration-time, most recently received ack of
+	potential-expiration-time from the partner, and most recently
+	acked potential-expiration-time to the partner.  <!-- tomek:
+	commented out as don't have section about BNDUPD message yet.
+	See section 7.1.5 for details. --> If this time would be earlier
+	than the current time plus the maximum-client-lead-time, then
+	the time the server entered PARTNER-DOWN state plus the
+	maximum-client-lead-time is used.</t>
 
 	<t>The server is not restricted by the MCLT when offering
 	lease tmes while in PARTNER-DOWN state.</t>
+
+        <t>In the unlikely case, when there are two servers operating
+        in a PARTNER-DOWN state, there is a change od duplicate leases
+        assigned. This leads to a POTENTIAL-CONFLICT (unresponsive)
+        state when they re-establish contact. The duplicate lease
+        issue can be postponed to a large extent by the server giving
+        new leases from its own pool. Therefore the server operating
+        in PARTNER-DOWN state MUST use its own pool first for new
+        leases before assigning any leases from its downed partner pool.
+        </t>
 
       </section> <!-- operation-in-partner-down-state -->
 
@@ -1939,7 +1965,8 @@ CONFLICT-DONE                                  |
     <t>This document extensively uses concepts, definitions and other
     parts of <xref target="dhcpv4-failover"/> document.  Authors would
     like to thank Shawn Routher, Greg Rabil, and Bernie Volz for their
-    significant involvement and contributions.</t>
+    significant involvement and contributions. Authors would like to
+    thank VithalPrasad Gaitonde for his insightful comments.</t>
 
     <t>This work has been partially supported by Department of
     Computer Communications (a division of Gdansk University of
