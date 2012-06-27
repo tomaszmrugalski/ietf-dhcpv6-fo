@@ -55,13 +55,15 @@
       <t>DHCPv6 defined in <xref target="RFC3315"/> does not offer
       server redundancy. This document defines a design for DHCPv6
       failover, a mechanism for running two servers on the same
-      network with capability for either server to take over clients' 
-      leases in case of server failure or network partition. 
-      This is a DHCPv6 Failover design document, it is not protocol 
-      specification document. It is a second document in a 
-      planned series of three documents. DHCPv6 failover requirements 
-      are specified in <xref target="requirements"/>. 
-      A protocol specification document is planned to follow this document.</t>
+      network with capability for either server to take over clients'
+      leases in case of server failure or network partition.  This is
+      a DHCPv6 Failover design document, it is not protocol
+      specification document. It is a second document in a planned
+      series of three documents. DHCPv6 failover requirements are
+      specified in <xref
+      target="I-D.ietf-dhc-dhcpv6-failover-requirements"/>.  A
+      protocol specification document is planned to follow this
+      document.</t>
     </abstract>
   </front>
 
@@ -75,55 +77,56 @@
 
     <section title="Glossary">
       <t>This is a supplemental glossary that should be combined with
-      definitions in Section 3 of <xref target="requirements"/>.
+      definitions in Section 3 of
+      <xref target="I-D.ietf-dhc-dhcpv6-failover-requirements"/>.
 
       <list style="symbols">
 
-	<t>Failover endpoint - The failover protocol allows for
-	there to be a unique failover 'endpoint' per partner per
-	role per relationship (where role is primary or secondary
-	and the relationship is defined by the relationship-name).
-	This failover endpoint can take actions and hold unique
-	states.  Typically, there is a one failover endpoint per
-	partner (server), although there may be more.  'Server' and
-	'failover endpoint' are synonymous only if the server
-	participates in only one failover relationship. However,
-	for the sake of simplicity 'Server' is used throughout the
-	document to refer to a failover endpoint unless to do so
-	would be confusing.</t>
-	
+        <t>Failover endpoint - The failover protocol allows for
+        there to be a unique failover 'endpoint' per partner per
+        role per relationship (where role is primary or secondary
+        and the relationship is defined by the relationship-name).
+        This failover endpoint can take actions and hold unique
+        states.  Typically, there is a one failover endpoint per
+        partner (server), although there may be more.  'Server' and
+        'failover endpoint' are synonymous only if the server
+        participates in only one failover relationship. However,
+        for the sake of simplicity 'Server' is used throughout the
+        document to refer to a failover endpoint unless to do so
+        would be confusing.</t>
+
         <t>Failover transmission - all messages exchanged between
         partners.</t>
 
-	<t>Independent Allocation - a prefix allocation algorithm
-	to split the available pool of resources between the primary
-	and secondary servers that is particularly well suited for
-	vast pools (i.e. when available resources are not expected
-	to deplete). See <xref target="alloc-separated"/> for
-	details.</t>
+        <t>Independent Allocation - a prefix allocation algorithm
+        to split the available pool of resources between the primary
+        and secondary servers that is particularly well suited for
+        vast pools (i.e. when available resources are not expected
+        to deplete). See <xref target="alloc-separated"/> for
+        details.</t>
 
         <t>Primary Server</t>
 
-	<t>Proportional Allocation - a prefix allocation algorithm
-	to split the available free leases between the primary and
-	secondary servers that is particularly well suited for more
-	limited resources.  See <xref target="alloc-classic"/> for
-	details.</t>
+        <t>Proportional Allocation - a prefix allocation algorithm
+        to split the available free leases between the primary and
+        secondary servers that is particularly well suited for more
+        limited resources.  See <xref target="alloc-classic"/> for
+        details.</t>
 
         <t>Resource - an IPv6 address or a IPv6
         prefix.</t>
 
-	<t>Responsive - A server that is responsive, will respond to
-	DHCPv6 client requests.</t>
+        <t>Responsive - A server that is responsive, will respond to
+        DHCPv6 client requests.</t>
 
         <t>Secondary Server</t>
 
-	<t>Server - A DHCPv6 server that implements DHCPv6 failover.
-	'Server' and 'failover endpoint' as synonymous only if
-	server participates in only one failover relationship. </t>
+        <t>Server - A DHCPv6 server that implements DHCPv6 failover.
+        'Server' and 'failover endpoint' as synonymous only if
+        server participates in only one failover relationship. </t>
 
-	<t>Unresponsive - A server that is unresponsive will not
-	respond to DHCPv6 client requests.</t>
+        <t>Unresponsive - A server that is unresponsive will not
+        respond to DHCPv6 client requests.</t>
 
       </list>
       </t>
@@ -137,7 +140,8 @@
       is designed to protect DHCPv6 clients against server unreachability,
       including server failure and network partition. It is possible
       to deploy exactly two servers that are able to continue
-      providing a lease on an IPv6 address or on an IPv6 prefix
+      providing a lease on an IPv6 address <xref target="RFC3315"/>
+      or on an IPv6 prefix <xref target="RFC3633"/>
       without the DHCPv6 client experiencing lease expiration or a
       reassignment of a lease to a different IPv6 address in the event
       of failure by one or the other of the two servers.</t>
@@ -166,7 +170,7 @@
       lifetime of at least 30 minutes SHOULD be used if possible.</cref>
 
       <t>This design attempts to fulfill all DHCPv6 failover requirements
-      defined in <xref target="requirements"/>.</t>
+      defined in <xref target="I-D.ietf-dhc-dhcpv6-failover-requirements"/>.</t>
 
       <section title="Additional Requirements">
         <t>The following requirements are not related to failover
@@ -174,27 +178,27 @@
 
         <list style="numbers">
           <t>Minimize Asymmetry - while there are two distinct roles
-          in failover (primary and secondary server), the 
+          in failover (primary and secondary server), the
           differences between those two roles should be as small as
           possible.   This will yield a simpler design as well as
-	  a simpler implementation of that design.</t>
+          a simpler implementation of that design.</t>
         </list>
         </t>
       </section>
 
       <section title="Features out of Scope: Load Balancing">
-	<t>It may be tempting to extend DHCPv6 failover mechanism to
-	also offer load balancing, as DHCPv4 failover did. Here is
-	the reasoning for this decision. In general case (not
-	related to failover) load balancing solutions are used when
-	each server is not able to handle total incoming traffic.
-	However, by the very definition, DHCPv6 failover is supposed
-	to assume service availability despite failure of one
-	server. That leads to conclusion that each server must be
-	able to handle whole traffic. Therefore in properly provisioned
-	setup, load balancing is not needed.</t>
+        <t>It may be tempting to extend DHCPv6 failover mechanism to
+        also offer load balancing, as DHCPv4 failover did. Here is
+        the reasoning for this decision. In general case (not
+        related to failover) load balancing solutions are used when
+        each server is not able to handle total incoming traffic.
+        However, by the very definition, DHCPv6 failover is supposed
+        to assume service availability despite failure of one
+        server. That leads to conclusion that each server must be
+        able to handle whole traffic. Therefore in properly provisioned
+        setup, load balancing is not needed.</t>
       </section> <!-- features out of Scope -->
-      
+
     </section> <!-- Goals -->
 
 <section title="Protocol Overview">
@@ -275,7 +279,7 @@
 
   <section anchor="states-overview" title="Failover Machine Sate Overview">
     <t>The following section provides simplified description of all
-    states. For the sake of clarity and simplicity, it omits important 
+    states. For the sake of clarity and simplicity, it omits important
     details. For complete description, see <xref target="states"/>.
     In case of a disagreement between simplified and complete description,
     please follow <xref target="states"/>.</t>
@@ -301,7 +305,7 @@
     not extend any lease beyond its partner knowledge by at most MCLT.
     That imposes additional burden on the server. Therefore it is not
     recommended to operate for prolonged periods in this state.
-    Once communication is reestablished, server may go into NORMAL, 
+    Once communication is reestablished, server may go into NORMAL,
     POTENTIAL-CONFLICT or PARTNER-DOWN state. It may also stay in
     COMMUNICATIONS-INTERRUPTED if certain conditions are met.</t>
 
@@ -311,7 +315,7 @@
     that initially granted the lease. In that state server handles
     leases from its own pool, but is albo able to serve pool from
     its downed partner. MCLT restrictions no longer apply. Operation
-    in this mode is less demanding for the server that remains operational, 
+    in this mode is less demanding for the server that remains operational,
     than in COMMUNICATIONS-INTERRUPTED state, but PARTNER-DOWN does
     not offer any kind of redundancy.</t>
 
@@ -471,7 +475,7 @@
 
   <list style="numbers">
     <t>Proportional Allocation - This allocation algorithm is a
-    direct application of algorithm defined in <xref target="dhcpv4-failover"/> 
+    direct application of algorithm defined in <xref target="dhcpv4-failover"/>
     to DHCPv6. Available resources are
     split between primary and secondary server. Released resources
     are always returned to primary server.  Primary and secondary
@@ -597,7 +601,7 @@
   <section title="Failover Mechanisms">
     <t>This section lays out an overview of the communication between
     partners and other mechanisms required for failover operation. As
-    this is a design document, not a protocol specification, 
+    this is a design document, not a protocol specification,
     high level ideas are presented without implementation
     specific details (e.g. lack of on-wire formats). Implementation details
     will be specified in a separate draft.</t>
@@ -714,7 +718,7 @@
         <t hangText="acknowledged potential valid lifetime:">
           <vspace/>
           The acknowledged potential valid lifetime is the potential lease
-          interval the partner server has most recently acknowledged in 
+          interval the partner server has most recently acknowledged in
           a BNDACK message.
         </t>
       </list>
@@ -728,17 +732,17 @@
 
      <t>When a server makes an offer for a new lease on an IP address to a
      DHCPv6 client, it determines the desired valid lifetime (in this
-     case, 3 days).  It then examines the acknowledged potential valid 
+     case, 3 days).  It then examines the acknowledged potential valid
      lifetime (which in this case is zero) and determines the remainder
      of the time left to run, which is also zero.  To this it adds the
      MCLT.  Since the actual valid lifetime cannot be allowed to exceed
-     the remainder of the current acknowledged potential valid lifetime 
+     the remainder of the current acknowledged potential valid lifetime
      plus the MCLT, the offer made to the client is for the remainder
      of the current acknowledged potential valid lifetime (i.e., zero)
      plus the MCLT.  Thus, the actual valid lifetime is 1 hour.</t>
 
      <t>Once the server has sent the REPLY to the DHCPv6 client, it
-     will update its failover partner with the lease information. 
+     will update its failover partner with the lease information.
      However, the desired potential valid lifetime will be composed of one
      half of the current actual valid lifetime added to the desired
      valid lifetime. Thus, the failover partner is updated with a
@@ -814,7 +818,7 @@
         simulatenously. Note2: IAID for IA, TA and PD are orthogonal
         number spaces.)</t>
         <t>valid life time sent to client</t>
-	<t>potential valid life time</t>
+        <t>potential valid life time</t>
         <t>preferred life time sent to client</t>
         <t>CLTT - Client Last Transaction Time, a timestamp
         of the last received transmission from a client</t>
@@ -823,7 +827,7 @@
       Discussion: Do we need T1 as well? Something like next expected
       client transmission?</t>
       <t>Q: Maybe we could reuse IA_NA and IA_PD options here? Yes.</t>
-      <t>Q: Do we care about preferred lifetime? (presumably no).  Certainly not 
+      <t>Q: Do we care about preferred lifetime? (presumably no).  Certainly not
       what was requested by the client.</t>
       <t>Q: Do we care about IAID? (presumably yes) Yes.</t>
 
@@ -847,7 +851,7 @@
       aspects: if the lease is already assigned to specific client,
       who had contact with client recently, start time of the lease, etc.
       </t>
-      <t>The lease update may be accepted or rejected. 
+      <t>The lease update may be accepted or rejected.
       Rejection SHOULD NOT change the flag in a lease that says that
       it should be transmitted to the failover partner.  If this flag
       is set, then it should be transmitted, but if it is not already
@@ -858,11 +862,11 @@
       disagreement is better than an update storm.
       </t>
       <t>
-	Discussion: There will definitely be different types of
-	update rejections. For example, this will allow a server
-	to treat differently a case when receiving a new lease that
-	it previously haven't seen than a case when partner sents
-	old version of a lease for which a newer state is known.
+        Discussion: There will definitely be different types of
+        update rejections. For example, this will allow a server
+        to treat differently a case when receiving a new lease that
+        it previously haven't seen than a case when partner sents
+        old version of a lease for which a newer state is known.
       </t>
 
     </section>
@@ -878,37 +882,37 @@
 
       <t>Each server (or, more accurately, failover endpoint) can take
       on a variety of failover states.  These states play a crucial role
-      in determining the actions that a server will perform when 
+      in determining the actions that a server will perform when
       processing a request from a DHCPv6 client as well as dealing with
       changing external conditions (e.g., loss of connection to a failover
       partner).</t>
 
       <t> The failover state in which a server is running controls the following
       behaviors: </t>
-	<t><list style="symbols">
+        <t><list style="symbols">
 
-	  <t>Responsiveness -- the server is either responsive to DHCPv6
-	  client requests or it is not.</t>
+          <t>Responsiveness -- the server is either responsive to DHCPv6
+          client requests or it is not.</t>
 
-	  <t>Allocation Pool -- which pool of addresses (or prefixes) can be used for allocation
-	  on receipt of a SOLICIT message.</t>
+          <t>Allocation Pool -- which pool of addresses (or prefixes) can be used for allocation
+          on receipt of a SOLICIT message.</t>
 
-	  <t>MCLT -- ensure that valid lifetimes are not beyond what the partner 
-	  has acked plus the MCLT (or not).</t>
+          <t>MCLT -- ensure that valid lifetimes are not beyond what the partner
+          has acked plus the MCLT (or not).</t>
 
-	</list></t>
+        </list></t>
 
       <t>A server will transition from one failover state to another based
       on the specific values held by the following state variables:</t>
-	<t><list style="symbols">
+        <t><list style="symbols">
 
-	  <t>Current failover state.</t>
+          <t>Current failover state.</t>
 
-	  <t>Communications status (OK or not OK).</t>
+          <t>Communications status (OK or not OK).</t>
 
-	  <t>Partner's failover state (if known).</t>
+          <t>Partner's failover state (if known).</t>
 
-	</list></t>
+        </list></t>
 
       <t>Whenever the either of the last two of the above state
       variables changes state, the state machine is invoked, which
@@ -936,54 +940,54 @@
       its otherwise current state, which then becomes the previous state
       upon server restart.</t>
 
-    <figure anchor="state-machine" title="Failover Endpoint State Machine"> 
+    <figure anchor="state-machine" title="Failover Endpoint State Machine">
     <artwork><![CDATA[
-        +---------------+  V  +--------------+
-        |    RECOVER -|+|  |  |   STARTUP  - |
-        |(unresponsive) |  +->+(unresponsive)|
-        +------+--------+     +--------------+
-        +-Comm. OK             +-----------------+
-        |     Other State:     |  PARTNER DOWN - +<----------------------+
-        |    RESOLUTION-INTER. | (responsive)    |                       ^
-       All     POTENTIAL-      +----+------------+                       |
-      Others   CONFLICT------------ | --------+                          |
-        |      CONFLICT-DONE     Comm. OK     |     +--------------+     |
-     UPDREQ or                 Other State:   |  +--+ RESOLUTION - |     |
-     UPDREQALL                  |       |     |  |  | INTERRUPTED  |     |
-     Rcv UPDDONE             RECOVER    All   |  |  | (responsive) |     |
-        |  +---------------+    |      Others |  |  +------------+-+     |
-        +->+RECOVER-WAIT +-| RECOVER    |     |  |         ^     |       |
-           |(unresponsive) |  WAIT or   |     |  Comm.     |    Ext.     |
-           +-----------+---+  DONE      |     |  OK     Comm.   Cmd----->+
-    Comm.---+     Wait MCLT     |       V     V  V     Failed            |
-    Changed |          V    +---+   +---+-----+--+-+       |             |
-     |  +---+----------++   |       |  POTENTIAL + +-------+             |
-     |  |RECOVER-DONE +-|  Wait     |  CONFLICT    +------+              |
-     +->+(unresponsive) |  for      |(unresponsive)|   Primary           |
-        +------+--------+  Other  +>+----+--------++   resolve     Comm. |
-         Comm. OK          State: |      |        ^    conflict  Changed |
-    +---Other State:-+   RECOVER  |   Secondary   |       V       V   |  |
-    |    |           |     DONE   |    resolve    |   ++----------+---++ |
-    | All Others:  POTENT.  |     |   conflict    |   |CONFLICT-DONE-|+| |
-    | Wait for    CONFLICT- | ----+    see (9.10) |   | (responsive)   | |
-    | Other State:          V            V        |   +------+---------+ |
-    | NORMAL or RECOVER    ++------------+---+      Other State: NORMAL  |
-    |    |       DONE      |     NORMAL    + +<--------------+           |
-    |    +--+----------+-->+   (balanced)    +-------External Command--->+
-    |       ^          ^   +--------+--------+       or Other State:     |
-    |       |          |            |             |  SHUTDOWN            |
-    |   Wait for   Comm. OK  Comm. Failed or      |                      |
-    |    Other      Other    Other State: PAUSED  |               External
-    |    State:     State:          |             |                Command
-    | RECOVER-DONE  NORMAL     Start Safe      Comm. OK                or
-    |       |     COMM. INT.  Period Timer    Other State:            Safe
-    |    Comm. OK.     |            V          All Others           Period
-    |   Other State:   |  +---------+--------+    |             expiration
-    |     RECOVER      +--+ COMMUNICATIONS - +----+                      |
-    |       +-------------+   INTERRUPTED    |                           |
-    RECOVER               |  (responsive)    +-------------------------->+
-    RECOVER-WAIT--------->+------------------+
-    ]]></artwork></figure>
+    +---------------+  V  +--------------+
+    |    RECOVER -|+|  |  |   STARTUP  - |
+    |(unresponsive) |  +->+(unresponsive)|
+    +------+--------+     +--------------+
+    +-Comm. OK             +-----------------+
+    |     Other State:     |  PARTNER DOWN - +<----------------------+
+    |    RESOLUTION-INTER. | (responsive)    |                       ^
+   All     POTENTIAL-      +----+------------+                       |
+  Others   CONFLICT------------ | --------+                          |
+    |      CONFLICT-DONE     Comm. OK     |     +--------------+     |
+ UPDREQ or                 Other State:   |  +--+ RESOLUTION - |     |
+ UPDREQALL                  |       |     |  |  | INTERRUPTED  |     |
+ Rcv UPDDONE             RECOVER    All   |  |  | (responsive) |     |
+    |  +---------------+    |      Others |  |  +------------+-+     |
+    +->+RECOVER-WAIT +-| RECOVER    |     |  |         ^     |       |
+       |(unresponsive) |  WAIT or   |     |  Comm.     |    Ext.     |
+       +-----------+---+  DONE      |     |  OK     Comm.   Cmd----->+
+Comm.---+     Wait MCLT     |       V     V  V     Failed            |
+Changed |          V    +---+   +---+-----+--+-+       |             |
+ |  +---+----------++   |       |  POTENTIAL + +-------+             |
+ |  |RECOVER-DONE +-|  Wait     |  CONFLICT    +------+              |
+ +->+(unresponsive) |  for      |(unresponsive)|   Primary           |
+    +------+--------+  Other  +>+----+--------++   resolve     Comm. |
+     Comm. OK          State: |      |        ^    conflict  Changed |
++---Other State:-+   RECOVER  |   Secondary   |       V       V   |  |
+|    |           |     DONE   |    resolve    |   ++----------+---++ |
+| All Others:  POTENT.  |     |   conflict    |   |CONFLICT-DONE-|+| |
+| Wait for    CONFLICT- | ----+    see (9.10) |   | (responsive)   | |
+| Other State:          V            V        |   +------+---------+ |
+| NORMAL or RECOVER    ++------------+---+      Other State: NORMAL  |
+|    |       DONE      |     NORMAL    + +<--------------+           |
+|    +--+----------+-->+   (balanced)    +-------External Command--->+
+|       ^          ^   +--------+--------+       or Other State:     |
+|       |          |            |             |  SHUTDOWN            |
+|   Wait for   Comm. OK  Comm. Failed or      |                      |
+|    Other      Other    Other State: PAUSED  |               External
+|    State:     State:          |             |                Command
+| RECOVER-DONE  NORMAL     Start Safe      Comm. OK                or
+|       |     COMM. INT.  Period Timer    Other State:            Safe
+|    Comm. OK.     |            V          All Others           Period
+|   Other State:   |  +---------+--------+    |             expiration
+|     RECOVER      +--+ COMMUNICATIONS - +----+                      |
+|       +-------------+   INTERRUPTED    |                           |
+RECOVER               |  (responsive)    +-------------------------->+
+RECOVER-WAIT--------->+------------------+
+]]></artwork></figure>
 
     </section> <!-- state-machine-operation -->
 
@@ -1008,89 +1012,89 @@
 
       <section anchor="operation-in-startup-state" title="Operation in STARTUP State">
 
-	<t>The server MUST NOT be responsive in STARTUP state.</t>
+        <t>The server MUST NOT be responsive in STARTUP state.</t>
 
-	<t>Whenever a STATE message is sent to the partner while
-	in STARTUP state the STARTUP flag MUST be set the message
-	and the previously recorded failover state MUST be placed
-	in the server-state option.</t>
+        <t>Whenever a STATE message is sent to the partner while
+        in STARTUP state the STARTUP flag MUST be set the message
+        and the previously recorded failover state MUST be placed
+        in the server-state option.</t>
 
       </section> <!-- operation-in-startup-state -->
 
       <section anchor="transition-out-of-startup-state" title="Transition Out of STARTUP State">
 
-	<t>The following algorithm is followed every time the
-	server initializes itself, and enters STARTUP state.</t>
+        <t>The following algorithm is followed every time the
+        server initializes itself, and enters STARTUP state.</t>
 
-	<t>Step 1:</t>
+        <t>Step 1:</t>
 
-	<t>If there is any record in stable storage of a previous
-	failover state for this server, set PREVIOUS-STATE to the
-	last recorded value in stable storage, and go to Step 2.</t>
+        <t>If there is any record in stable storage of a previous
+        failover state for this server, set PREVIOUS-STATE to the
+        last recorded value in stable storage, and go to Step 2.</t>
 
-	<t>If there is no record of any previous failover state in
-	stable storage for this server, then set the PREVIOUS-STATE
-	to RECOVER and set the TIME-OF-FAILURE to 0.  This will
-	allow two servers which already have lease information to
-	synchronize themselves prior to operating.</t>
+        <t>If there is no record of any previous failover state in
+        stable storage for this server, then set the PREVIOUS-STATE
+        to RECOVER and set the TIME-OF-FAILURE to 0.  This will
+        allow two servers which already have lease information to
+        synchronize themselves prior to operating.</t>
 
-	<t>In some cases, an existing server will be commissioned
-	as a failover server and brought back into operation where
-	its partner is not yet available.  In this case, the newly
-	commissioned failover server will not operate until its
-	partner comes online  -- but it has operational responsibilities
-	as a DHCP server nonetheless.  To properly handle this
-	situation, a server SHOULD be configurable in such a way
-	as to move directly into PARTNER-DOWN state after the startup
-	period expires if it has been unable to contact its partner
-	during the startup period.</t>
+        <t>In some cases, an existing server will be commissioned
+        as a failover server and brought back into operation where
+        its partner is not yet available.  In this case, the newly
+        commissioned failover server will not operate until its
+        partner comes online  -- but it has operational responsibilities
+        as a DHCP server nonetheless.  To properly handle this
+        situation, a server SHOULD be configurable in such a way
+        as to move directly into PARTNER-DOWN state after the startup
+        period expires if it has been unable to contact its partner
+        during the startup period.</t>
 
-	<t>Step 2:</t>
+        <t>Step 2:</t>
 
-	<t>If the previous state is one where communications was
-	"OK", then set the previous state to the state that is the
-	result of the communications failed state transition (if
-	such transition exists -- some states don't have a
-	communications failed state transition, since they allow
-	both commun- ications OK and failed).</t>
+        <t>If the previous state is one where communications was
+        "OK", then set the previous state to the state that is the
+        result of the communications failed state transition (if
+        such transition exists -- some states don't have a
+        communications failed state transition, since they allow
+        both commun- ications OK and failed).</t>
 
-	<t>Step 3:</t>
+        <t>Step 3:</t>
 
-	<t>Start the STARTUP state timer.  The time that a server
-	remains in the STARTUP state (absent any communications
-	with its partner) is implementation dependent but SHOULD
-	be short.  It SHOULD be long enough for a TCP connection
-	to be created to a heavily loaded partner across a slow
-	network.</t>
+        <t>Start the STARTUP state timer.  The time that a server
+        remains in the STARTUP state (absent any communications
+        with its partner) is implementation dependent but SHOULD
+        be short.  It SHOULD be long enough for a TCP connection
+        to be created to a heavily loaded partner across a slow
+        network.</t>
 
-	<t>Step 4:</t>
+        <t>Step 4:</t>
 
-	<t>Attempt to create a TCP connection to the failover partner.</t>
+        <t>Attempt to create a TCP connection to the failover partner.</t>
 
-	<t>Step 5:</t>
+        <t>Step 5:</t>
 
-	<t>Wait for "communications OK".</t>
+        <t>Wait for "communications OK".</t>
 
-	<t>When and if communications become "okay", clear the STARTUP
-	flag, and set the current state to the PREVIOUS-STATE.</t>
+        <t>When and if communications become "okay", clear the STARTUP
+        flag, and set the current state to the PREVIOUS-STATE.</t>
 
-	<t>If the partner is in PARTNER-DOWN state, and if the time
-	at which it entered PARTNER-DOWN state (as received in the
-	start-time-of-state option in the STATE message) is later
-	than the last recorded time of operation of this server,
-	then set CURRENT-STATE to RECOVER.  If the time at which
-	it entered PARTNER-DOWN state is earlier than the last
-	recorded time of operation of this server, then set
-	CURRENT-STATE to POTENTIAL-CONFLICT.</t>
+        <t>If the partner is in PARTNER-DOWN state, and if the time
+        at which it entered PARTNER-DOWN state (as received in the
+        start-time-of-state option in the STATE message) is later
+        than the last recorded time of operation of this server,
+        then set CURRENT-STATE to RECOVER.  If the time at which
+        it entered PARTNER-DOWN state is earlier than the last
+        recorded time of operation of this server, then set
+        CURRENT-STATE to POTENTIAL-CONFLICT.</t>
 
-	<t>Then, transition to the current state and take the
-	"communications OK" state transition based on the current
-	state of this server and the partner.</t>
+        <t>Then, transition to the current state and take the
+        "communications OK" state transition based on the current
+        state of this server and the partner.</t>
 
-	<t>Step 6:</t>
+        <t>Step 6:</t>
 
-	<t>If the startup time expires the server SHOULD go transition
-	to the PREVIOUS-STATE.</t>
+        <t>If the startup time expires the server SHOULD go transition
+        to the PREVIOUS-STATE.</t>
 
       </section> <!-- transition-out-of-startup-state -->
 
@@ -1105,37 +1109,37 @@
 
       <section anchor="operation-in-partner-down-state" title="Operation in PARTNER-DOWN State">
 
-	<t>The server MUST be responsive in PARTNER-DOWN state.</t>
+        <t>The server MUST be responsive in PARTNER-DOWN state.</t>
 
-	<t>It will allow renewal of all outstanding leases on IP
-	addresses.  For those IP addresses for which the server is
-	using proportional allocation, it will allocate IP addresses
-	from its own pool, and after a fixed period of time (the
-	MCLT interval) has elapsed from entry into PARTNER-DOWN
-	state, it will allocate IP addresses from the set of all
-	available IP addresses.</t>
+        <t>It will allow renewal of all outstanding leases on IP
+        addresses.  For those IP addresses for which the server is
+        using proportional allocation, it will allocate IP addresses
+        from its own pool, and after a fixed period of time (the
+        MCLT interval) has elapsed from entry into PARTNER-DOWN
+        state, it will allocate IP addresses from the set of all
+        available IP addresses.</t>
 
-	<t>Any IP address tagged as available for allocation by the
-	other server (at entry to PARTNER-DOWN state) MUST NOT be
-	allocated to a new client until the maximum-client-lead-time
-	beyond the entry into PARTNER-DOWN state has elapsed.</t>
+        <t>Any IP address tagged as available for allocation by the
+        other server (at entry to PARTNER-DOWN state) MUST NOT be
+        allocated to a new client until the maximum-client-lead-time
+        beyond the entry into PARTNER-DOWN state has elapsed.</t>
 
-	<t>A server in PARTNER-DOWN state MUST NOT allocate an IP
-	address to a DHCP client different from that to which it was
-	allocated at the entrance to PARTNER-DOWN state until the
-	maximum-client-lead-time beyond the maximum of the following
-	times: client expiration time, most recently transmitted
-	potential-expiration-time, most recently received ack of
-	potential-expiration-time from the partner, and most recently
-	acked potential-expiration-time to the partner.  <!-- tomek:
-	commented out as don't have section about BNDUPD message yet.
-	See section 7.1.5 for details. --> If this time would be earlier
-	than the current time plus the maximum-client-lead-time, then
-	the time the server entered PARTNER-DOWN state plus the
-	maximum-client-lead-time is used.</t>
+        <t>A server in PARTNER-DOWN state MUST NOT allocate an IP
+        address to a DHCP client different from that to which it was
+        allocated at the entrance to PARTNER-DOWN state until the
+        maximum-client-lead-time beyond the maximum of the following
+        times: client expiration time, most recently transmitted
+        potential-expiration-time, most recently received ack of
+        potential-expiration-time from the partner, and most recently
+        acked potential-expiration-time to the partner.  <!-- tomek:
+        commented out as don't have section about BNDUPD message yet.
+        See section 7.1.5 for details. --> If this time would be earlier
+        than the current time plus the maximum-client-lead-time, then
+        the time the server entered PARTNER-DOWN state plus the
+        maximum-client-lead-time is used.</t>
 
-	<t>The server is not restricted by the MCLT when offering
-	lease tmes while in PARTNER-DOWN state.</t>
+        <t>The server is not restricted by the MCLT when offering
+        lease tmes while in PARTNER-DOWN state.</t>
 
         <t>In the unlikely case, when there are two servers operating
         in a PARTNER-DOWN state, there is a change od duplicate leases
@@ -1151,46 +1155,46 @@
 
       <section anchor="transition-out-of-partner-down-state" title="Transition Out of PARTNER-DOWN State">
 
-	<t>When a server in PARTNER-DOWN state succeeds in establishing
-	a con- nection to its partner, its actions are conditional
-	on the state and flags received in the STATE message from
-	the other server as part of the process of establishing the
-	connection.</t>
+        <t>When a server in PARTNER-DOWN state succeeds in establishing
+        a con- nection to its partner, its actions are conditional
+        on the state and flags received in the STATE message from
+        the other server as part of the process of establishing the
+        connection.</t>
 
-	<t>If the STARTUP bit is set in the server-flags option of
-	a received STATE message, a server in PARTNER-DOWN state
-	MUST NOT take any state transitions based on reestablishing
-	communications. Essentially, if a server is in PARTNER-DOWN
-	state, it ignores all STATE messages from its partner that
-	have the STARTUP bit set in the server-flags option of the
-	STATE message. THIS NEEDS TO BE MOVED</t>
+        <t>If the STARTUP bit is set in the server-flags option of
+        a received STATE message, a server in PARTNER-DOWN state
+        MUST NOT take any state transitions based on reestablishing
+        communications. Essentially, if a server is in PARTNER-DOWN
+        state, it ignores all STATE messages from its partner that
+        have the STARTUP bit set in the server-flags option of the
+        STATE message. THIS NEEDS TO BE MOVED</t>
 
-	<t>If the STARTUP bit is not set in the server-flags option
-	of a STATE message received from its partner, then a server
-	in PARTNER-DOWN state takes the following actions based on
-	the state of the partner as received in a STATE message
-	(either immediately after establishing communications or
-	at any time later when a new state is received)</t>
+        <t>If the STARTUP bit is not set in the server-flags option
+        of a STATE message received from its partner, then a server
+        in PARTNER-DOWN state takes the following actions based on
+        the state of the partner as received in a STATE message
+        (either immediately after establishing communications or
+        at any time later when a new state is received)</t>
 
-	<t>If the partner is in:</t>
+        <t>If the partner is in:</t>
 
-	<t>NORMAL, COMMUNICATIONS-INTERRUPTED, PARTNER-DOWN,
-	POTENTIAL-CONFLICT, RESOLUTION-INTERRUPTED, or CONFLICT-DONE
-	state</t>
+        <t>NORMAL, COMMUNICATIONS-INTERRUPTED, PARTNER-DOWN,
+        POTENTIAL-CONFLICT, RESOLUTION-INTERRUPTED, or CONFLICT-DONE
+        state</t>
 
-	<t>transition to POTENTIAL-CONFLICT state</t>
+        <t>transition to POTENTIAL-CONFLICT state</t>
 
-	<t>If the partner is in:</t>
+        <t>If the partner is in:</t>
 
         <t>RECOVER, RECOVER-WAIT, SHUTDOWN, PAUSED state</t>
 
-	<t>stay in PARTNER-DOWN state</t>
+        <t>stay in PARTNER-DOWN state</t>
 
-	<t>If the partner is in:</t>
+        <t>If the partner is in:</t>
 
         <t>RECOVER-DONE state</t>
 
-	<t>transition into NORMAL state</t>
+        <t>transition into NORMAL state</t>
 
       </section> <!-- transition-out-of-partner-down-state -->
 
@@ -1206,43 +1210,43 @@
 
       <section anchor="operation-in-recover-state" title="Operation in RECOVER State">
 
-	<t>The server MUST NOT be responsive in RECOVER state.</t>
+        <t>The server MUST NOT be responsive in RECOVER state.</t>
 
-	<t>A server in RECOVER state will attempt to reestablish
-	communications with the other server.</t>
+        <t>A server in RECOVER state will attempt to reestablish
+        communications with the other server.</t>
 
       </section> <!-- operation-in-recover-state -->
 
       <section anchor="transition-out-of-recover-state" title="Transition Out of RECOVER State">
 
-	<t>If the other server is in POTENTIAL-CONFLICT,
-	RESOLUTION-INTERRUPTED, or CONFLICT-DONE state when
-	communications are reestablished, then the server in RECOVER
-	state will move to POTENTIAL-CONFLICT state itself.</t>
+        <t>If the other server is in POTENTIAL-CONFLICT,
+        RESOLUTION-INTERRUPTED, or CONFLICT-DONE state when
+        communications are reestablished, then the server in RECOVER
+        state will move to POTENTIAL-CONFLICT state itself.</t>
 
-	<t>If the other server is in any other state, then the
-	server in RECOVER state will request an update of missing
-	binding information by sending an UPDREQ message.  If the
-	server has determined that it has lost its stable storage
-	because it has no record of ever having talked to its
-	partner, while its partner does have a record of communicating
-	with it, it MUST send an UPDREQALL message, otherwise it
-	MUST send an UPDREQ message.</t>
+        <t>If the other server is in any other state, then the
+        server in RECOVER state will request an update of missing
+        binding information by sending an UPDREQ message.  If the
+        server has determined that it has lost its stable storage
+        because it has no record of ever having talked to its
+        partner, while its partner does have a record of communicating
+        with it, it MUST send an UPDREQALL message, otherwise it
+        MUST send an UPDREQ message.</t>
 
-	<t>It will wait for an UPDDONE message, and upon receipt
-	of that message it will transition to RECOVER-WAIT state.</t>
+        <t>It will wait for an UPDDONE message, and upon receipt
+        of that message it will transition to RECOVER-WAIT state.</t>
 
-	<t>If communications fails during the reception of the
-	results of the UPDREQ or UPDREQALL message, the server will
-	remain in RECOVER state, and will re-issue the UPDREQ or
-	UPDREQALL when communications are re-established.</t>
+        <t>If communications fails during the reception of the
+        results of the UPDREQ or UPDREQALL message, the server will
+        remain in RECOVER state, and will re-issue the UPDREQ or
+        UPDREQALL when communications are re-established.</t>
 
-	<t>If an UPDDONE message isn't received within an implementation
-	dependent amount of time, and no BNDUPD messages are being
-	received, the connection SHOULD be dropped.</t>
+        <t>If an UPDDONE message isn't received within an implementation
+        dependent amount of time, and no BNDUPD messages are being
+        received, the connection SHOULD be dropped.</t>
 
-	<figure anchor="figure-transition-out-of-recover-state" title="Transition out of RECOVER state"> 
-	<artwork><![CDATA[
+        <figure anchor="figure-transition-out-of-recover-state" title="Transition out of RECOVER state">
+        <artwork><![CDATA[
                 A                                        B
               Server                                  Server
 
@@ -1277,13 +1281,13 @@
                 | >---- State-(NORMAL)--------------->   |
                 |                                        |
                 |                                        |
-	]]></artwork></figure>
+        ]]></artwork></figure>
 
 
-	<t>If, at any time while a server is in RECOVER state
-	communications fails, the server will stay in RECOVER state.
-	When communications are restored, it will restart the process
-	of transitioning out of RECOVER state.</t>
+        <t>If, at any time while a server is in RECOVER state
+        communications fails, the server will stay in RECOVER state.
+        When communications are restored, it will restart the process
+        of transitioning out of RECOVER state.</t>
 
       </section> <!-- transition-out-of-recover-state -->
 
@@ -1301,46 +1305,46 @@
 
       <section anchor="operation-in-recover-wait-state" title="Operation in RECOVER-WAIT State">
 
-	<t>The server MUST NOT be responsive in RECOVER-WAIT state.</t>
+        <t>The server MUST NOT be responsive in RECOVER-WAIT state.</t>
 
       </section> <!-- operation-in-recover-wait-state -->
 
       <section anchor="transition-out-of-recover-wait-state" title="Transition Out of RECOVER-WAIT State">
 
-	<t>Upon entry to RECOVER-WAIT state the server MUST start
-	a timer whose expiration is set to a time equal to the time
-	the server went down (if known) or the time the server
-	started (if the down-time is unknown) plus the
-	maximum-client-lead-time.  When this timer expires, the
-	server will transition into RECOVER-DONE state.</t>
+        <t>Upon entry to RECOVER-WAIT state the server MUST start
+        a timer whose expiration is set to a time equal to the time
+        the server went down (if known) or the time the server
+        started (if the down-time is unknown) plus the
+        maximum-client-lead-time.  When this timer expires, the
+        server will transition into RECOVER-DONE state.</t>
 
-	<t>This is to allow any IP addresses that were allocated
-	by this server prior to loss of its client binding information
-	in stable storage to contact the other server or to time
-	out.</t>
+        <t>This is to allow any IP addresses that were allocated
+        by this server prior to loss of its client binding information
+        in stable storage to contact the other server or to time
+        out.</t>
 
-	<t>If this is the first time this server has run failover
-	-- as determined by the information received from the
-	partner, not necessarily only as determined by this server's
-	stable storage (as that may have been lost), then the waiting
-	time discussed above may be skipped, and the server may
-	transition immediately to RECOVER-DONE state.</t>
+        <t>If this is the first time this server has run failover
+        -- as determined by the information received from the
+        partner, not necessarily only as determined by this server's
+        stable storage (as that may have been lost), then the waiting
+        time discussed above may be skipped, and the server may
+        transition immediately to RECOVER-DONE state.</t>
 
-	<t>If the server has never before run failover, then there
-	is no need to wait in this state -- but, again, to determine
-	if this server has run failover it is vital that the
-	information provided by the partner be utilized, since the
-	stable storage of this server may have been lost.</t>
+        <t>If the server has never before run failover, then there
+        is no need to wait in this state -- but, again, to determine
+        if this server has run failover it is vital that the
+        information provided by the partner be utilized, since the
+        stable storage of this server may have been lost.</t>
 
-	<t>If communications fails while a server is in RECOVER-WAIT
-	state, it has no effect on the operation of this state.
-	The server SHOULD continue to operate its timer, and the
-	timer expires during the period where communications with
-	the other server have failed, then the server SHOULD
-	transition to RECOVER-DONE state.  This is rare -- failover
-	state transitions are not usually made while communications
-	are interrupted, but in this case there is no reason to
-	inhibit the timer.</t>
+        <t>If communications fails while a server is in RECOVER-WAIT
+        state, it has no effect on the operation of this state.
+        The server SHOULD continue to operate its timer, and the
+        timer expires during the period where communications with
+        the other server have failed, then the server SHOULD
+        transition to RECOVER-DONE state.  This is rare -- failover
+        state transitions are not usually made while communications
+        are interrupted, but in this case there is no reason to
+        inhibit the timer.</t>
 
       </section> <!-- transition-out-of-recover-wait-state -->
 
@@ -1355,19 +1359,20 @@
 
       <section anchor="operation-in-recover-done-state" title="Operation in RECOVER-DONE State">
 
-	<t>A server in RECOVER-DONE state MUST respond only to
-	DHCPREQUEST/RENEWAL and DHCPREQUEST/REBINDING DHCP messages.</t>
+        <t>A server in RECOVER-DONE state MUST respond only to
+        DHCPREQUEST/RENEWAL and DHCPREQUEST/REBINDING DHCP messages.</t>
 
       </section> <!-- operation-in-recover-done-state -->
 
-      <section anchor="transition-out-of-recover-done-state" title="Transition Out of RECOVER-DONE State">
+      <section anchor="transition-out-of-recover-done-state"
+               title="Transition Out of RECOVER-DONE State">
 
-	<t>When a server in RECOVER-DONE state determines that its
-	partner server has entered NORMAL or RECOVER-DONE state,
-	then it will transition into NORMAL state.</t>
+        <t>When a server in RECOVER-DONE state determines that its
+        partner server has entered NORMAL or RECOVER-DONE state,
+        then it will transition into NORMAL state.</t>
 
-	<t>If communications fails while in RECOVER-DONE state, a
-	server will stay in RECOVER-DONE state.</t>
+        <t>If communications fails while in RECOVER-DONE state, a
+        server will stay in RECOVER-DONE state.</t>
 
       </section> <!-- transition-out-of-recover-done-state -->
 
@@ -1387,43 +1392,46 @@
       state is a secondary server, then it will request IP addresses for
       allocation using the POOLREQ message.</t>
 
-      <section anchor="operation-in-normal-state" title="Operation in NORMAL State">
+      <section anchor="operation-in-normal-state"
+               title="Operation in NORMAL State">
 
       <!-- Secondary is unresponsive in NORMAL state. -->
 
-	<t>When in NORMAL state a server will operate in the following manner:
+        <t>When in NORMAL state a server will operate in the following manner:
       <list style="hanging">
-	<t hangText="Lease time calculations"> <vspace/>
-	As discussed in <xref target="mclt"/>, the
-	lease interval given to a DHCP client can never be more than the
-	MCLT greater than the most recently received potential-
-	expiration-time from the failover partner or the current time,
-	whichever is later.
-	<vspace blankLines="1"/>
-	As long as a server adheres to this constraint, the specifics of
-	the lease interval that it gives to a DHCP client or the value
-	of the potential-expiration-time sent to its failover partner
-	are implementation dependent.</t>
-	
-	<t hangText="Lazy update of partner server"> <vspace/>
-	After sending an REPLY that includes lease update to a client,
-	the server servicing a DHCP client request attempts to update
-	its partner with the new binding information. Server transmits both
-	desired valid lifetime and actual valid lifetime.
+        <t hangText="Lease time calculations"> <vspace/>
+        As discussed in <xref target="mclt"/>, the
+        lease interval given to a DHCP client can never be more than the
+        MCLT greater than the most recently received potential-
+        expiration-time from the failover partner or the current time,
+        whichever is later.
+        <vspace blankLines="1"/>
+        As long as a server adheres to this constraint, the specifics of
+        the lease interval that it gives to a DHCP client or the value
+        of the potential-expiration-time sent to its failover partner
+        are implementation dependent.</t>
 
-	<!-- v4 text: The lease time used in the partner update, a
-	     server MUST be at least that given to the DHCP client in
-	     the DHCPACK, and the potential-expiration-time MUST be at
-	     least the lease time, and SHOULD be considerably longer. --></t>
+        <t hangText="Lazy update of partner server"> <vspace/>
+        After sending an REPLY that includes lease update to a client,
+        the server servicing a DHCP client request attempts to update
+        its partner with the new binding information. Server transmits both
+        desired valid lifetime and actual valid lifetime.
 
-	<t hangText="Reallocation of IP addresses between clients"> <vspace/>
+        <!-- v4 text: The lease time used in the partner update, a
+             server MUST be at least that given to the DHCP client in
+             the DHCPACK, and the potential-expiration-time MUST be at
+             least the lease time, and SHOULD be considerably longer. --></t>
 
-	Whenever a client binding is released or expires, a BNDUPD mes-
-        sage must be sent to the partner, setting the binding state to
-        RELEASED or EXPIRED.  However, until a BNDACK is received for
-        this message, the IP address cannot be allocated to another
-        client.  It cannot be allocated to the same client again if a
-        BNDUPD was sent, otherwise it can.  See <xref target="reallocation"/>.</t>
+        <t hangText="Reallocation of IP addresses between clients"> <vspace/>
+
+        Whenever a client binding is released or expires, a BNDUPD
+        mes- sage must be sent to the partner, setting the binding
+        state to RELEASED or EXPIRED.  However, until a BNDACK is
+        received for this message, the IP address cannot be allocated
+        to another client.  It cannot be allocated to the same client
+        again if a BNDUPD was sent, otherwise it can. See <xref
+        target="reallocation"/>.
+        </t>
       </list>
       </t>
 
@@ -1433,48 +1441,50 @@
       corresponding BNDACK message to its partner server.</t>
 
       </section> <!-- operation-in-normal-state -->
-      <section anchor="transition-out-of-normal-state" title="Transition Out of NORMAL State">
-	<t>If an external command is received by a server in NORMAL
-	state informing it that its partner is down, then transition
-	into PARTNER- DOWN state.  Generally, this would be an unusual
-	situation, where some external agency knew the partner server
-	was down.  Using the command in this case would be appropriate
-	if the polling interval and timeout were long.</t>
-	<!-- Does it make sense? That is at least strange - server maintain
-	connection with its parner and suddenly operator states that that
-	partner is down. -->
+      <section anchor="transition-out-of-normal-state"
+               title="Transition Out of NORMAL State">
+        <t>If an external command is received by a server in NORMAL
+        state informing it that its partner is down, then transition
+        into PARTNER- DOWN state.  Generally, this would be an unusual
+        situation, where some external agency knew the partner server
+        was down.  Using the command in this case would be appropriate
+        if the polling interval and timeout were long.</t>
+        <!-- Does it make sense? That is at least strange - server maintain
+        connection with its parner and suddenly operator states that that
+        partner is down. -->
 
-	<t>If a server in NORMAL state fails to receive acks to messages sent to
-	its partner for an implementation dependent period of time, it MAY
-	move into COMMUNICATIONS-INTERRUPTED state.  This situation might
-	occur if the partner server was capable of maintaining the TCP con-
-	nection between the server and also capable of sending a CONTACT mes-
-	sage every tSend seconds, but was (for some reason) incapable of pro-
-	cessing BNDUPD messages.</t>
+        <t>If a server in NORMAL state fails to receive acks to messages sent to
+        its partner for an implementation dependent period of time, it MAY
+        move into COMMUNICATIONS-INTERRUPTED state.  This situation might
+        occur if the partner server was capable of maintaining the TCP con-
+        nection between the server and also capable of sending a CONTACT mes-
+        sage every tSend seconds, but was (for some reason) incapable of pro-
+        cessing BNDUPD messages.</t>
 
-	<t>If the communications is determined to not be "ok" (as
-	defined in <xref target="reachability"/>), then transition
-	into COMMUNICATIONS-INTERRUPTED state.</t>
+        <t>If the communications is determined to not be "ok" (as
+        defined in <xref target="reachability"/>), then transition
+        into COMMUNICATIONS-INTERRUPTED state.</t>
 
-	<t>If a server in NORMAL state receives any messages from its partner
-	where the partner has changed state from that expected by the server
-	in NORMAL state, then the server should transition into
-	COMMUNICATIONS-INTERRUPTED state and take the appropriate state tran-
-	sition from there.  For example, it would be expected for the partner
-	to transition from POTENTIAL-CONFLICT into NORMAL state, but not for
-	the partner to transition from NORMAL into POTENTIAL-CONFLICT state.</t>
+        <t>If a server in NORMAL state receives any messages from its partner
+        where the partner has changed state from that expected by the server
+        in NORMAL state, then the server should transition into
+        COMMUNICATIONS-INTERRUPTED state and take the appropriate state tran-
+        sition from there.  For example, it would be expected for the partner
+        to transition from POTENTIAL-CONFLICT into NORMAL state, but not for
+        the partner to transition from NORMAL into POTENTIAL-CONFLICT state.</t>
 
-	<t><!-- we don't need PAUSED If a server in NORMAL state
-	receives any messages from its partner where the PARTNER has
-	changed into PAUSED state, the server should transition into
-	COMMUNICATIONS-INTERRUPTED state. -->If a server in NORMAL
-	state receives any messages from its partner where the PARTNER
-	has changed into SHUTDOWN state, the server should transition
-	into PARTNER-DOWN state.</t>
+        <t><!-- we don't need PAUSED If a server in NORMAL state
+        receives any messages from its partner where the PARTNER has
+        changed into PAUSED state, the server should transition into
+        COMMUNICATIONS-INTERRUPTED state. -->If a server in NORMAL
+        state receives any messages from its partner where the PARTNER
+        has changed into SHUTDOWN state, the server should transition
+        into PARTNER-DOWN state.</t>
       </section> <!-- transition-out-of-normal-state -->
     </section> <!-- normal state -->
 
-    <section anchor="state-comm-interrrupted" title="COMMUNICATIONS-INTERRUPTED State">
+    <section anchor="state-comm-interrrupted"
+             title="COMMUNICATIONS-INTERRUPTED State">
       <t>A server goes into COMMUNICATIONS-INTERRUPTED state whenever it is
       unable to communicate with its partner. Primary and secondary
       servers cycle automatically (without administrative intervention)
@@ -1495,76 +1505,79 @@
       alert administrative staff to a potential problem in the DHCP
       subsystem.</t>
 
-      <section anchor="operation-in-comm-interrupted-state" 
-	       title="Operation in COMMUNICATIONS-INTERRUPTED State">
+      <section anchor="operation-in-comm-interrupted-state"
+               title="Operation in COMMUNICATIONS-INTERRUPTED State">
 
-	<t>In this state a server MUST respond to all DHCP client
-	requests.  When allocating new lease, each server allocates
-	from its own pool, where the primary MUST allocate only FREE
-	resources (addresses or prefixes), and the secondary MUST
-	allocate only BACKUP resources (addresses or prefixes).  When
-	responding to RENEW messages, each server will allow continued
-	renewal of a DHCP client's current lease on an IP address or
-	prefix irrespective of whether that lease was given out by the
-	receiving server or not, although the renewal period MUST NOT
-	exceed the maximum client lead time (MCLT) beyond the latest
-	of: 1) the potential valid lifetime already acknowledged by
-	the other server, or 2) the lease- expiration-time <!-- what
-	is this? -->, or 3) the potential valid lifetime received from
-	the partner server.</t>
+        <t>In this state a server MUST respond to all DHCP client
+        requests.  When allocating new lease, each server allocates
+        from its own pool, where the primary MUST allocate only FREE
+        resources (addresses or prefixes), and the secondary MUST
+        allocate only BACKUP resources (addresses or prefixes).  When
+        responding to RENEW messages, each server will allow continued
+        renewal of a DHCP client's current lease on an IP address or
+        prefix irrespective of whether that lease was given out by the
+        receiving server or not, although the renewal period MUST NOT
+        exceed the maximum client lead time (MCLT) beyond the latest
+        of: 1) the potential valid lifetime already acknowledged by
+        the other server, or 2) the lease- expiration-time <!-- what
+        is this? -->, or 3) the potential valid lifetime received from
+        the partner server.</t>
 
-	<t>However, since the server cannot communicate with its
-	partner in this state, the acknowledged potential valid
-	lifetime will not be updated in any new bindings.  This is
-	likely to eventually cause the actual valid lifetimes to be
-	the current time plus the MCLT (unless this is greater than
-	the desired-client-lease- time).</t>
+        <t>However, since the server cannot communicate with its
+        partner in this state, the acknowledged potential valid
+        lifetime will not be updated in any new bindings.  This is
+        likely to eventually cause the actual valid lifetimes to be
+        the current time plus the MCLT (unless this is greater than
+        the desired-client-lease- time).</t>
 
-	<t>The server should continue to try to establish a connection
-	with its partner.</t>
+        <t>The server should continue to try to establish a connection
+        with its partner.</t>
 
       </section> <!-- operation-in-comm-interrrupted-state -->
-      <section anchor="transition-out-of-comm-interrrupted-state" 
-	       title="Transition Out of COMMUNICATIONS-INTERRUPTED State">
+      <section anchor="transition-out-of-comm-interrrupted-state"
+               title="Transition Out of COMMUNICATIONS-INTERRUPTED State">
 
-	<t>If the safe period timer expires while a server is in the
-	COMMUNICATIONS-INTERRUPTED state, it will transition immediately into
-	PARTNER-DOWN state.</t>
+        <t>If the safe period timer expires while a server is in the
+        COMMUNICATIONS-INTERRUPTED state, it will transition immediately into
+        PARTNER-DOWN state.</t>
 
-	<t>If an external command is received by a server in COMMUNICATIONS-
-	INTERRUPTED state informing it that its partner is down, it will
-	transition immediately into PARTNER-DOWN state.</t>
+        <t>If an external command is received by a server in COMMUNICATIONS-
+        INTERRUPTED state informing it that its partner is down, it will
+        transition immediately into PARTNER-DOWN state.</t>
 
-	<t>If communications is restored with the other server, then the server
-	in COMMUNICATIONS-INTERRUPTED state will transition into another
-	state based on the state of the partner:
+        <t>If communications is restored with the other server, then the server
+        in COMMUNICATIONS-INTERRUPTED state will transition into another
+        state based on the state of the partner:
 
-	<list style="symbols">
-	  <t>NORMAL or COMMUNICATIONS-INTERRUPTED: Transition into the
-	  NORMAL state.</t>
-	  <!-- The partner SHOULD NOT be in NORMAL state here, since upon res-
-	  toration of communications it MUST have created a new TCP con-
-	  nection which would have forced it into COMMUNICATIONS-
-	  INTERRUPTED state.  Still, we should account for every state
-	  just in case. -->
+        <list style="symbols">
+          <t>NORMAL or COMMUNICATIONS-INTERRUPTED: Transition into the
+          NORMAL state.</t>
+          <!-- The partner SHOULD NOT be in NORMAL state here, since upon res-
+          toration of communications it MUST have created a new TCP con-
+          nection which would have forced it into COMMUNICATIONS-
+          INTERRUPTED state.  Still, we should account for every state
+          just in case. -->
 
-	  <t>RECOVER: Stay in COMMUNICATIONS-INTERRUPTED state.</t>
+          <t>RECOVER: Stay in COMMUNICATIONS-INTERRUPTED state.</t>
 
-	  <t>RECOVER-DONE: Transition into NORMAL state.</t>
+          <t>RECOVER-DONE: Transition into NORMAL state.</t>
 
-	  <t>PARTNER-DOWN, POTENTIAL-CONFLICT, CONFLICT-DONE, or
-	  RESOLUTION-INTERRUPTED: Transition into POTENTIAL-CONFLICT
-	  state.</t>
+          <t>PARTNER-DOWN, POTENTIAL-CONFLICT, CONFLICT-DONE, or
+          RESOLUTION-INTERRUPTED: Transition into POTENTIAL-CONFLICT
+          state.</t>
 
-	  <t>SHUTDOWN: Transition into PARTNER-DOWN state.</t>
-	</list></t>
+          <t>SHUTDOWN: Transition into PARTNER-DOWN state.</t>
+        </list></t>
 
-	<t>The following figure illustrates the transition from NORMAL
-	to COMMUNICATIONS-INTERRUPTED state and then back to NORMAL
-	state again.</t>
+        <t>The following figure illustrates the transition from NORMAL
+        to COMMUNICATIONS-INTERRUPTED state and then back to NORMAL
+        state again.</t>
 
-	<figure anchor="state-change-example" title="Transition from NORMAL to COMMUNICATIONS-INTERRUPTED and back (example with 2 addresses allocated to secondary)">
-	  <artwork><![CDATA[
+        <!-- this title is too long. That should be a caption field -->
+        <figure anchor="state-change-example" title="Transition from NORMAL to
+         COMMUNICATIONS-INTERRUPTED and back (example with 2 addresses
+         allocated to secondary)">
+          <artwork><![CDATA[
    Primary                                Secondary
     Server                                  Server
 
@@ -1629,32 +1642,32 @@ t>      |                                        |
       the primary to send it an UPDREQ message.</t>
 
       <section anchor="operation-in-potential-conflict-state"
-	       title="Operation in POTENTIAL-CONFLICT State">
-	<t>Any server in POTENTIAL-CONFLICT state MUST NOT process any
-	incoming DHCP requests.</t>
+               title="Operation in POTENTIAL-CONFLICT State">
+        <t>Any server in POTENTIAL-CONFLICT state MUST NOT process any
+        incoming DHCP requests.</t>
       </section> <!-- operation-in-potential-conflict-state -->
       <section anchor="transition-out-of-potential-conflict-state"
-	       title="Transition Out of POTENTIAL-CONFLICT State">
+               title="Transition Out of POTENTIAL-CONFLICT State">
 
-	<t>If communications fails with the partner while in
-	POTENTIAL-CONFLICT state, then the server will transition to
-	RESOLUTION-INTERRUPTED state.</t>
+        <t>If communications fails with the partner while in
+        POTENTIAL-CONFLICT state, then the server will transition to
+        RESOLUTION-INTERRUPTED state.</t>
 
-	<t>Whenever either server receives an UPDDONE message from its
-	partner while in POTENTIAL-CONFLICT state, it MUST transition
-	to a new state.  The primary MUST transition to CONFLICT-DONE
-	state, and the secondary MUST transition to NORMAL state.
-	This will cause the primary server to leave POTENTIAL-CONFLICT
-	state prior to the secondary, since the primary sends an
-	UPDREQ message and receives an UPDDONE before the secondary
-	sends an UPDREQ message and receives its UPDDONE message.</t>
+        <t>Whenever either server receives an UPDDONE message from its
+        partner while in POTENTIAL-CONFLICT state, it MUST transition
+        to a new state.  The primary MUST transition to CONFLICT-DONE
+        state, and the secondary MUST transition to NORMAL state.
+        This will cause the primary server to leave POTENTIAL-CONFLICT
+        state prior to the secondary, since the primary sends an
+        UPDREQ message and receives an UPDDONE before the secondary
+        sends an UPDREQ message and receives its UPDDONE message.</t>
 
-	<t>When a secondary server receives an indication that the primary
-	server has made a transition from POTENTIAL-CONFLICT to CONFLICT-DONE
-	state, it SHOULD send an UPDREQ message to the primary server.</t>
+        <t>When a secondary server receives an indication that the primary
+        server has made a transition from POTENTIAL-CONFLICT to CONFLICT-DONE
+        state, it SHOULD send an UPDREQ message to the primary server.</t>
 
-<figure anchor="out-of-potential-conflict" 
-	title="Transition out of POTENTIAL-CONFLICT"> 
+<figure anchor="out-of-potential-conflict"
+        title="Transition out of POTENTIAL-CONFLICT">
     <artwork><![CDATA[
     Primary                                Secondary
     Server                                  Server
@@ -1713,38 +1726,38 @@ CONFLICT-DONE                                  |
       DHCP subsystem.</t>
 
       <section anchor="operation-in-resolution-interrupted-state"
-	       title="Operation in RESOLUTION-INTERRUPTED State">
-	<t>In this state a server MUST respond to all DHCP client
-	requests. When allocating new resources (addresses or
-	prefixes), each server SHOULD allocate from its own pool (if
-	that can be determined), where the primary SHOULD allocate
-	only FREE resources, and the secondary SHOULD allocate only
-	BACKUP resources. When responding to renewal requests, each
-	server will allow continued renewal of a DHCP client's current
-	lease irrespective of whether that lease was given out by the
-	receiving server or not, although the renewal period MUST not
-	exceed the maximum client lead time (MCLT) beyond the latest
-	of: 1) the potential valid lifetime already acknowledged by
-	the other server or 2) the lease-expiration-time <!-- what is
-	this? --> or 3) potential valid lifetime received from the
-	partner server.</t>
+               title="Operation in RESOLUTION-INTERRUPTED State">
+        <t>In this state a server MUST respond to all DHCP client
+        requests. When allocating new resources (addresses or
+        prefixes), each server SHOULD allocate from its own pool (if
+        that can be determined), where the primary SHOULD allocate
+        only FREE resources, and the secondary SHOULD allocate only
+        BACKUP resources. When responding to renewal requests, each
+        server will allow continued renewal of a DHCP client's current
+        lease irrespective of whether that lease was given out by the
+        receiving server or not, although the renewal period MUST NOT
+        exceed the maximum client lead time (MCLT) beyond the latest
+        of: 1) the potential valid lifetime already acknowledged by
+        the other server or 2) the lease-expiration-time <!-- what is
+        this? --> or 3) potential valid lifetime received from the
+        partner server.</t>
 
-	<t>However, since the server cannot communicate with its
-	partner in this state, the acknowledged potential valid
-	lifetime will not be updated in any new bindings.</t>
+        <t>However, since the server cannot communicate with its
+        partner in this state, the acknowledged potential valid
+        lifetime will not be updated in any new bindings.</t>
       </section> <!--
-	operation-in-resolution-interrupted-state -->
+        operation-in-resolution-interrupted-state -->
       <section anchor="transition-out-of-resolution-interrupted-state"
-	       title="Transition Out of RESOLUTION-INTERRUPTED State">
+               title="Transition Out of RESOLUTION-INTERRUPTED State">
 
-	<t>If an external command is received by a server in
-	RESOLUTION-INTERRUPTED state informing it that its partner is
-	down, it will transition immediately into PARTNER-DOWN
-	state.</t>
+        <t>If an external command is received by a server in
+        RESOLUTION-INTERRUPTED state informing it that its partner is
+        down, it will transition immediately into PARTNER-DOWN
+        state.</t>
 
-	<t>If communications is restored with the other server, then
-	the server in RESOLUTION-INTERRUPTED state will transition
-	into POTENTIAL-CONFLICT state.</t>
+        <t>If communications is restored with the other server, then
+        the server in RESOLUTION-INTERRUPTED state will transition
+        into POTENTIAL-CONFLICT state.</t>
 
       </section> <!-- transition-out-of-resolution-interrupted-state -->
     </section> <!-- resolution-interrupted state -->
@@ -1761,27 +1774,27 @@ CONFLICT-DONE                                  |
       actually equal to NORMAL. Need to remove CONFLICT-DONE and
       replace all its references to NORMAL.</t>
       <section anchor="operation-in-conflict-done-state"
-	       title="Operation in CONFLICT-DONE State">
-	<t>A primary server in CONFLICT-DONE state is fully responsive
-	to all DHCP clients (similar to the situation in
-	COMMUNICATIONS-INTERRUPTED state).</t>
-	
-	<t>If communications fails, remain in CONFLICT-DONE state.  If
-	communications becomes OK, remain in CONFLICT-DONE state until
-	the conditions for transition out become satisfied.</t>
+               title="Operation in CONFLICT-DONE State">
+        <t>A primary server in CONFLICT-DONE state is fully responsive
+        to all DHCP clients (similar to the situation in
+        COMMUNICATIONS-INTERRUPTED state).</t>
+
+        <t>If communications fails, remain in CONFLICT-DONE state.  If
+        communications becomes OK, remain in CONFLICT-DONE state until
+        the conditions for transition out become satisfied.</t>
       </section> <!-- operation-in-conflict-done-state -->
       <section anchor="transition-out-of-conflict-done-state"
-	       title="Transition Out of CONFLICT-DONE State">
-	<t>If communications fails with the partner while in
-	CONFLICT-DONE state, then the server will remain in
-	CONFLICT-DONE state.</t>
-	
-	<t>When a primary server determines that the secondary
-	server has made a transition into NORMAL state, the primary
-	server will also transition into NORMAL state.</t>
+               title="Transition Out of CONFLICT-DONE State">
+        <t>If communications fails with the partner while in
+        CONFLICT-DONE state, then the server will remain in
+        CONFLICT-DONE state.</t>
+
+        <t>When a primary server determines that the secondary
+        server has made a transition into NORMAL state, the primary
+        server will also transition into NORMAL state.</t>
       </section> <!-- transition-out-of-conflict-done-state -->
     </section> <!-- conflict-done state -->
-    
+
     <section anchor="state-paused" title="PAUSED State">
       <t>TODO: Remove PAUSED state completely</t>
 
@@ -1809,18 +1822,18 @@ CONFLICT-DONE                                  |
       previous state when it is restarted.</t>
 
       <section anchor="operation-in-paused-state"
-	       title="Operation in PAUSED State">
-	<t>Server MUST NOT perform any operation while in PAUSED
-	state.</t>
+               title="Operation in PAUSED State">
+        <t>Server MUST NOT perform any operation while in PAUSED
+        state.</t>
       </section> <!-- operation-in-paused-state -->
       <section anchor="transition-out-of-paused-state"
-	       title="Transition Out of PAUSED State">
-	<t>A server makes a transition out of PAUSED state by being
-	restarted.  At that time, the previous state MUST be the state
-	the server was in prior to entering the PAUSED state.</t>
+               title="Transition Out of PAUSED State">
+        <t>A server makes a transition out of PAUSED state by being
+        restarted.  At that time, the previous state MUST be the state
+        the server was in prior to entering the PAUSED state.</t>
       </section> <!-- transition-out-of-paused-state -->
     </section> <!-- paused state -->
-    
+
     <section anchor="state-shutdown" title="SHUTDOWN State">
       <t>This state exists to allow one server to inform another that
       it will be out of service for what is predicted to be a
@@ -1837,23 +1850,23 @@ CONFLICT-DONE                                  |
       a STATE message with the server-state field containing
       SHUTDOWN.</t>
       <section anchor="operation-in-shutdown-state"
-	       title="Operation in SHUTDOWN State">
-	<t>A server in SHUTDOWN state MUST NOT respond to any DHCP
-	client input.</t>
+               title="Operation in SHUTDOWN State">
+        <t>A server in SHUTDOWN state MUST NOT respond to any DHCP
+        client input.</t>
 
-	<t>If a server receives any message indicating that the
-	partner has moved to PARTNER-DOWN state while it is in
-	SHUTDOWN state then it MUST record RECOVER state as the
-	previous state to be used when it is restarted.</t>
+        <t>If a server receives any message indicating that the
+        partner has moved to PARTNER-DOWN state while it is in
+        SHUTDOWN state then it MUST record RECOVER state as the
+        previous state to be used when it is restarted.</t>
 
-	<t>A server SHOULD wait for a few seconds after informing the
-	partner of entry into SHUTDOWN state (if communications are
-	okay) to determine if the partner entered PARTNER-DOWN state.</t>
+        <t>A server SHOULD wait for a few seconds after informing the
+        partner of entry into SHUTDOWN state (if communications are
+        okay) to determine if the partner entered PARTNER-DOWN state.</t>
       </section> <!-- operation-in-shutdown-state -->
       <section anchor="transition-out-of-shutdown-state"
-	       title="Transition Out of SHUTDOWN State">
-	<t>A server makes a transition out of SHUTDOWN state by being
-	restarted.</t>
+               title="Transition Out of SHUTDOWN State">
+        <t>A server makes a transition out of SHUTDOWN state by being
+        restarted.</t>
 
       </section> <!-- transition-out-of-shutdown-state -->
     </section> <!-- shutdown state -->
@@ -1981,29 +1994,13 @@ CONFLICT-DONE                                  |
   <back>
     <references title="Normative References">
       <?rfc include='reference.RFC.2119'?>
-      <?rfc include='reference.RFC.2131'?>
-      <?rfc include='reference.RFC.3074'?>
       <?rfc include='reference.RFC.3315'?>
       <?rfc include='reference.RFC.3633'?>
       <?rfc include='reference.RFC.4704'?>
       <?rfc include="reference.RFC.5460"?>
     </references> <references title="Informative References">
 
-    <!-- <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-failover-requirements.xml'?> -->
-    <reference anchor="requirements">
-      <front>
-        <title>DHCPv6 Failover Requirements</title>
-        <author initials="T" surname="Mrugalski" fullname="Tomasz Mrugalski">
-          <organization abbrv="ISC">Internet Systems Consortium</organization>
-        </author>
-        <author initials="K" surname="Kinnear" fullname="Kim Kinnear">
-          <organization abbrev="Cisco">Cisco Systems</organization>
-        </author>
-        <date month="October" day="18" year="2011"/>
-      </front>
-      <seriesInfo name="Internet-Draft" value="draft-ietf-dhc-dhcpv6-failover-requirements-00"/>
-      <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-dhc-dhcpv6-failover-requirements-00.txt"/>
-    </reference>
+    <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-failover-requirements.xml'?>
 
       <reference anchor="dhcpv4-failover">
         <front>
