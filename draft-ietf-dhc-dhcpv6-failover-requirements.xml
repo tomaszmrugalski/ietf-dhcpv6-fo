@@ -281,14 +281,14 @@
 
       <section title="Partial server communication loss">
         <!-- by Prasad: http://www.ietf.org/mail-archive/web/dhcwg/current/msg12104.html -->
-        <t>There is a scenario where the DHCP server may be
+        <t>There is a scenario where the DHCPv6 server may be
         configured to serve clients on one network adapter and
         communicate with partner server (server-2-server traffic) on a
         different network adapter. In this scenario, if the server
         loses connectivity on the network adapter used to communicate
         with the clients because of network adapter (hardware)
         failure, there is no intimation of the loss of service to the
-        partner in the DHCPv4 failover protocol. Since the servers are
+        partner in the DHCPv6 failover protocol. Since the servers are
         able to communicate with each other, the partner remains
         ignorant of the loss of service to clients.</t>
       </section>
