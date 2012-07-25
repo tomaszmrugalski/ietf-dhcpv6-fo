@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
 ]>
 <rfc ipr="trust200902" category="std"
-     docName="draft-ietf-dhc-dhcpv6-failover-design-00">
+     docName="draft-ietf-dhc-dhcpv6-failover-design-01">
   <front>
     <title abbrev="DHCPv6 Failover Design">DHCPv6 Failover Design</title>
 
@@ -203,16 +203,15 @@
 
 <section title="Protocol Overview">
 
-  <t>The DHCPv6 Failover Protocol is defined as a communication
-  between failover partners with all associated algorithms and
-  mechanisms.  Failover communication is conducted over a TCP
-  connection established between the partners. The protocol reuses
-  the framing format specified in Section 5.1 of <xref
-  target="RFC5460">DHCPv6 Bulk Leasequery</xref>, but uses different
-  message types. Additional failover-specific message types will
-  be defined. All information is sent over the connection as typical
-  DHCPv6 Options, following format defined in Section 22.1 of <xref
-  target="RFC3315"/>.</t>
+  <t>The DHCPv6 Failover Protocol is defined as a communication between failover
+  partners with all associated algorithms and mechanisms.  Failover
+  communication is conducted over a TCP connection established between the
+  partners. The protocol reuses the framing format specified in Section 5.1 of
+  <xref target="RFC5460">DHCPv6 Bulk Leasequery</xref>, but uses different
+  message types. New failover-specific message types are listed in <xref
+  target="msg-list" />. All information is sent over the connection as typical
+  DHCPv6 messages that convey DHCPv6 options, following format defined in
+  Section 22.1 of <xref target="RFC3315"/>.</t>
 
   <t>After initialization, the primary server establishes a TCP connection
   with its partner. The primary server sends a CONNECT message with initial
@@ -277,7 +276,7 @@
   operation. A Server SHOULD transmit any pending lease updates before
   transmitting DISCONNECT message.</t>
 
-  <section anchor="states-overview" title="Failover Machine Sate Overview">
+  <section anchor="states-overview" title="Failover Machine State Overview">
     <t>The following section provides simplified description of all
     states. For the sake of clarity and simplicity, it omits important
     details. For complete description, see <xref target="states"/>.
@@ -341,6 +340,85 @@
     <t>Server that is being shut down, switches briefly to SHUTDOWN
     state and communicates its state to its partner before actual
     termination.</t>
+  </section>
+
+  <section anchor="msg-list" title="Messages">
+    <t>The failover protocol is centered around the message exchanges used by
+    one server to update its partner and respond to received updates. The
+    following list enumerates new messages.</t>
+    <t>It should be noted that no specific formats or message type values are
+    assigned at this stage. Appropriate implementation details will be specified
+    in a separate protocol specification document.</t>
+
+    <list style="symbols">
+      <t>BNDUPD - The binding update message is used to send the binding lease
+      changes to the partner. One message may contain one or more lease
+      updates. The partner is expected to respond with a BNDACK message.</t>
+      <t>BNDACK - The binding acknowledgement is used for confirmation of the
+      received BNDUPD message. It may contain positive or negative response
+      (e.g. due to detected lease conflict).</t>
+      
+      <t>POOLREQ - The Pool Request message is used by one server (typically
+      secondary) to request allocation of resources (addresses or prefixes) from
+      its partner. The partner responds with POOLRSP.</t>
+
+      <t>POOLRSP - The Pool Response message is used by one server (typically
+      primary) to repond to its partner's request for resources allocation. One
+      POOLRSP message may contain more than one pool.</t>
+
+      <t>UPDREQ - The update request message is used by one server to request
+      that its partner send all binding database changes that has not been
+      sent and confirmed already. Requested partner is expected to respond
+      with zero or more BNDUPD messages, followed by UPDDONE that signals
+      end of updates.</t>
+
+      <t>UPDREQALL - The update request all is used by one server to request
+      that all binding database information be sent in order to recover from a
+      total loss of its binding database by the requesting server. Requested
+      server responds with zero or more BNDUPD messages, followed by UPDDONE
+      that signal end of updates.</t>
+
+      <t>UPDDONE - The update done message is used by the responding server to
+      indicate that all requested updates have been sent the responding server
+      and acked by the requesting server.</t>
+
+      <t>CONNECT - The connect message is used by the primary server to
+      establish a high level connection with the other server, and to transmit
+      several important configuration data items between the servers. The
+      partner is expected to confirm by responding with CONNECTACK message.</t>
+
+      <t>CONNECTACK - The connect acknowledgement message is used by the
+      secondary server to respond to a CONNECT message from the primary
+      server.</t>
+      <!-- tomek: do we want to make this bi-directional? I think it should work
+           both ways, not only primary connecting to secondary, but in the
+           opposite direction as well. -->
+      
+      <t>DISCONNECT - The disconnect message is used by either server when
+      closing a connection and shutting down. No response is required for this
+      message.</t>
+      <!-- tomek: v4 doesn't have any DISCONNECTACK. Why? Perhaps we should add
+           it. Servers that use failover are not pocket devices that must shut
+           down in 0.001 seconds to conserve energy. It is ok to prolong the
+           shutdown sequence by a second or two. It is reasonable to assume that
+           some implementations will abort graceful shutdown if there is no
+           response from the partner. Of course, such implementations would need
+           some form of forced shutdown knob. -->
+      
+      <t>STATE - The state message is used by either server to infom its
+      partner about a change of failover state. In some cases it may be used
+      to also inform the partner about current state, e.g. after connection
+      is established in COMMUNICATIONS-INTERRUPTED or PARTNER-DOWN states.</t>
+      <!-- tomek: again, why is there no STATEACK message? -->
+
+      <t>CONTACT - The contact message is used by either server to ensure that
+      the other server continues to see the connection as opera- tional.  It
+      MUST be transmitted periodically over every esta- blished connection if
+      other message traffic is not flowing, and it MAY be sent at any time.</t>
+      <!-- tomek: what about link failing in only one direction, e.g. uplink
+      broken? Perhaps there should be some way to acknowledge CONTACT? -->
+    </list>
+
   </section>
 </section>
 
