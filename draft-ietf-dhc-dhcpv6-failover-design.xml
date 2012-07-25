@@ -663,8 +663,96 @@
 
 <section title="Information model">
 
-  <t>TODO: Describe information model here. In particular, we need to
-  describe lease lifecycle here.</t>
+  <t>In most DHCP servers a resource (an IP address or a prefix) can
+  take on several different binding-status values, sometimes also
+  called lease states.  While no two DHCP servers probably have
+  exactly the same possible binding-status values, the DHCP RFC
+  enforces some commonality among the general semantics of the
+  binding-status values used by various DHCP server implementations.</t>
+
+  <t> In order to transmit binding database updates between one server
+  and another using the failover protocol, some common denominator
+  binding-status values must be defined.  It is not expected that
+  these values correspond with any actual implementation of the DHCP
+  protocol in a DHCP server, but rather that the binding-status
+  values defined in this document should be a common denominator of
+  those in use by many DHCP server implementations. <!-- [tomek: That's
+  basically an expanded repetion of the last sentence:] It is a goal of
+  this protocol that any DHCP server can map the various IP address
+  binding-status values that it uses internally into these failover IP
+  address binding-status values on transmission of binding database
+  updates to its partner, and likewise that it can map any failover IP
+  address binding-status values it received in a binding update into
+  its internal IP address binding-status values. --></t>
+
+  <t>The lease binding-status values defined for the failover protocol
+  are listed below. Unless otherwise noted below, there MAY be client
+  information associated with each of these binding-status value.</t>
+
+  <list style="hanging">
+    <t hangText="ACTIVE"> -- The lease is assigned to a client. Client
+    identification data MUST appear.</t>
+    <t hangText="EXPIRED"> -- indicates that a client's binding on a
+    given lease has expired. When the partner acks the BNDUPD of an
+    expired lease, the server sets its internal state to FREE*. Client
+    identification SHOULD appear.</t>
+    <t hangText="RELEASED"> -- indicates that a client sent in RELEASE
+    message. When the partner acks the BNDUPD of a released lease,
+    the server sets its internal state to FREE*. Client identification
+    SHOULD appear.</t>
+
+    <t hangText="FREE*"> -- Once a lease is expired or released, its
+    state becomes FREE*. Depending on which algorithm and which pool
+    was used to allocate a given lease, FREE* may either mean FREE or
+    FREE_BACKUP. Implementations do not have to implement this FREE*
+    state, but may choose to switch to the destination state directly.
+    For a clarity of representation, this transitional FREE* state is
+    treated as a separate state. </t>
+
+    <t hangText="FREE"> -- Is used when a DHCP server needs to
+    communicate that a resource is unused by any client, but it
+    was not just released, expired or reset by a network administrator.
+    When the partner acks the BNDUPD of a FREE lease, the server
+    marks the lease as available for assignment by the primary server.
+    Note that secondary server running in PARTNER-DOWN state, after
+    waiting the MCLT, the resource MAY be allocated to a client by the
+    secondary server if proportional algorithm is used. Client
+    identification MAY appear.</t>
+
+    <!-- tomek: this was called BACKUP in v4, but it was confusing for
+	 users. FREE_BACKUP is  -->
+    <t hangText="FREE_BACKUP"> -- indicates that this resource can
+    be allocated by the secondary server to a client at any time. Note
+    that the primary server running in PARTNER-DOWN state, after waiting
+    the MCLT, the resource MAY be allocated to a client by the primary
+    server if proportional algorithm was used. Client identification
+    MAY appear.</t>
+
+    <t hangText="ABANDONED"> -- indicates that a lease is considered
+    unusable by the DHCP system. The primary reason for entering
+    such state is reception of DECLINE message for said lease. Client 
+    identification MUST NOT appear.</t>
+
+    <t hangText="RESET"> -- indicates that this resource was previously
+    abandoned, but was made available by operator command. This is a
+    distinct state so that the reason that the resource became FREE
+    can be determined. Client identification MAY appear.</t>
+  </list>
+
+
+  <t>TODO: Insert lease state machine diagram here.</t>
+
+  <figure anchor="lease-state-machine" title="Failover Endpoint State Machine">
+    <artwork><![CDATA[
++---------------+---------+-----------+
+| \  Pool owner |         |           |
+|  \-------\    | Primary | Secondary |
+|  Algorithm\   |         |           |
++---------------+---------+-----------+
+| Proportional  | FREE    |  FREE     | 
+| Independent   | FREE    |FREE_BACKUP|
++---------------+---------+-----------+]]>
+</artwork><caption>FREE* transition</caption></figure>
 
   <t>TODO: In case of Active-Passive model, while majority of
   addresses are owned by the primary server, secondary server will
@@ -1018,7 +1106,7 @@
       its otherwise current state, which then becomes the previous state
       upon server restart.</t>
 
-    <figure anchor="state-machine" title="Failover Endpoint State Machine">
+    <figure anchor="endpoint-state-machine" title="Failover Endpoint State Machine">
     <artwork><![CDATA[
     +---------------+  V  +--------------+
     |    RECOVER -|+|  |  |   STARTUP  - |
@@ -1082,7 +1170,7 @@ RECOVER-WAIT--------->+------------------+
       if it is available) what state it should enter.</t>
 
       <t>The STARTUP state is not shown with any specific state
-      transitions in the <xref target="state-machine">state machine
+      transitions in the <xref target="endpoint-state-machine">state machine
       diagram</xref> because the processing during the STARTUP state
       can cause the server to transition to any of the other states,
       so that specific state transition arcs would only obscure
