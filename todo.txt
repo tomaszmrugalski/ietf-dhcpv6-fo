@@ -8,14 +8,8 @@ option.
  REQUIREMENTS
 --------------
 
-
-
-
-
  DESIGN
 --------
-1. Need to rewokr v4-specific vocabulity to v6, in section 6.2
-"Independent allocation"
 2. Reuse rest of description from failover-12, section 5.4.
 3. Describe pool allocation based on percentage.
 4. Describe controlled re-allocation.
@@ -31,14 +25,11 @@ option.
 10. Describe lease reservation.
 11. Write security considerations.
 
-
-
  PROTOCOL SPEC
 ---------------
-
 - Write that thing!
-
-
 
  DONE
 ------
+1. Need to rework v4-specific vocabulary to v6, in section 6.2
+"Independent allocation"

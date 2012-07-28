@@ -1052,46 +1052,74 @@
    echo-reply approach, rather than periodic transmissions?</t>
  </section>
 
- <section anchor="reallocation" title="Re-allocating Leases">
-   <!-- issue 4 -->
-   <t>TODO: Describe controlled re-allocation of released/expired
-   leases to different clients.</t>
-   <!-- see section 5.2.2 in v4 failover -->
- </section>
+  <section anchor="reallocation" title="Re-allocating Leases">
+    <!-- issue 4 -->
+    <t>TODO: Describe controlled re-allocation of released/expired
+    leases to different clients.</t>
+    <!-- see section 5.2.2 in v4 failover -->
+  </section>
 
-    <section title="Sending Data">
-      <t>Each server updates its failover partner about recent changes in lease states.
-      Each update must include following information:
-      <list style="numbers">
-        <t>resource type - non-temporary address or a prefix</t>
-        <t>resource information - actual address or prefix</t>
-        <t>valid life time requested by client</t>
-        <t>IAID - Identity Association used by client, while obtaining
-        this lease. (Note1: one client may use many IAID
-        simulatenously. Note2: IAID for IA, TA and PD are orthogonal
-        number spaces.)</t>
-        <t>valid life time sent to client</t>
-        <t>potential valid life time</t>
-        <t>preferred life time sent to client</t>
-        <t>CLTT - Client Last Transaction Time, a timestamp
-        of the last received transmission from a client</t>
-        <t>assigned FQDN names, if any (optional)</t>
-      </list>
-      Discussion: Do we need T1 as well? Something like next expected
-      client transmission?</t>
-      <t>Q: Maybe we could reuse IA_NA and IA_PD options here? Yes.</t>
-      <t>Q: Do we care about preferred lifetime? (presumably no).  Certainly not
-      what was requested by the client.</t>
-      <t>Q: Do we care about IAID? (presumably yes) Yes.</t>
+  <section title="Sending Binding Update">
+    <t>Each server updates its failover partner about recent changes in lease
+    states.  Each update MUST include at least the following information:
+    <list style="numbers">
+      <t>resource type - non-temporary address or a prefix. Resource type can
+      be indicated by the container that conveys actual resource (e.g. IA_NA
+      option indicates non-temporary IPv6 address).</t>
+      <t>resource information - the actual address or prefix. That is conveyed
+      using appropriate option, e.g. IAADDR for an address or IAPREFIX for
+      prefix.</t>
+      <t>valid life time requested by client</t>
+      <t>valid life time sent to client</t>
+      <t>IAID - Identity Association used by client, while obtaining
+      a given lease. (Note1: one client may use many IAIDs
+      simulatenously. Note2: IAID for IA, TA and PD are orthogonal
+      number spaces.)</t>
+      <t>Next Expected Client Transmission - time interval since Client Last
+      Transmission Time, when a response from a client is expected. <!--
+      this is a T1 timer. Since we decided to use IA_NA/IA_PD anyway, we
+      will just set it properly --></t>
+      <t>potential valid life time - a lifetime that the server is willing to
+      set if there were no MCLT/failover restrictions imposed.</t>
+      <t>preferred life time sent to client - the actual value sent back to
+      the client</t>
+      <t>CLTT - Client Last Transaction Time, a timestamp of the last received
+      transmission from a client</t>
+      <t>Client DUID</t>
+    </list>
+    </t>
+    <!-- tomek: we don't really care about preferred lifetime. Since it is
+	 defined in IAADDR/IAPREFIX options that we will be reusing, we will
+	 need to send something. -->
+    <!-- tomek: we will use IA_NA + IAADDR, IA_PD + IAPREFIX options here
+	 with some new additional options:
+	 - valid lifetime requested by client
+	 - potential valid life time
+	 - cltt -->
 
-    <section title="Required Data">
-    </section>
+    <t>The BNDUPD message MAY contain additional information related to the
+    updated lease. The additional information MAY include, but is not limited to:
+    <list style="numbers">
+      <t>assigned FQDN name, defined in <xref target="RFC4704"/></t>
+      <t>Remote-ID, defined in <xref target="RFC4649"/></t>
+      <t>Relay-ID, defined in  <xref target="RFC5460"/>, section 5.4.1</t>
+      <t>Link-layer address <xref
+      target="I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt"/></t>
+      <t>Any other options the updating partner deems useful.</t>
+    </list>
+    </t>
 
-    <section title="Optional Data">
-    </section>
+    <t>Receiving partner MAY store received additional information, but it MAY
+    choose to ignore them as well. Some information may be useful, so it is a
+    good idea to keep or update them. One reason is FQDN information. A server
+    SHOULD be prepared to clean up DNS information once the lease expires or is
+    released. Another reason the partner may be interested in keepin additional
+    data is a better support for leasequery <xref target="RFC5007"/> or bulk
+    leasequery <xref target="RFC5460"/>, which features queries based on
+    Relay-ID, by link address and by Remote-ID.</t>
   </section> <!-- sending data -->
 
-  <section title="Receiving Data">
+  <section title="Receiving Binding Update">
 
     <section title="Conflict Resolution">
       <!-- issue 5 -->
@@ -1148,8 +1176,8 @@
           <t>Responsiveness -- the server is either responsive to DHCPv6
           client requests or it is not.</t>
 
-          <t>Allocation Pool -- which pool of addresses (or prefixes) can be used for allocation
-          on receipt of a SOLICIT message.</t>
+          <t>Allocation Pool -- which pool of addresses (or prefixes) can be
+          used for allocation on receipt of a SOLICIT message.</t>
 
           <t>MCLT -- ensure that valid lifetimes are not beyond what the partner
           has acked plus the MCLT (or not).</t>
@@ -1168,25 +1196,23 @@
 
         </list></t>
 
-      <t>Whenever the either of the last two of the above state
-      variables changes state, the state machine is invoked, which
-      may then trigger a change in the current failove state.  Thus,
-      whenever the communications status changes, the state machine
-      is processing is invoked.  This may or may not result in a
-      change in the current failover state.</t>
+      <t>Whenever the either of the last two of the above state variables
+      changes state, the state machine is invoked, which may then trigger a
+      change in the current failove state.  Thus, whenever the communications
+      status changes, the state machine is processing is invoked.  This may or
+      may not result in a change in the current failover state.</t>
 
-      <t>Whenever a server transitions to a new failover state, the
-      new state MUST be communicated to its failover partner in a
-      STATE message if the communications status is OK.  In addition,
-      whenever a server makes a transition into a new state, it
-      MUST record the new state, its current understanding of its
-      partner's state, and the time at which it entered the new
-      state in stable storage.</t>
+      <t>Whenever a server transitions to a new failover state, the new state
+      MUST be communicated to its failover partner in a STATE message if the
+      communications status is OK.  In addition, whenever a server makes a
+      transition into a new state, it MUST record the new state, its current
+      understanding of its partner's state, and the time at which it entered the
+      new state in stable storage.</t>
 
-      <t>The following state transition diagram gives a condensed
-      view of the state machine.  If there is a difference between
-      the words describing a particular state and the diagram below,
-      the words should be considered authoritative.</t>
+      <t>The following state transition diagram gives a condensed view of the
+      state machine.  If there is a difference between the words describing a
+      particular state and the diagram below, the words should be considered
+      authoritative.</t>
 
       <t>A transition into SHUTDOWN or PAUSED state is not represented in the
       following figure, since other than sending that state to its partner,
