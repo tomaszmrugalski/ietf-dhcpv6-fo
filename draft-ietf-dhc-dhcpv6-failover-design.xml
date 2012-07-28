@@ -113,8 +113,11 @@
         limited resources.  See <xref target="alloc-classic"/> for
         details.</t>
 
-        <t>Resource - an IPv6 address or a IPv6
-        prefix.</t>
+        <t>Resource - Any type of resource that is assignable using
+        DHCPv6. Currently there are two types of such resources defined: a
+        nono-temporary IPv6 address and an IPv6 prefix. Due to the nature of
+        temporary addresses, they are not covered by failover mechanism. Other
+        resource types may be defined in the future.</t>
 
         <t>Responsive - A server that is responsive, will respond to
         DHCPv6 client requests.</t>
@@ -1059,7 +1062,43 @@
     <!-- see section 5.2.2 in v4 failover -->
   </section>
 
-  <section title="Sending Binding Update">
+  <section anchor="title="Sending Binding Update">
+
+    <t>This and the following section is written as though every BNDUPD message
+    contains only a single binding update transaction in order to reduce the
+    complexity of the discussion. Note that while a server MAY generate BNDUPD
+    messages with multiple binding update transactions, every server MUST be
+    able to process a BNDUPD message which contains multiple binding update
+    transactions and generate the corresponding BNDACK messages with status for
+    multiple binding update transactions.</t>
+
+    <!-- tomek: here's the table from v4-failover-12, section 7.1:
+
+                                        binding-status            BACKUP
+                                                                  RESET
+                                                                  ABANDONED
+   Option                        ACTIVE     EXPIRED    RELEASED   FREE
+   ------                        ------     -------    --------   ----
+   assigned-IP-address (3)       MUST       MUST       MUST       MUST
+   IP-flags                      MUST(4)    MUST(4)    MUST(4)    MUST(4)
+   binding-status                MUST       MUST       MUST       MUST
+   client-identifier             MAY        MAY        MAY        MAY(2)
+   client-hardware-address       MUST       MUST       MUST       MAY(2)
+   lease-expiration-time         MUST       MUST NOT   MUST NOT   MUST NOT
+   potential-expiration-time     MUST       MUST NOT   MUST NOT   MUST NOT
+   start-time-of-state           SHOULD     SHOULD     SHOULD     SHOULD
+   client-last-trans.-time       MUST       SHOULD     MUST       MAY
+   DDNS(1)                       SHOULD     SHOULD     SHOULD     SHOULD
+   client-request-options        SHOULD     SHOULD NOT SHOULD     SHOULD NOT
+   client-reply-options          SHOULD     SHOULD NOT SHOULD NOT SHOULD NOT
+
+   (1) MUST if server is performing dynamic DNS for this IP address, else
+       MUST NOT.
+   (2) MUST NOT if binding-status is ABANDONED.
+   (3) assigned-IP-address MUST be the first option for an IP address
+   (4) IP-flags option MUST appear if any flags are non-zero, else it
+       MAY appear. -->
+
     <t>Each server updates its failover partner about recent changes in lease
     states.  Each update MUST include at least the following information:
     <list style="numbers">
@@ -1087,10 +1126,12 @@
       transmission from a client</t>
       <t>Client DUID</t>
     </list>
+    <!-- TODO: point out that in some states client DUID MUST NOT appear -->
     </t>
     <!-- tomek: we don't really care about preferred lifetime. Since it is
-	 defined in IAADDR/IAPREFIX options that we will be reusing, we will
-	 need to send something. -->
+         defined in IAADDR/IAPREFIX options that we will be reusing, we will
+         need to send something. We may just send actual preferred lifetime, but
+         it won't be useful for anything. -->
     <!-- tomek: we will use IA_NA + IAADDR, IA_PD + IAPREFIX options here
 	 with some new additional options:
 	 - valid lifetime requested by client
@@ -1100,7 +1141,11 @@
     <t>The BNDUPD message MAY contain additional information related to the
     updated lease. The additional information MAY include, but is not limited to:
     <list style="numbers">
+      <!-- tomek: v4-failover-12 states that FQDN either MUST or MUST NOT
+           appear, depending on whether server did or did not DDNS. Perhaps
+           putting it in the optional section is not the right place? -->
       <t>assigned FQDN name, defined in <xref target="RFC4704"/></t>
+      <t>Options Requested by the client, i.e. content of the ORO</t>
       <t>Remote-ID, defined in <xref target="RFC4649"/></t>
       <t>Relay-ID, defined in  <xref target="RFC5460"/>, section 5.4.1</t>
       <t>Link-layer address <xref
@@ -1121,36 +1166,140 @@
 
   <section title="Receiving Binding Update">
 
-    <section title="Conflict Resolution">
-      <!-- issue 5 -->
-      <t>TODO: This is just a loose collection of notes. This section
-      will probably need to be rewritten as a a flowchart of some kind.</t>
+    <!-- see v4-failover-12, section 7.1.2 -->
+    <t>When a server receives a BNDUPD message, it needs to decide how to
+    process the binding update transaction it contains and whether that
+    transaction represents a conflict of any sort. The conflict resolution
+    process MUST be used on the receipt of every BNDUPD message, not just those
+    that are received while in POTENTIAL-CONFLICT state, in order to increase
+    the robustness of the protocol.</t>
+    
+    <t>There are three sorts of conflicts:
+    <list style="numbers">
+      <t>Two clients, one resource - This is the duplicate resource allocation
+      conflict. There two different clients each allocated the same resource. See
+      <xref target="conflict-resolution"/>.</t>
+      <t>Two resources, one client conflict - This conflict exists when a clien
+      on one server is associated with a one resourge, and on the other server
+      with a different resource in the same or related subnet. This does not
+      refer to the case where a single client has resources in multiple
+      different subnets or administrative domains, but rather the case where on
+      the same subnet the client has as lease on one IP address in one server
+      and on a different IP address on the other server.
+      
+      <!-- how to start new paragraph within the same bullet? -->
+      <vspace/>
 
-      <t>The server receiving a lease update from its partner must evaluate
-      the received lease information to see if it is consistent with already known state and
-      decide which information - previously known or just received -
+      This conflict can or may not be a problem for a given DHCP server
+      implementation and policy. If implementations and policies allow, both
+      resources can be assigned to a given client. In the event that a DHCP
+      server requires that a DHCP client have only one outstanding lease of a
+      given type, the conflict MUST be resolved by accepting the lease which has
+      the latest CLTT.</t>
+
+      <t>binding-status conflict - This is normal conflict, where one server is
+      updating the other with newer information. See <xref
+      target="conflict-resolution"/> for details of how to resolve these
+      conflicts.</t>
+
+    <section anchor="conflct-resolution" title="Conflict Resolution">
+      <!-- tomek: that paragraph is no longer needed. Following paragraphs
+	   based on v4 failover decribe the issue much better -->
+      <t>The server receiving a lease update from its partner must evaluate the
+      received lease information to see if it is consistent with already known
+      state and decide which information - previously known or just received -
       is "better". The server should take into consideration the following
-      aspects: if the lease is already assigned to specific client,
-      who had contact with client recently, start time of the lease, etc.
-      </t>
-      <t>The lease update may be accepted or rejected.
-      Rejection SHOULD NOT change the flag in a lease that says that
-      it should be transmitted to the failover partner.  If this flag
-      is set, then it should be transmitted, but if it is not already
-      set, the rejection of a lease state update SHOULD NOT trigger
-      an automatic update of the failover partner sending the rejected
-      update.  The potential for update storms is too great, and in
-      the unusual case where the servers simply can't agree, that
-      disagreement is better than an update storm.
-      </t>
-      <t>
-        Discussion: There will definitely be different types of
-        update rejections. For example, this will allow a server
-        to treat differently a case when receiving a new lease that
-        it previously haven't seen than a case when partner sents
-        old version of a lease for which a newer state is known.
+      aspects: if the lease is already assigned to specific client, who had
+      contact with client recently, start time of the lease, etc.</t> -->
+
+      <t>When analyzing a BNDUPD message from a partner server, if there is
+      insufficient information in the BNDUPD to process it, then reject the
+      BNDUPD with reject-reason 3: "Missing binding information".</t>
+
+      <t>If the resource in the BNDUPD is not a aresource associated with
+      the failover endpoint which received the BNDUPD message, then reject
+      it with reject-reason 1: "Illegal IP address (not part of any address
+      pool)".</t>
+      <!-- issue 12: do we want separate reject-reason for prefixes? -->
+
+      <t>Every BNDUPD message SHOULD contain a client-last-transaction-time
+      option, which MUST, if it appears, be the time that the server last
+      interacted with the DHCP client.  It MUST NOT be, for instance, the
+      time that the lease on an IP address expired.  If there has been no
+      interaction with the DHCP client in question (or there is no DHCP
+      client presently associated with this resource), then there will be
+      no client-last-transaction-time option in the BNDUPD message.</t>
+
+      <t>The list in <xref target="tbl-conflict-resolution"/> presents conflict
+      resolution outcome. To "accept" BNDUPD means to update the server's
+      bindings database with the information contained in the BNDUDP and once
+      the update is complete, send a BNDACK message corresponding to the BNDUPD
+      message. To "reject" a BNDUPD means to respond to the BNDUPD with BNDACK
+      with a rejest-reason option included.</t>
+
+      <t>When interpreting the information in the following table (<xref
+      target="tbl-conflict-resolution"/>), for those rules that are listed with
+      "time" -- if a BNDUPD doesn't have a client-last-transaction-time value,
+      then it MUST NOT be considered later than the client-last-transaction-time
+      in the receiving server's binding.  If the BNDUPD contains a client-last-
+      transaction-time value and the receiving server's binding does not, then
+      the client-last-transaction-time value in the BNDUPD MUST be considered
+      later than the server's.</t>
+
+  <figure anchor="tbl-conflict-resolution" title="Conflict Resolution">
+    <artwork><![CDATA[ binding-status in received BNDUPD
+binding-status
+in receiving                                  FREE           RESET
+server          ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
+
+ACTIVE          accept(5) time(2)   time(1)    time(2)      accept
+EXPIRED         time(1)   accept    accept     accept       accept
+RELEASED        time(1)   time(1)   accept     accept       accept
+FREE/BACKUP     accept    accept    accept     accept       accept
+RESET           time(3)   accept    accept     accept       accept
+ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
+]]></artwork><figure>
+
+    <t>time(1): If the client-last-transaction-time in the BNDUPD is later than
+    the client-last-transaction-time in the receiving server's binding, accept
+    it, else reject it.</t>
+
+    <t>time(2): If the current time is later than the receiving servers'
+    lease-expiration-time, accept it, else reject it.</t>
+
+    <t>time(3): If the client-last-transaction-time in the BNDUPD is later than
+    the start-time-of-state in the receiving server's binding, accept it, else
+    reject it.</t>
+
+    <t>(1,2,3): If rejecting, use reject reason 15: "Outdated binding
+    information".</t>
+
+    <t>(4): Use reject reason 16: "Less critical binding information".</t>
+    
+    <t>(5): If the clients in a BNDUPD message and in a receiving server's
+    binding differ, then if the receiving server is a secondary accept it, else
+    reject it with a reject reason of 2: "Fatal conflict exists: address in use
+    by other client".</t>
+
+    <!-- issue 5: Done. The issue was: This is just a loose collection of
+         notes. This section will probably need to be rewritten as a a flowchart
+         of some kind. -->
+    
+      <t>The lease update may be accepted or rejected.  Rejection SHOULD NOT
+      change the flag in a lease that says that it should be transmitted to the
+      failover partner.  If this flag is set, then it should be transmitted, but
+      if it is not already set, the rejection of a lease state update SHOULD NOT
+      trigger an automatic update of the failover partner sending the rejected
+      update.  The potential for update storms is too great, and in the unusual
+      case where the servers simply can't agree, that disagreement is better
+      than an update storm.
       </t>
 
+    <!-- <t>Discussion: There will definitely be different types of update
+      rejections. For example, this will allow a server to treat differently a
+      case when receiving a new lease that it previously haven't seen than a
+      case when partner sents old version of a lease for which a newer state is
+      known.</t>-->
     </section>
 
     <section title="Acknowledging Reception">

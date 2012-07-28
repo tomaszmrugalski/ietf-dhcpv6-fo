@@ -13,7 +13,6 @@ option.
 2. Reuse rest of description from failover-12, section 5.4.
 3. Describe pool allocation based on percentage.
 4. Describe controlled re-allocation.
-5. Write conflict resolution section.
 6. Describe Failover FSM initialization.
 7. Since we do not support load balancing (and active-
    active) in general, CONFLICT-DONE can be removed and
@@ -25,6 +24,9 @@ option.
 10. Describe lease reservation.
 11. Write security considerations.
 
+Q: Do we want to cover address/prefix reservation in the base
+   draft or do we define an extension for it?
+
  PROTOCOL SPEC
 ---------------
 - Write that thing!
@@ -33,3 +35,4 @@ option.
 ------
 1. Need to rework v4-specific vocabulary to v6, in section 6.2
 "Independent allocation"
+5. Write conflict resolution section.
