@@ -562,7 +562,7 @@
     threshold. Only resources that are not leased to any clients
     are "owned" by one of the servers. This algorithm is particularly
     well suited for scenarios where amount of available resources
-    is limited, as may be the case for prefix delegation. See <xref
+    is limited, as may be the case with prefix delegation. See <xref
     target="alloc-classic"/> for details.</t>
 
     <t>Independent Allocation - This allocation algorithm assumes
@@ -589,7 +589,7 @@
     owned initially by the primary server, and it may or may not be
     allocated to the secondary server by the primary server.</t>
 
-    <t>So, the flow of a resource is as follows: initially a resource
+    <t>The flow of a resource is as follows: initially a resource
     is owned by the primary server.  It may be allocated to the
     secondary server if it is available, and then it is owned by the
     secondary server.  Either server can allocate available resources
@@ -607,16 +607,18 @@
     respect to the primary instead of enhancing the balance of
     available addresses or prefixes between them.</t>
 
-    <!-- issue 1 -->
+    <!-- issue 1: Done
+	 tomek: the vocabulary seems ok to me. There are no explicit
+	 references to addresses, but rather resources (address or prefix).
     <t>TODO: Need to rework this v4-specific vocabulary to v6, once we
-    decide how things will look like in v6.</t>
+    decide how things will look like in v6.</t> -->
 
-    <t>When they are used, these proportional pools are used for allocation when
-    in every state but PARTNER-DOWN state.  In PARTNER-DOWN state a failover
-    server can allocate from either pool.  This allocation and maintenance of
-    these address pools is an area of some sensitivity, since the goal is to
-    maintain a more or less constant ratio of available addresses between the
-    two servers.</t>
+    <t>Pools governed by proportional allocation are used for allocation when
+    the server is in all states, except PARTNER-DOWN.  In PARTNER-DOWN state the
+    healthy partner can allocate from either pool (both its own and its
+    partner's). This allocation and maintenance of these address pools is an
+    area of some sensitivity, since the goal is to maintain a more or less
+    constant ratio of available addresses between the two servers.</t>
 
     <!-- issue 2 -->
     <t>TODO: Reuse rest of the description from section 5.4 from <xref
@@ -740,59 +742,90 @@
     can be determined. Client identification MAY appear.</t>
   </list>
 
+  <t>The lease state machine has been presented in <xref
+  target="lease-state-machine"/>. Most states are stationary, i.e. the lease
+  stays in a given state untile exernal event triggers transition to another
+  state. The only transitive state is FREE*. One it is reached, the the state
+  machine immediately transitions to either FREE or FREE_BACKUP state.</t>
 
   <figure anchor="lease-state-machine" title="Lease State Machine">
     <artwork><![CDATA[
-                    +---------+
- /----------------->|  ACTIVE |<-------------\
- |                  +---------+              |
- |                    |  |  |                |
- |       /----(8)-----/ (3) \---(9)--\       |
- |       |               |           |       |
- |       V               V           V       |
- |   +-------+     +--------+   +---------+  |
- |   |EXPIRED|     |RELEASED|   |ABANDONED|  |
- |   +-------+     +--------+   +---------+  |
- |       |              |            |       |
- |       |              |           (10)     |
- |       |              |            V       |
- |       |              |       +---------+  |
- |       |              |       |  RESET  |  |
- |       |              |       +---------+  |
- |       |              |            |       |
- |       \----(4)----\ (4) /----(4)--/       |
- |                   |  |  |                 |
-(1)                  V  V  V                (2)
- |                 /---------\               |
- |                 |  FREE*  |               |
- |                 \---------/               |
- |                    |   |                  |
- |         ----(5)---/    \-(6)-\            |
- |         |                    |            |
- |         V                    V            |
- |    +---------+         +-----------+      |
- \----|  FREE   |<--(7)-->|FREE_BACKUP|------/
-      +---------+         +-----------+]]>
+                +---------+
+ /------------->|  ACTIVE |<--------------\
+ |              +---------+               |
+ |                |  |  |                 |
+ |       /--(8)--/  (3)  \--(9)-\         |
+ |      |            |           |        |
+ |      V            V           V        |
+ |  +-------+   +--------+   +---------+  |
+ |  |EXPIRED|   |RELEASED|   |ABANDONED|  |
+ |  +-------+   +--------+   +---------+  |
+ |      |            |            |       |
+ |      |            |           (10)     |
+ |      |            |            V       |
+ |      |            |       +---------+  |
+ |      |            |       |  RESET  |  |
+ |      |            |       +---------+  |
+ |      |            |            |       |
+ |       \--(4)--\  (4)  /--(4)--/        |
+ |                |  |  |                 |
+(1)               V  V  V                (2)
+ |              /---------\               |
+ |              |  FREE*  |               |
+ |              \---------/               |
+ |                 |   |                  |
+ |         /-(5)--/     \-(6)-\           |
+ |        |                    |          |
+ |        V                    V          |
+ |    +-------+         +-----------+     |
+ \----|  FREE |<--(7)-->|FREE_BACKUP|-----/
+      +-------+         +-----------+]]>
 </artwork><caption>FREE* transition</caption></figure>
+
+<t>Transitions between states are results of the following events:
 
 <list style="none">
   <t>1. Primary server allocates a lease.</t>
+
   <t>2. Secondary server allocates a lease.</t>
+
   <t>3. Client sends RELEASE and the lease is released.</t>
-  <t>4. Partner acknowledges state change.</t>
-  <t>5. Proportional allocation is used, or idependent
-   allocation is used and this lease belongs to
-   primary server.</t>
-  <t>6. Independent allocation is used and the lease
-   belongs to the secondary server.</t>
-  <t>7. Pool is rebalanced (POOLREQ/POOLRSP messages are exchanged).</t>
-  <t>8. The lease is expired.</t>
+
+  <t>4. Partner acknowledges state change. This transition MAY also occur if the
+  server is in PARTNER-DOWN state and the MCLT has passed since the entry in
+  RELEASED, EXPIRED, or RESET states.</t>
+
+  <t>5. The lease belongs to a pool that is governed by the proportional
+  allocation, or idependent allocation is used and this lease belongs to primary
+  server.</t>
+
+  <t>6. The lease belongs to a pool that is governed by the independent
+  allocation is used and the lease belongs to the secondary server.</t>
+
+  <t>7. Pool rebalance event occurs (POOLREQ/POOLRSP messages are
+  exchanged). Pools belonging to primary server can be assigned to secondary
+  server pool (transition from FREE to FREE_BACKUP) or vice versa. Transition
+  from FREE to FREE_BACKUP MAY occur if the server is secondary and the
+  MCLT has passed since its entry into PARTNER-DOWN state.</t>
+
+  <t>8. The lease is expired.<!-- tomek: v4 draft metioned optional grace period
+  here.  I decided to simplify things here and not mention it. Is it ok?--></t>
+
   <t>9. DECLINE message is received or a lease is deemed
    unusable for other reasons.</t>
-  <t>10. An administrative action is taken to recover the lease
-   back to usable state.</t>
-</list>
 
+  <t>10. An administrative action is taken to recover an abandoned lease back to
+  usable state. This transition MAY occur due to an implementation specific
+  handling on ABANDONED resource. One possible example of such use is an
+  Neighbor Discovery or ICMP Echo check if the address is still in use.</t>
+</list>
+</t>
+
+  <t>The resource that is no longer in use (due to expiration or release),
+  becomes FREE*. Depending of what allocation algorithm is used, the resource
+  that is no longer is use, returns to primary (FREE) or secondary pool
+  (FREE_BACKUP). The conditions for specific transitions are depicted in
+  <xref target="free-transition"/>.</t>
   <figure anchor="free-transition" title="FREE* State Transitions">
     <artwork><![CDATA[
 +---------------+---------+-----------+
