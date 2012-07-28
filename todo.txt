@@ -1,0 +1,44 @@
+This file lists issues and tasks related to failover drafts:
+
+Please add new number to new issues. Please move closed issues
+to the list below. If this list grows significantly, we should
+move to some issue tracker. IETF's DHC tracker is a reasonable
+option.
+
+ REQUIREMENTS
+--------------
+
+
+
+
+
+ DESIGN
+--------
+1. Need to rewokr v4-specific vocabulity to v6, in section 6.2
+"Independent allocation"
+2. Reuse rest of description from failover-12, section 5.4.
+3. Describe pool allocation based on percentage.
+4. Describe controlled re-allocation.
+5. Write conflict resolution section.
+6. Describe Failover FSM initialization.
+7. Since we do not support load balancing (and active-
+   active) in general, CONFLICT-DONE can be removed and
+   we can transition to NORMAL immediately)
+8. Let's try to simplify the FSM a bit. We can get rid of
+   PAUSE state. SHUTDOWN state can be used instead, even
+   if the unavailability is only brief.
+9. Describe DNS Update challenges in failover environment.
+10. Describe lease reservation.
+11. Write security considerations.
+
+
+
+ PROTOCOL SPEC
+---------------
+
+- Write that thing!
+
+
+
+ DONE
+------

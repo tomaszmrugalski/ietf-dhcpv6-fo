@@ -607,17 +607,18 @@
     respect to the primary instead of enhancing the balance of
     available addresses or prefixes between them.</t>
 
+    <!-- issue 1 -->
     <t>TODO: Need to rework this v4-specific vocabulary to v6, once we
     decide how things will look like in v6.</t>
 
-    <t>When they are used, these proportional pools are used for
-    allocation when in every state but PARTNER-DOWN state.  In
-    PARTNER-DOWN state a failover server can allocate from either
-    pool.  This allocation and maintenance of these address pools
-    is an area of some sensitivity, since the goal is to maintain
-    a more or less constant ratio of available addresses between
-    the two servers.</t>
+    <t>When they are used, these proportional pools are used for allocation when
+    in every state but PARTNER-DOWN state.  In PARTNER-DOWN state a failover
+    server can allocate from either pool.  This allocation and maintenance of
+    these address pools is an area of some sensitivity, since the goal is to
+    maintain a more or less constant ratio of available addresses between the
+    two servers.</t>
 
+    <!-- issue 2 -->
     <t>TODO: Reuse rest of the description from section 5.4 from <xref
     target="dhcpv4-failover"/> here.</t>
 
@@ -740,9 +741,59 @@
   </list>
 
 
-  <t>TODO: Insert lease state machine diagram here.</t>
+  <figure anchor="lease-state-machine" title="Lease State Machine">
+    <artwork><![CDATA[
+                    +---------+
+ /----------------->|  ACTIVE |<-------------\
+ |                  +---------+              |
+ |                    |  |  |                |
+ |       /----(8)-----/ (3) \---(9)--\       |
+ |       |               |           |       |
+ |       V               V           V       |
+ |   +-------+     +--------+   +---------+  |
+ |   |EXPIRED|     |RELEASED|   |ABANDONED|  |
+ |   +-------+     +--------+   +---------+  |
+ |       |              |            |       |
+ |       |              |           (10)     |
+ |       |              |            V       |
+ |       |              |       +---------+  |
+ |       |              |       |  RESET  |  |
+ |       |              |       +---------+  |
+ |       |              |            |       |
+ |       \----(4)----\ (4) /----(4)--/       |
+ |                   |  |  |                 |
+(1)                  V  V  V                (2)
+ |                 /---------\               |
+ |                 |  FREE*  |               |
+ |                 \---------/               |
+ |                    |   |                  |
+ |         ----(5)---/    \-(6)-\            |
+ |         |                    |            |
+ |         V                    V            |
+ |    +---------+         +-----------+      |
+ \----|  FREE   |<--(7)-->|FREE_BACKUP|------/
+      +---------+         +-----------+]]>
+</artwork><caption>FREE* transition</caption></figure>
 
-  <figure anchor="lease-state-machine" title="Failover Endpoint State Machine">
+<list style="none">
+  <t>1. Primary server allocates a lease.</t>
+  <t>2. Secondary server allocates a lease.</t>
+  <t>3. Client sends RELEASE and the lease is released.</t>
+  <t>4. Partner acknowledges state change.</t>
+  <t>5. Proportional allocation is used, or idependent
+   allocation is used and this lease belongs to
+   primary server.</t>
+  <t>6. Independent allocation is used and the lease
+   belongs to the secondary server.</t>
+  <t>7. Pool is rebalanced (POOLREQ/POOLRSP messages are exchanged).</t>
+  <t>8. The lease is expired.</t>
+  <t>9. DECLINE message is received or a lease is deemed
+   unusable for other reasons.</t>
+  <t>10. An administrative action is taken to recover the lease
+   back to usable state.</t>
+</list>
+
+  <figure anchor="free-transition" title="FREE* State Transitions">
     <artwork><![CDATA[
 +---------------+---------+-----------+
 | \  Pool owner |         |           |
@@ -754,6 +805,7 @@
 +---------------+---------+-----------+]]>
 </artwork><caption>FREE* transition</caption></figure>
 
+  <!-- issue 3 -->
   <t>TODO: In case of Active-Passive model, while majority of
   addresses are owned by the primary server, secondary server will
   need a portion of addresses to serve new clients while operating in
@@ -968,7 +1020,9 @@
  </section>
 
  <section anchor="reallocation" title="Re-allocating Leases">
-   <t>TODO: Describe controlled re-allocation of released/expired leases to different clients.</t>
+   <!-- issue 4 -->
+   <t>TODO: Describe controlled re-allocation of released/expired
+   leases to different clients.</t>
    <!-- see section 5.2.2 in v4 failover -->
  </section>
 
@@ -1007,6 +1061,7 @@
   <section title="Receiving Data">
 
     <section title="Conflict Resolution">
+      <!-- issue 5 -->
       <t>TODO: This is just a loose collection of notes. This section
       will probably need to be rewritten as a a flowchart of some kind.</t>
 
@@ -1158,7 +1213,8 @@ RECOVER-WAIT--------->+------------------+
     </section> <!-- state-machine-operation -->
 
     <section anchor="state-init" title="State Machine Initialization">
-      <t>TODO</t>
+      <!-- issue 6 -->
+      <t>TODO: Describe state machine initialization</t>
     </section>
 
     <section anchor="state-startup" title="STARTUP State">
@@ -1936,6 +1992,7 @@ CONFLICT-DONE                                  |
       in order that it may be totally responsive to the client load,
       as opposed to NORMAL state where it would be in a "balanced"
       responsive state, running the load balancing algorithm.</t>
+      <!-- issue 7 -->
       <t>TODO: We do not support load balancing, so CONFLICT-DONE is
       actually equal to NORMAL. Need to remove CONFLICT-DONE and
       replace all its references to NORMAL.</t>
@@ -1962,6 +2019,7 @@ CONFLICT-DONE                                  |
     </section> <!-- conflict-done state -->
 
     <section anchor="state-paused" title="PAUSED State">
+      <!-- issue 8 -->
       <t>TODO: Remove PAUSED state completely</t>
 
       <t>This state exists to allow one server to inform another that
@@ -2078,12 +2136,14 @@ CONFLICT-DONE                                  |
   </section>
 
   <section anchor="DDNS" title="Dynamic DNS Considerations">
-    <t>TODO: Descibe DNS Updates challenges in failover environment.
+    <!-- issue 9 -->
+    <t>TODO: Describe DNS Updates challenges in failover environment.
     It is nicely described in Section 5.12 of <xref
     target="dhcpv4-failover"/>.</t>
   </section>
 
   <section anchor="reserve" title="Reservations and failover">
+    <!-- issue 10 -->
     <t>TODO: Describe how lease reservation works with failover. See
     Section 5.13 in <xref target="dhcpv4-failover"/>.</t>
   </section>
@@ -2131,6 +2191,7 @@ CONFLICT-DONE                                  |
   </section>
 
   <section title="Security Considerations">
+    <!-- issue 11 -->
     <t>TODO: Security considerations section will contain loose notes
     and will be transformed into consistent text once the core design
     solidifies.</t>
