@@ -751,7 +751,7 @@
   state. The only transitive state is FREE*. One it is reached, the the state
   machine immediately transitions to either FREE or FREE_BACKUP state.</t>
 
-  <figure anchor="lease-state-machine" title="Lease State Machine">
+  <figure anchor="lease-state-machine" title="Lease State Machine" align="center">
     <artwork><![CDATA[
                 +---------+
  /------------->|  ACTIVE |<--------------\
@@ -787,7 +787,7 @@
 
 <t>Transitions between states are results of the following events:
 
-<list style="none">
+<list style="empty">
   <t>1. Primary server allocates a lease.</t>
 
   <t>2. Secondary server allocates a lease.</t>
@@ -829,17 +829,18 @@
   that is no longer is use, returns to primary (FREE) or secondary pool
   (FREE_BACKUP). The conditions for specific transitions are depicted in
   <xref target="free-transition"/>.</t>
-  <figure anchor="free-transition" title="FREE* State Transitions">
+
+  <figure anchor="free-transition" title="FREE* State Transitions" align="center">
     <artwork><![CDATA[
 +---------------+---------+-----------+
-| \  Pool owner |         |           |
+| \   Pool owner|         |           |
 |  \-------\    | Primary | Secondary |
-|  Algorithm\   |         |           |
+|Algorithm  \   |         |           |
 +---------------+---------+-----------+
 | Proportional  | FREE    |  FREE     | 
 | Independent   | FREE    |FREE_BACKUP|
 +---------------+---------+-----------+]]>
-</artwork><caption>FREE* transition</caption></figure>
+</artwork></figure>
 
   <!-- issue 3 -->
   <t>TODO: In case of Active-Passive model, while majority of
@@ -1062,7 +1063,7 @@
     <!-- see section 5.2.2 in v4 failover -->
   </section>
 
-  <section anchor="title="Sending Binding Update">
+  <section anchor="send-bndupd" title="Sending Binding Update">
 
     <t>This and the following section is written as though every BNDUPD message
     contains only a single binding update transaction in order to reduce the
@@ -1078,7 +1079,7 @@
                                                                   RESET
                                                                   ABANDONED
    Option                        ACTIVE     EXPIRED    RELEASED   FREE
-   ------                        ------     -------    --------   ----
+   ======                        ======     =======    ========   ====
    assigned-IP-address (3)       MUST       MUST       MUST       MUST
    IP-flags                      MUST(4)    MUST(4)    MUST(4)    MUST(4)
    binding-status                MUST       MUST       MUST       MUST
@@ -1201,8 +1202,11 @@
       updating the other with newer information. See <xref
       target="conflict-resolution"/> for details of how to resolve these
       conflicts.</t>
+    </list>
+    </t>
+  </section>
 
-    <section anchor="conflct-resolution" title="Conflict Resolution">
+    <section anchor="conflict-resolution" title="Conflict Resolution">
       <!-- tomek: that paragraph is no longer needed. Following paragraphs
 	   based on v4 failover decribe the issue much better -->
       <t>The server receiving a lease update from its partner must evaluate the
@@ -1247,7 +1251,8 @@
       later than the server's.</t>
 
   <figure anchor="tbl-conflict-resolution" title="Conflict Resolution">
-    <artwork><![CDATA[ binding-status in received BNDUPD
+    <artwork><![CDATA[
+                          binding-status in received BNDUPD.
 binding-status
 in receiving                                  FREE           RESET
 server          ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
@@ -1258,7 +1263,7 @@ RELEASED        time(1)   time(1)   accept     accept       accept
 FREE/BACKUP     accept    accept    accept     accept       accept
 RESET           time(3)   accept    accept     accept       accept
 ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
-]]></artwork><figure>
+]]></artwork></figure>
 
     <t>time(1): If the client-last-transaction-time in the BNDUPD is later than
     the client-last-transaction-time in the receiving server's binding, accept
@@ -1305,7 +1310,6 @@ ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
     <section title="Acknowledging Reception">
     </section>
 
-  </section> <!-- receiving data -->
 </section> <!-- partner update -->
 
   <section anchor="states" title="Endpoint States">
@@ -2432,11 +2436,13 @@ CONFLICT-DONE                                  |
       <?rfc include='reference.RFC.3315'?>
       <?rfc include='reference.RFC.3633'?>
       <?rfc include='reference.RFC.4704'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt.xml'?>
+    </references>
+    <references title="Informative References">
+      <?rfc include='reference.RFC.4649'?>
+      <?rfc include="reference.RFC.5007"?>
       <?rfc include="reference.RFC.5460"?>
-    </references> <references title="Informative References">
-
-    <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-failover-requirements.xml'?>
-
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-failover-requirements.xml'?>
       <reference anchor="dhcpv4-failover">
         <front>
           <title>DHCP Failover Protocol</title> <author fullname="Ralph
