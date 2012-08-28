@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-01">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-02">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -54,8 +54,8 @@
     <abstract>
       <t>The DHCPv6 protocol, defined in <xref target="RFC3315"/> allows
       for multiple servers to operate on a single network, however it does
-      not define any way to decide which server responds to which
-      client queries. Some sites are interested in running multiple
+      not define any way the servers could share information about currently
+      active clients and their leases. Some sites are interested in running multiple
       servers in such a way as to provide increased availability in case of server
       failure. In order for this to work reliably, the cooperating
       primary and secondary servers must maintain a consistent
@@ -196,11 +196,34 @@
           will change.</t>
 	</section>
         <section title="Redundant servers">
-          <!-- describe <xref target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/> here -->
+	  <t>In some cases the desire to deploy failover is motivated by
+	  high availability, i.e. to continue providing services
+	  despite server failure. If there are no additional
+	  requirements, that goal may be fulfilled with simply
+	  deploying two or more independent servers on the same link.</t>
+
+	  <t>There are several well documented approaches how such
+	  deployment works. They are discussed in detail in <xref
+	  target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/>. Each of
+	  those approaches is simpler to deploy and maintain that full
+	  failover.</t>
         </section>
-        <section title="Distributted databases">
-          <!-- there's proposal that two or more servers could use
-          distributted database. This approach should be commented on. -->
+        <section title="Distributed databases">
+	  <t>Some servers may allow their lease database to be stored
+	  in external databases. Another possible alternative to
+	  failover is to configure two servers to connect to the same
+	  distributed database.</t>
+
+	  <t>Care should be taken to understand how inconsistencies
+	  are solved in such database backends and how such conflict
+	  resolutions affect DHCPv6 server operation.</t>
+
+	  <t>It is also essential to use only databases that are
+	  really distributed and do not have single point of failure
+	  themselves. Otherwise only the single point of failure is
+	  only moved to a different location (database rather than
+	  DHCPv6 server). Such configuation does not improve
+	  redundancy, but significantly complicates deployment.</t>
         </section>
       </section>
     </section>
@@ -283,7 +306,7 @@
         <!-- by Prasad: http://www.ietf.org/mail-archive/web/dhcwg/current/msg12104.html -->
         <t>There is a scenario where the DHCPv6 server may be
         configured to serve clients on one network adapter and
-        communicate with partner server (server-2-server traffic) on a
+        communicate with a partner server (server to server traffic) on a
         different network adapter. In this scenario, if the server
         loses connectivity on the network adapter used to communicate
         with the clients because of network adapter (hardware)
@@ -466,7 +489,7 @@
       <t>
       <list style="numbers">
 	<t>The number of supported partners MUST be exactly two,
-	i.e. there are at most two servers that are aware of specific
+	i.e. there are at most two servers that are aware of a specific
 	lease; this approach is often called 1-to-1 model.</t> 
 
 	<t>For each prefix or address pool, server MUST NOT
@@ -488,16 +511,17 @@
 
 	<t>Use of the failover protocol MUST NOT introduce significant
 	performance impact on server response times. Therefore
-	synchronization between partner MUST be done using some form
+	synchronization between partners MUST be done using some form
 	of lazy updates (see <xref target="lazy-updates"/>).</t>
 	
 	<t>The pair of failover servers MUST be able to recover from
-	server down failure (see <xref target="partner-down"/>).</t>
+	a server down failure (see <xref target="partner-down"/>).</t>
 	
 	<t>The pair of failover servers MUST be able to recover from a
 	network partition event (see <xref target="partition"/>).</t>
 
-	<t>The design MUST allow secure communication.</t>
+	<t>The design MUST allow secure communication between the failover
+	partners.</t>
 
 	<t>The definition of extensions to this core protocol SHOULD
 	be allowed, when possible.</t>
@@ -510,8 +534,7 @@
       individual DHCPv6 servers. In particular, it means the server
       that takes over providing service to clients from its failed
       partner, will continue serving the same addresses and/or
-      prefixes. This property is also sometime called lease
-      stability.</t>
+      prefixes. This property is also called 'lease stability'.</t>
 
       <t>The core protocol MUST be limited to the 1-to-1 model (see
       <xref target="1-to-1"/>). In addition, the core protocol MUST
@@ -663,7 +686,7 @@
 	  protocol provides for allocation of some percentage of
 	  the available leases to each failover partner.</t>
 
-	  <t>A failover server which cannot commuicate with its
+	  <t>A failover server which cannot communicate with its
 	  partner must therefore wait out the MCLT beyond the lease
 	  expiration (if any) of IP addresses before it can allocate
 	  them to DHCPv4 clients.  This could impact the server's
@@ -720,7 +743,7 @@
 	  partition" (see <xref target="partition"/>). The DHCPv4
 	  failover protocol distinguishes between these different
 	  situations by having different failover states to represent
-	  "communications-interrupted" situations and a "partner-down"
+	  "communications-interrupted" situations and "partner-down"
 	  situations. The expectation is that (at least in some
 	  situations) it requires an operator action to distinguish
 	  between a communications-interrupted and partner-down
@@ -770,7 +793,6 @@
 	  Both a simple active -- passive relationship without
 	  load balancing is defined as well as a more complex active
 	  -- active relationship.</t>
-
 	</section>
 
       </section> <section title="DHCPv6 Redundancy Considerations">
@@ -795,7 +817,21 @@
     </section>
 
     <section title="Security Considerations">
-      <t>TBD...</t>
+      <t>The design MUST allow secure communication between the
+      failover partners. This requirement applies to the specification
+      only, i.e. the design must include a way to secure
+      communication. It does dot mandate such security. It is likely
+      that such a security will be optional, but exact decision will
+      be made during the actual design.</t>
+
+      <t>The design of a security protection MUST take into
+      consideration the fact that the protocol MUST operate despite
+      network failures. In particular, relying on any external
+      infrastructure (e.g. any form of Certificate Authority) is
+      discouraged (or at least must be optional).</t>
+
+      <t>The security considerations for the design itself will be
+      discussed in the design document.</t>
     </section>
 
     <section title="IANA Considerations">
