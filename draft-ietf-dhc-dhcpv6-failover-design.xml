@@ -82,18 +82,22 @@
 
       <list style="symbols">
 
-        <t>Failover endpoint - The failover protocol allows for
-        there to be a unique failover 'endpoint' per partner per
-        role per relationship (where role is primary or secondary
-        and the relationship is defined by the relationship-name).
-        This failover endpoint can take actions and hold unique
-        states.  Typically, there is a one failover endpoint per
-        partner (server), although there may be more.  'Server' and
-        'failover endpoint' are synonymous only if the server
-        participates in only one failover relationship. However,
-        for the sake of simplicity 'Server' is used throughout the
-        document to refer to a failover endpoint unless to do so
-        would be confusing.</t>
+	<t>Failover endpoint - The failover protocol allows for
+	there to be a unique failover 'endpoint' for each failover
+	relationship in which a failover server participates.  The
+	failover relationship is defined by a relationship name,
+	and includes the failover partner IP address, the role this
+	server takes with respect to that partner (primary or
+	secondary), and the prefixes associated with that relationship.
+	Note that a single prefix can only be associated with a
+	single failover relationship.  This failover endpoint can
+	take actions and hold unique states.  Typically, there is
+	a one failover endpoint per partner (server), although there
+	may be more.  'Server' and 'failover endpoint' are synonymous
+	only if the server participates in only one failover
+	relationship. However, for the sake of simplicity 'Server'
+	is used throughout the document to refer to a failover
+	endpoint unless to do so would be confusing.</t>
 
         <t>Failover transmission - all messages exchanged between
         partners.</t>
@@ -113,11 +117,12 @@
         limited resources.  See <xref target="alloc-classic"/> for
         details.</t>
 
-        <t>Resource - Any type of resource that is assignable using
-        DHCPv6. Currently there are two types of such resources defined: a
-        nono-temporary IPv6 address and an IPv6 prefix. Due to the nature of
-        temporary addresses, they are not covered by failover mechanism. Other
-        resource types may be defined in the future.</t>
+	<t>Resource - Any type of resource that is assignable using
+	DHCPv6. Currently there are two types of such resources
+	defined: a nono-temporary IPv6 address and an IPv6 prefix.
+	Due to the nature of temporary addresses, they are not
+	covered by the failover mechanism. Other resource types may
+	be defined in the future.</t>
 
         <t>Responsive - A server that is responsive, will respond to
         DHCPv6 client requests.</t>
@@ -125,7 +130,7 @@
         <t>Secondary Server</t>
 
         <t>Server - A DHCPv6 server that implements DHCPv6 failover.
-        'Server' and 'failover endpoint' as synonymous only if
+        'Server' and 'failover endpoint' are synonymous only if the
         server participates in only one failover relationship. </t>
 
         <t>Unresponsive - A server that is unresponsive will not
@@ -190,16 +195,17 @@
       </section>
 
       <section title="Features out of Scope: Load Balancing">
-        <t>It may be tempting to extend DHCPv6 failover mechanism to
-        also offer load balancing, as DHCPv4 failover did. Here is
-        the reasoning for this decision. In general case (not
-        related to failover) load balancing solutions are used when
-        each server is not able to handle total incoming traffic.
-        However, by the very definition, DHCPv6 failover is supposed
-        to assume service availability despite failure of one
-        server. That leads to conclusion that each server must be
-        able to handle whole traffic. Therefore in properly provisioned
-        setup, load balancing is not needed.</t>
+	<t>While it is tempting to extend DHCPv6 failover mechanism
+	to also offer load balancing, as DHCPv4 failover did, this
+	design does not do that. Here is the reasoning for this
+	decision. In general case (not related to failover) load
+	balancing solutions are used when each server is not able
+	to handle total incoming traffic.  However, by the very
+	definition, DHCPv6 failover is supposed to assume service
+	availability despite failure of one server. That leads to
+	conclusion that each server must be able to handle whole
+	traffic. Therefore in properly provisioned setup, load
+	balancing is not needed.</t>
       </section> <!-- features out of Scope -->
 
     </section> <!-- Goals -->
@@ -223,7 +229,7 @@
   <t>Depending on the failover state of each partner, they MUST
   initiate one of the binding update procedures. Each server MAY
   send an UPDREQ message to request its partner to send all updates
-  that have not been sent yet (this case applies when partner has
+  that have not been sent yet (this case applies when the partner has
   an existing database and wants to update it). Alternatively, a
   server MAY choose to send an UPDREQALL message to request a full
   lease database transmission including all leases (this case applies
@@ -231,22 +237,23 @@
   or complete loss of database, or other catastrophic failure).</t>
 
   <t>Servers exchange lease information by using BNDUPD messages.
-  Depending on local and remote state of a lease, a server may
+  Depending on the local and remote state of a lease, a server may
   either accept or reject the update. Reception of lease update
-  information is confirmed by responding with BNDACK message with
+  information is confirmed by responding with a BNDACK message with
   appropriate status. The majority of the messages sent over a
   failover TCP connection consists of BNDUPD and BNDACK messages.</t>
 
   <t>A subset of available resources (addresses or prefixes) is
   reserved for secondary server use. This is required for handling
   a case where both servers are able to communicate with clients,
-  but unable to communicate with each other. After initial connection
-  is established, the secondary server requests a pool of available
-  addresses by sending a POOLREQ message. The primary server assigns
-  a pool to the secondary by transmitting a POOLRESP message and
-  then sending a series of BNDUPD messages. The secondary server
-  may initiate such pool request at any time when maintaining
-  communication with primary server.</t>
+  but unable to communicate with each other. After the initial
+  connection is established, the secondary server requests a pool
+  of available addresses by sending a POOLREQ message. The primary
+  server assigns addresses to the secondary by sending a series of
+  BNDUPD messages.  When this process is complete, the primary
+  server sends a POOLRESP message to the secondary server.  The
+  secondary server may initiate such pool request at any time when
+  in communication with primary server.</t>
 
   <t>Failover servers use a lazy update mechanism to update their
   failover partner about changes to their lease state database.
@@ -280,36 +287,42 @@
   transmitting DISCONNECT message.</t>
 
   <section anchor="states-overview" title="Failover Machine State Overview">
-    <t>The following section provides simplified description of all
+    <t>The following section provides a simplified description of all
     states. For the sake of clarity and simplicity, it omits important
     details. For complete description, see <xref target="states"/>.
-    In case of a disagreement between simplified and complete description,
+    In case of a disagreement between the simplified and complete description,
     please follow <xref target="states"/>.</t>
 
-    <t>Each server may be in one of the well defines states. In each
+    <t>Each server MUST be in one of the well defines states. In each
     state a server may be either responsive (responds to clients'
     queries) or unresponsive (clients' queries are ignored).</t>
 
     <t>A server starts its operation in short-lived STARTUP state. A
-    server determines its partner reachibility and state and usually
+    server determines its partner reachibility and state and sets its
+    own state based on that determination.  It frequently
     returns back to the state it was in before shutdown.</t>
 
     <t>During typical operation when servers maintain communication,
-    both are in NORMAL state. In that state only primary responds to
-    clients' requests. A secondary server in unresponsive.</t>
+    both are in NORMAL state. In that state only the primary responds to
+    clients' requests. A secondary server in unresponsive to DHCPv6 
+    clients.</t>
 
     <t>If a server discovers that its partner is no longer reachable,
-    it goes to COMMUNICATIONS-INTERRUPTED state. Server must be extra
-    cautious as it can't distingush if its partner is down or just
-    communication between servers is interrupted. Since communication
-    between partners is not possible, a server must act on the assumtion
-    that if its partner is up, it follows defined procedure. In particular,
-    not extend any lease beyond its partner knowledge by at most MCLT.
-    That imposes additional burden on the server. Therefore it is not
-    recommended to operate for prolonged periods in this state.
-    Once communication is reestablished, server may go into NORMAL,
-    POTENTIAL-CONFLICT or PARTNER-DOWN state. It may also stay in
-    COMMUNICATIONS-INTERRUPTED if certain conditions are met.</t>
+    it goes to COMMUNICATIONS-INTERRUPTED state. A server must be
+    extra cautious as it can't distingush if its partner is down
+    or just communication between servers is interrupted. Since
+    communication between partners is not possible, a server must
+    act on the assumtion that its partner is up.  A failover server
+    must follow a defined procedure, in particular, it MUST NOT
+    extend any lease more than the MCLT beyond its partner's knowledge
+    of the lease expiration time.  This imposes an additional burden
+    on the server, in that clients will be return to the server for
+    lease renewals more frequently than they would otherwise.
+    Therefore it is not recommended to operate for prolonged periods
+    in this state.  Once communication is reestablished, server may
+    go into NORMAL, POTENTIAL-CONFLICT or PARTNER-DOWN state. It
+    may also stay in COMMUNICATIONS-INTERRUPTED state if certain
+    conditions are met.</t>
 
     <t>Once a server is switched into PARTNER-DOWN (when
     auto-partner-down is used or as a result of administrative
@@ -324,31 +337,33 @@
     <t>When server loses its database (e.g. due to first time run or
     catastrophic failure) or detects that is partner is in
     PARTNER-DOWN state and additional conditions are met, it switches
-    to RECOVER state. In that state server acknowledges that content
+    to RECOVER state. In that state the server acknowledges that content
     of its database is doubtful and needs to refresh its database
     from its partner. Once this operation is done, it switches to
     RECOVER-WAIT and later to RECOVER-DONE.</t>
 
     <t>Once servers reestablish connection, they discover each others'
     state. Depending on the conditions, they may return to NORMAL or
-    move to POTENTINAL-CONFLICT in case of unexpected partner's
-    state. It is a goal of this protocol to minimize the possibility
+    move to POTENTINAL-CONFLICT if the partner is in a state that doesn't
+    allow a simple re-integration of the server's lease state databases.
+    It is a goal of this protocol to minimize the possibility
     that POTENTIAL-CONFLICT state is ever entered. Servers running in
-    POTENTIAL-CONFLICT do not respond to clients' requests and work on
+    POTENTIAL-CONFLICT do not respond to clients' requests and work only on
     resolving potential conflicts. Once outstanding lease updates are
     exchanged, servers move to CONFLICT-DONE or NORMAL states.</t>
-    <t>Servers that are recovering from potential conflict and loose
+    <t>Servers that are recovering from potential conflicts and loose
     communication, switch to RESOLUTION-INTERRUPTED.</t>
 
-    <t>Server that is being shut down, switches briefly to SHUTDOWN
-    state and communicates its state to its partner before actual
-    termination.</t>
+    <t>A Server that is being shut down sends a DISCONNECT message.
+    See <xref target="msg-list"/>.</t>
+
   </section>
 
   <section anchor="msg-list" title="Messages">
     <t>The failover protocol is centered around the message exchanges used by
     one server to update its partner and respond to received updates. The
-    following list enumerates new messages.</t>
+    following list enumerates these messages.</t>
+
     <t>It should be noted that no specific formats or message type values are
     assigned at this stage. Appropriate implementation details will be specified
     in a separate protocol specification document.</t>
@@ -358,7 +373,7 @@
       changes to the partner. One message may contain one or more lease
       updates. The partner is expected to respond with a BNDACK message.</t>
       <t>BNDACK - The binding acknowledgement is used for confirmation of the
-      received BNDUPD message. It may contain positive or negative response
+      received BNDUPD message. It may contain a positive or negative response
       (e.g. due to detected lease conflict).</t>
       
       <t>POOLREQ - The Pool Request message is used by one server (typically
@@ -382,7 +397,7 @@
       that signal end of updates.</t>
 
       <t>UPDDONE - The update done message is used by the responding server to
-      indicate that all requested updates have been sent the responding server
+      indicate that all requested updates have been sent by the responding server
       and acked by the requesting server.</t>
 
       <t>CONNECT - The connect message is used by the primary server to
@@ -408,7 +423,7 @@
            response from the partner. Of course, such implementations would need
            some form of forced shutdown knob. -->
       
-      <t>STATE - The state message is used by either server to infom its
+      <t>STATE - The state message is used by either server to inform its
       partner about a change of failover state. In some cases it may be used
       to also inform the partner about current state, e.g. after connection
       is established in COMMUNICATIONS-INTERRUPTED or PARTNER-DOWN states.</t>
@@ -428,57 +443,45 @@
 
 <section title="Connection Management">
   <section title="Creating Connections">
-    <t>Every server implementing the failover protocol SHOULD attempt to
-    connect to all of its partners periodically, where the period is
-    implementation dependent and SHOULD be configurable.  In the event
-    that a connection has been rejected by a CONNECTACK message with a
-    reject-reason option contained in it or a DISCONNECT message, a
-    server SHOULD reduce the frequency with which it attempts to connect
-    to that server but it SHOULD continue to attempt to connect
-    periodically.</t>
+    <t>Every primary server implementing the failover protocol
+    SHOULD attempt to connect to all of its partners periodically,
+    where the period is implementation dependent and SHOULD be
+    configurable.  In the event that a connection has been rejected
+    by a CONNECTACK message with a reject-reason option contained
+    in it or a DISCONNECT message, a server SHOULD reduce the
+    frequency with which it attempts to connect to that server but
+    it SHOULD continue to attempt to connect periodically.</t>
 
-    <t>When a connection attempt succeeds, if the server generating the
-    connection attempt is a primary server for that relationship, then
-    it MUST send a CONNECT message down the connection.  If it is not
-    a primary server for the relationship, then it MUST just drop the
-    connection and wait for the primary server to connect to it.</t>
+    <t>Every secondary server implementing the failover protocol
+    SHOULD listen for connection attempts from the primary server.
+    </t>
 
-    <t>When a connection attempt is received, the only information that
-    the receiving server has is the IP address of the partner initiating
-    a connection.  It also knows whether it has the primary role for
-    any failover relationships with the connecting server.  If it has
-    any relationships for which it is a primary server, it should
-    initiate a connection of its own to the partner server, one for
-    each primary relationship it has with that server.</t>
+    <t>When a connection attempt succeeds, the primary server which
+    has initiated the connection attempt MUST send a CONNECT message
+    down the connection.  </t>
 
-    <t>If it has any relationships with the connecting server for which
-    it is a seconary server, it should just await the CONNECT message
-    to determine which relationship this connection is to serve.</t>
+    <t>When a connection attempt is received, the only information
+    that the receiving server has is the IP address of the partner
+    initiating a connection.  If it has any relationships with the
+    connecting server for which it is a seconary server, it should
+    just await the CONNECT message to determine which relationship
+    this connection is to serve.</t>
 
-    <t>If it has no secondary relationships with the connecting server, it
-    SHOULD drop the connection.</t>
+    <t>If it has no secondary relationships with the connecting
+    server, it SHOULD drop the connection.</t>
 
     <t>To summarize -- a primary server MUST use a connection that it has
     initiated in order to send a CONNECT message.  Every server that
-    is a secondary server in a relationship attempts to create a
-    connection to the server which is primary in the relationship, but
-    that connection is only used to stimulate the primary server into
-    recognizing that the secondary server is ready for operation.  The
-    reason behind this is that the secondary server has no way to
-    communicate to the primary server which relationship a connection
-    is designed to serve.</t>
-
-    <t>A server which has multiple secondary relationships with a primary
-    server SHOULD only send one stimulus connection attempt to the
-    primary server.</t>
+    is a secondary server in a relationship simply listens for connection
+    attempts from the primary server.
+    </t>
 
     <t>Once a connection is established, the primary server MUST send
     a CONNECT message across the connection.  A secondary server MUST
     wait for the CONNECT message from a primary server.  If the
     secondary server doesn't receive a CONNECT message from the
     primary server in an installation dependent amount of time, it MAY
-    drop the connection and send another stimulus connection attempt
-    to the primary server.</t>
+    drop the connection.</t>
 
     <t>Every CONNECT message includes a TLS-request option, and if the
     CONNECTACK message does not reject the CONNECT message and the
@@ -496,11 +499,6 @@
     TCP connection or a connection utilizing TLS) is a STATE message.
     Upon the receipt of this message, the receiver can consider
     communications up.</t>
-
-    <t>A secondary server MUST NOT respond to the closing of a TCP
-    connection with a blind attempt to reconnect -- there may be
-    another TCP connection to the same failover partner already in
-    use.</t>
 
   </section>
 
@@ -556,11 +554,11 @@
 
   <list style="numbers">
     <t>Proportional Allocation - This allocation algorithm is a
-    direct application of algorithm defined in <xref target="dhcpv4-failover"/>
+    direct application of the algorithm defined in <xref target="dhcpv4-failover"/>
     to DHCPv6. Available resources are
-    split between primary and secondary server. Released resources
-    are always returned to primary server.  Primary and secondary
-    servers may initiate a rebalancing procedure, when disparity
+    split between the primary and secondary servers. Released resources
+    are always returned to the primary server.  Primary and secondary
+    servers may initiate a rebalancing procedure when disparity
     between resources available to each server reaches a preconfigured
     threshold. Only resources that are not leased to any clients
     are "owned" by one of the servers. This algorithm is particularly
@@ -635,13 +633,13 @@
     secondary servers as part of initial connection establishment. Once
     resources are allocated to each server, there is no need to
     reassign them.  This algorithm is simpler than proportional
-    allocation since it requires no less initial communicagtion and does not
+    allocation since it requires similar initial communication and does not
     require a rebalancing mechanism, but it assumes
     that the pool assigned to each server will never deplete. That is
     often a reasonable assumption for IPv6 addresses (e.g. servers are
     often assigned a /64 pool that contains many more addresses than existing
     electronic devices on Earth). This allocation mechanism SHOULD be
-    used for IPv6 addresses, unless configured address pool is small
+    used for IPv6 addresses, unless the configured address pool is small
     or is otherwise administratively limited.</t>
 
     <t>Once each server is assigned a resource pool during initial
@@ -799,20 +797,19 @@
   RELEASED, EXPIRED, or RESET states.</t>
 
   <t>5. The lease belongs to a pool that is governed by the proportional
-  allocation, or idependent allocation is used and this lease belongs to primary
+  allocation, or independent allocation is used and this lease belongs to primary
   server.</t>
 
   <t>6. The lease belongs to a pool that is governed by the independent
   allocation is used and the lease belongs to the secondary server.</t>
 
   <t>7. Pool rebalance event occurs (POOLREQ/POOLRSP messages are
-  exchanged). Pools belonging to primary server can be assigned to secondary
-  server pool (transition from FREE to FREE_BACKUP) or vice versa. Transition
-  from FREE to FREE_BACKUP MAY occur if the server is secondary and the
-  MCLT has passed since its entry into PARTNER-DOWN state.</t>
+  exchanged). Addresses (or prefixes) belonging to the primary
+  server can be assigned to the secondary server pool (transition
+  from FREE to FREE_BACKUP) or vice versa.  </t>
 
   <t>8. The lease is expired.<!-- tomek: v4 draft metioned optional grace period
-  here.  I decided to simplify things here and not mention it. Is it ok?--></t>
+  here.  I decided to simplify things here and not mention it. Is it ok? kim: yes --></t>
 
   <t>9. DECLINE message is received or a lease is deemed
    unusable for other reasons.</t>
@@ -858,23 +855,24 @@
     partners and other mechanisms required for failover operation. As
     this is a design document, not a protocol specification,
     high level ideas are presented without implementation
-    specific details (e.g. lack of on-wire formats). Implementation details
-    will be specified in a separate draft.</t>
+    specific details (e.g. on-wire protocol formats). Specific protocol details
+    are out of the scope of this document, and may be specified in a separate
+    draft.</t>
     <section anchor="time-skew" title="Time Skew">
       <t>Partners exchange information about known lease states. To
       reliably compare a known lease state with an update received from a
       partner, servers must be able to reliably compare the times stored
       in the known lease state with the times received in the update.
       Although a simple approach would be to require both partners to use
-      synchronized time, e.g. by using NTP, such a service may become
-      unavailable in some scenarios that failover expects to cover, e.g.
-      network partition. Therefore a mechanism to measure and track
+      synchronized time, e.g. by using NTP, such a service may not always
+      be available in some scenarios that failover expects to cover.
+      Therefore a mechanism to measure and track
       relative time differences between servers is necessary. To do so,
       each message MUST contain FO_TIMESTAMP option that contains the
       timestamp of the transmission in the time context of the transmitter.
       The transmitting server MUST set this as close to the
       actual transmission as possible. The receiving partner MUST store its
-      own timestamp of reception event as close to the actual reception as
+      own timestamp of reception as close to the actual reception as
       possible. The received timestamp information is then compared with local timestamp.</t>
 
       <t>To account for packet delay variation (jitter), the measured
@@ -932,7 +930,7 @@
       client will not exceed the MCLT beyond the potential expiration
       time acknowledged by its partner.</t>
 
-      <t>The fundamental relationship on which much of The correctness
+      <t>The fundamental relationship on which much of the correctness
       of this protocol depends is that the lease expiration time
       known to a DHCPv6 client MUST NOT under any circumstances be
       more than the maximum client lead time (MCLT) greater than the
@@ -1016,7 +1014,7 @@
      <t>When the DHCPv6 client attempts to renew at T1 (approximately one
      half an hour from the start of the lease), the primary server
      again determines the desired valid lifetime, which is still 3
-     days.  It then compares this with the remaining acknowledged
+     days.  It then compares this with the original acknowledged
      potential valid lifetime (3 days + 1/2 hour) and adjusts for the
      time passed since the secondary was last updated (1/2 hour).  Thus
      the time remaining of the acknowledged potential valid interval is
@@ -1052,8 +1050,6 @@
    message is transmitted and timer is reset. The CONTACT message may be
    transmitted at any time.</t>
 
-   <t>Discussion: Perhaps it would be more reasonable to use
-   echo-reply approach, rather than periodic transmissions?</t>
  </section>
 
   <section anchor="reallocation" title="Re-allocating Leases">
@@ -1107,7 +1103,7 @@
       be indicated by the container that conveys actual resource (e.g. IA_NA
       option indicates non-temporary IPv6 address).</t>
       <t>resource information - the actual address or prefix. That is conveyed
-      using appropriate option, e.g. IAADDR for an address or IAPREFIX for
+      using the appropriate option, e.g. IAADDR for an address or IAPREFIX for
       prefix.</t>
       <t>valid life time requested by client</t>
       <t>valid life time sent to client</t>
@@ -1180,8 +1176,8 @@
       <t>Two clients, one resource - This is the duplicate resource allocation
       conflict. There two different clients each allocated the same resource. See
       <xref target="conflict-resolution"/>.</t>
-      <t>Two resources, one client conflict - This conflict exists when a clien
-      on one server is associated with a one resourge, and on the other server
+      <t>Two resources, one client conflict - This conflict exists when a client
+      on one server is associated with a one resource, and on the other server
       with a different resource in the same or related subnet. This does not
       refer to the case where a single client has resources in multiple
       different subnets or administrative domains, but rather the case where on
@@ -1220,7 +1216,7 @@
       insufficient information in the BNDUPD to process it, then reject the
       BNDUPD with reject-reason 3: "Missing binding information".</t>
 
-      <t>If the resource in the BNDUPD is not a aresource associated with
+      <t>If the resource in the BNDUPD is not a resource associated with
       the failover endpoint which received the BNDUPD message, then reject
       it with reject-reason 1: "Illegal IP address (not part of any address
       pool)".</t>
@@ -1234,7 +1230,7 @@
       client presently associated with this resource), then there will be
       no client-last-transaction-time option in the BNDUPD message.</t>
 
-      <t>The list in <xref target="tbl-conflict-resolution"/> presents conflict
+      <t>The list in <xref target="tbl-conflict-resolution"/> presents the conflict
       resolution outcome. To "accept" BNDUPD means to update the server's
       bindings database with the information contained in the BNDUDP and once
       the update is complete, send a BNDACK message corresponding to the BNDUPD
@@ -1339,6 +1335,7 @@ ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
 
       <t>A server will transition from one failover state to another based
       on the specific values held by the following state variables:</t>
+
         <t><list style="symbols">
 
           <t>Current failover state.</t>
@@ -1346,6 +1343,21 @@ ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
           <t>Communications status (OK or not OK).</t>
 
           <t>Partner's failover state (if known).</t>
+
+        </list></t>
+
+      <t>Several events can cause the transition from one failover state to
+      another.</t>
+
+        <t><list style="symbols">
+
+          <t>Change in communications status (OK or not OK).</t>
+
+          <t>Change in partner's failover state.</t>
+
+          <t>Receipt of particular messages.</t>
+
+          <t>Expiration of timers.</t>
 
         </list></t>
 
@@ -1366,12 +1378,6 @@ ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
       state machine.  If there is a difference between the words describing a
       particular state and the diagram below, the words should be considered
       authoritative.</t>
-
-      <t>A transition into SHUTDOWN or PAUSED state is not represented in the
-      following figure, since other than sending that state to its partner,
-      the remaining actions involved look just like the server halting in
-      its otherwise current state, which then becomes the previous state
-      upon server restart.</t>
 
     <figure anchor="endpoint-state-machine" title="Failover Endpoint State Machine">
     <artwork><![CDATA[
@@ -1407,10 +1413,10 @@ Changed |          V    +---+   +---+-----+--+-+       |             |
 | NORMAL or RECOVER    ++------------+---+      Other State: NORMAL  |
 |    |       DONE      |     NORMAL    + +<--------------+           |
 |    +--+----------+-->+   (balanced)    +-------External Command--->+
-|       ^          ^   +--------+--------+       or Other State:     |
-|       |          |            |             |  SHUTDOWN            |
-|   Wait for   Comm. OK  Comm. Failed or      |                      |
-|    Other      Other    Other State: PAUSED  |               External
+|       ^          ^   +--------+--------+                           |
+|       |          |            |             |                      |
+|   Wait for   Comm. OK  Comm. Failed         |                      |
+|    Other      Other                         |               External
 |    State:     State:          |             |                Command
 | RECOVER-DONE  NORMAL     Start Safe      Comm. OK                or
 |       |     COMM. INT.  Period Timer    Other State:            Safe
@@ -1425,8 +1431,47 @@ RECOVER-WAIT--------->+------------------+
     </section> <!-- state-machine-operation -->
 
     <section anchor="state-init" title="State Machine Initialization">
-      <!-- issue 6 -->
-      <t>TODO: Describe state machine initialization</t>
+
+      <t>The state machine is characterized by storage (in stable storage) of at least the
+      following information:</t>
+
+        <t><list style="symbols">
+
+          <t>Current failover state.</t>
+
+          <t>Previous failover state.</t>
+
+          <t>Start time of current failover state.</t>
+
+          <t>Partner's failover state.</t>
+
+          <t>Start time of partner's failover state.</t>
+
+          <t>Time most recent packet received from partner.</t>
+
+        </list></t>
+
+      <t>The state machine is initialized by reading these data items
+      from stable storage and restoring their values from the information
+      saved.  If there is no information in stable storage concerning these
+      items, then they should be initialized as follows:</t>
+
+        <t><list style="symbols">
+
+          <t>Current failover state:  Primary: PARTNER-DOWN, Secondary: RECOVER</t>
+
+          <t>Previous failover state:  None.</t>
+
+          <t>Start time of current failover state: Current time.</t>
+
+          <t>Partner's failover state: None until reception of STATE message.</t>
+
+          <t>Start time of partner's failover state: None until reception of STATE message.</t>
+
+          <t>Time most recent packet received from partner: None until packet received.</t>
+
+        </list></t>
+
     </section>
 
     <section anchor="state-startup" title="STARTUP State">
@@ -1527,7 +1572,7 @@ RECOVER-WAIT--------->+------------------+
 
         <t>Step 6:</t>
 
-        <t>If the startup time expires the server SHOULD go transition
+        <t>If the startup time expires the server SHOULD transition
         to the PREVIOUS-STATE.</t>
 
       </section> <!-- transition-out-of-startup-state -->
@@ -1573,10 +1618,10 @@ RECOVER-WAIT--------->+------------------+
         maximum-client-lead-time is used.</t>
 
         <t>The server is not restricted by the MCLT when offering
-        lease tmes while in PARTNER-DOWN state.</t>
+        lease times while in PARTNER-DOWN state.</t>
 
         <t>In the unlikely case, when there are two servers operating
-        in a PARTNER-DOWN state, there is a change od duplicate leases
+        in a PARTNER-DOWN state, there is a chance of duplicate leases
         assigned. This leads to a POTENTIAL-CONFLICT (unresponsive)
         state when they re-establish contact. The duplicate lease
         issue can be postponed to a large extent by the server giving
@@ -1601,7 +1646,7 @@ RECOVER-WAIT--------->+------------------+
         communications. Essentially, if a server is in PARTNER-DOWN
         state, it ignores all STATE messages from its partner that
         have the STARTUP bit set in the server-flags option of the
-        STATE message. THIS NEEDS TO BE MOVED</t>
+        STATE message.</t>
 
         <t>If the STARTUP bit is not set in the server-flags option
         of a STATE message received from its partner, then a server
@@ -1620,7 +1665,7 @@ RECOVER-WAIT--------->+------------------+
 
         <t>If the partner is in:</t>
 
-        <t>RECOVER, RECOVER-WAIT, SHUTDOWN, PAUSED state</t>
+        <t>RECOVER, RECOVER-WAIT state</t>
 
         <t>stay in PARTNER-DOWN state</t>
 
@@ -1911,9 +1956,8 @@ RECOVER-WAIT--------->+------------------+
         receives any messages from its partner where the PARTNER has
         changed into PAUSED state, the server should transition into
         COMMUNICATIONS-INTERRUPTED state. -->If a server in NORMAL
-        state receives any messages from its partner where the PARTNER
-        has changed into SHUTDOWN state, the server should transition
-        into PARTNER-DOWN state.</t>
+        state receives a DISCONNECT message from its partner, the server should transition
+        into COMMUNICATIONS-INTERRUPTED state.</t>
       </section> <!-- transition-out-of-normal-state -->
     </section> <!-- normal state -->
 
@@ -1943,18 +1987,18 @@ RECOVER-WAIT--------->+------------------+
                title="Operation in COMMUNICATIONS-INTERRUPTED State">
 
         <t>In this state a server MUST respond to all DHCP client
-        requests.  When allocating new lease, each server allocates
+        requests.  When allocating new leases, each server allocates
         from its own pool, where the primary MUST allocate only FREE
         resources (addresses or prefixes), and the secondary MUST
-        allocate only BACKUP resources (addresses or prefixes).  When
+        allocate only FREE_BACKUP resources (addresses or prefixes).  When
         responding to RENEW messages, each server will allow continued
         renewal of a DHCP client's current lease on an IP address or
         prefix irrespective of whether that lease was given out by the
         receiving server or not, although the renewal period MUST NOT
         exceed the maximum client lead time (MCLT) beyond the latest
         of: 1) the potential valid lifetime already acknowledged by
-        the other server, or 2) the lease- expiration-time <!-- what
-        is this? -->, or 3) the potential valid lifetime received from
+        the other server, or 2) the actual valid lifetime sent to the
+	DHCPv6 client, or 3) the potential valid lifetime received from
         the partner server.</t>
 
         <t>However, since the server cannot communicate with its
@@ -2000,7 +2044,6 @@ RECOVER-WAIT--------->+------------------+
           RESOLUTION-INTERRUPTED: Transition into POTENTIAL-CONFLICT
           state.</t>
 
-          <t>SHUTDOWN: Transition into PARTNER-DOWN state.</t>
         </list></t>
 
         <t>The following figure illustrates the transition from NORMAL
@@ -2040,7 +2083,7 @@ RECOVER-WAIT--------->+------------------+
       |                                        |
       |        <--------------------POOLREQ--< |
       | >--POOLRESP-(2)-------------->         |
-t>      |                                        |
+      |                                        |
       | >--BNDUPD-(#1)--------------->         |
       |        <---------------------BNDACK--< |
       |                                        |
@@ -2168,7 +2211,7 @@ CONFLICT-DONE                                  |
         only FREE resources, and the secondary SHOULD allocate only
         BACKUP resources. When responding to renewal requests, each
         server will allow continued renewal of a DHCP client's current
-        lease irrespective of whether that lease was given out by the
+        lease independent of whether that lease was given out by the
         receiving server or not, although the renewal period MUST NOT
         exceed the maximum client lead time (MCLT) beyond the latest
         of: 1) the potential valid lifetime already acknowledged by
@@ -2229,83 +2272,6 @@ CONFLICT-DONE                                  |
         server will also transition into NORMAL state.</t>
       </section> <!-- transition-out-of-conflict-done-state -->
     </section> <!-- conflict-done state -->
-
-    <section anchor="state-paused" title="PAUSED State">
-      <!-- issue 8 -->
-      <t>TODO: Remove PAUSED state completely</t>
-
-      <t>This state exists to allow one server to inform another that
-      it will be out of service for what is predicted to be a
-      relatively short time, and to allow the other server to
-      transition to COMMUNICATIONS- INTERRUPTED state immediately and
-      to begin servicing all DHCP clients with no interruption in
-      service to new DHCP clients.</t>
-
-      <t>A server which is aware that it is shutting down temporarily
-      SHOULD send a STATE message with the server-state option
-      containing PAUSED state and close the TCP connection.</t>
-
-      <t>While a server may or may not transition internally into
-      PAUSED state, the 'previous' state determined when it is
-      restarted MUST be the state the server was in prior to receiving
-      the command to shut- down and restart and which precedes its
-      entry into the PAUSED state.  See <xref
-      target="transition-out-of-startup-state"/> concerning the use of
-      the previous state upon server restart.</t>
-
-      <t>When entering PAUSED state, the server MUST store the
-      previous state in stable storage, and use that state as the
-      previous state when it is restarted.</t>
-
-      <section anchor="operation-in-paused-state"
-               title="Operation in PAUSED State">
-        <t>Server MUST NOT perform any operation while in PAUSED
-        state.</t>
-      </section> <!-- operation-in-paused-state -->
-      <section anchor="transition-out-of-paused-state"
-               title="Transition Out of PAUSED State">
-        <t>A server makes a transition out of PAUSED state by being
-        restarted.  At that time, the previous state MUST be the state
-        the server was in prior to entering the PAUSED state.</t>
-      </section> <!-- transition-out-of-paused-state -->
-    </section> <!-- paused state -->
-
-    <section anchor="state-shutdown" title="SHUTDOWN State">
-      <t>This state exists to allow one server to inform another that
-      it will be out of service for what is predicted to be a
-      relatively long time, and to allow the other server to
-      transition immediately to PARTNER-DOWN state, and take over
-      completely for the server going down.</t>
-
-      <t>When entering SHUTDOWN state, the server MUST record the
-      previous state in stable storage for use when the server is
-      restarted. It also MUST record the current time as the last
-      time operational.</t>
-
-      <t>A server which is aware that it is shutting down SHOULD send
-      a STATE message with the server-state field containing
-      SHUTDOWN.</t>
-      <section anchor="operation-in-shutdown-state"
-               title="Operation in SHUTDOWN State">
-        <t>A server in SHUTDOWN state MUST NOT respond to any DHCP
-        client input.</t>
-
-        <t>If a server receives any message indicating that the
-        partner has moved to PARTNER-DOWN state while it is in
-        SHUTDOWN state then it MUST record RECOVER state as the
-        previous state to be used when it is restarted.</t>
-
-        <t>A server SHOULD wait for a few seconds after informing the
-        partner of entry into SHUTDOWN state (if communications are
-        okay) to determine if the partner entered PARTNER-DOWN state.</t>
-      </section> <!-- operation-in-shutdown-state -->
-      <section anchor="transition-out-of-shutdown-state"
-               title="Transition Out of SHUTDOWN State">
-        <t>A server makes a transition out of SHUTDOWN state by being
-        restarted.</t>
-
-      </section> <!-- transition-out-of-shutdown-state -->
-    </section> <!-- shutdown state -->
 
   </section> <!-- endpoint states -->
 
