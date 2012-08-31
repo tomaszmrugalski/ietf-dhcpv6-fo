@@ -12,7 +12,13 @@ option.
 --------
 2. Reuse rest of description from failover-12, section 5.4.
 3. Describe pool allocation based on percentage [Kim: is this different from #1?].
-4. Describe controlled re-allocation [Kim: what is this?].
+4. Describe controlled re-allocation, i.e. that healthy partner in
+   partner-down state can start using resources that belonged to the
+   downed partner. I think it was release/expiration time + MCLT.
+   It is described in v4-failover-12 in section 5.2.2
+   [Kim: what is this?]. [tomek: expanded this description a
+   bit. Also, the issues/todo items are marked in the XML.
+   If in doubt, it may be useful to look up there.]
 9. Describe DNS Update challenges in failover environment.
 10. Describe lease reservation.
 11. Write security considerations.

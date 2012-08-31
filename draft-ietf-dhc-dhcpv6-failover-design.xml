@@ -119,7 +119,7 @@
 
 	<t>Resource - Any type of resource that is assignable using
 	DHCPv6. Currently there are two types of such resources
-	defined: a nono-temporary IPv6 address and an IPv6 prefix.
+	defined: a non-temporary IPv6 address and an IPv6 prefix.
 	Due to the nature of temporary addresses, they are not
 	covered by the failover mechanism. Other resource types may
 	be defined in the future.</t>
