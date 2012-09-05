@@ -77,14 +77,19 @@
     </section>
 
     <section title="Introduction">
-      <t>The DHCPv6 protocol, defined in <xref target="RFC3315"/> allows
-      for multiple servers to be operating on a single network, however it does
-      not define any way to decide which server responds to which
-      client queries. Some sites are interested in running multiple
-      servers in such a way as to provide redundancy in case of server
-      failure. In order for this to work reliably, the cooperating
-      primary and secondary servers must maintain a consistent
-      database of the lease information.</t>
+      <t>The DHCPv6 protocol, defined in <xref target="RFC3315"/>
+      allows for multiple servers to be operating on a single network,
+      however it does not define how the servers can share the same
+      address and prefix delegation pools and allow a client to
+      seamlessly extend its existing leases when the original server
+      is down. <xtef target="RFC3315"/> provides for these
+      capabilities, but does not document how the servers cooperate
+      and communicate to provide this capability. Some sites are
+      interested in running multiple servers in such a way as to
+      provide redundancy in case of server failure. In order for this
+      to work reliably, the cooperating primary and secondary servers
+      must maintain a consistent database of the lease
+      information.</t>
       
       <t>This document discusses failover implementations scenarios,
       failure modes, and synchronization approaches to provide background
@@ -225,6 +230,14 @@
 	  DHCPv6 server). Such configuation does not improve
 	  redundancy, but significantly complicates deployment.</t>
         </section>
+
+        <section title="Load Balancing">
+          <t>Sometimes the desire to deploy more than one server
+          is based on the assumption that they will will share the
+          client traffic. Administrators that are interested in
+          such a capability are advised to deploy load balancing
+          mechanism, defined in <xref target="I-D.kostur-dhc-loadbv6"/>.</t>
+        </section>
       </section>
     </section>
 
@@ -274,14 +287,14 @@
       <section anchor="1-to-1" title="1-to-1, m-to-1 and m-to-m models">
 	<t>A failover relationship for a specific network is provided
 	by two failover partners. Those partners communicate with each
-	other. This scenario is sometimes referred to as the 1-to-1
-	model and is considered relatively simple. In larger networks
-	one server may be participating in several failover
-	relationships, i.e. it provides failover for several address
-	or prefix pools, each served by separate partners. Such a
-	scenario can be referred to as m-to-1. The most complex
-	scenario - m-to-m - assumes that each partner participates in
-	multiple failover relationships.</t>
+	other and back up all pools. This scenario is sometimes
+	referred to as the 1-to-1 model and is considered relatively
+	simple. In larger networks one server may be participating in
+	several failover relationships, i.e. it provides failover for
+	several address or prefix pools, each served by separate
+	partners. Such a scenario can be referred to as m-to-1. The
+	most complex scenario - m-to-m - assumes that each partner
+	participates in multiple failover relationships.</t>
       </section>
       <section title="Split prefixes">
 	<t>Due to the extensive IPv6 address space, it is possible to
@@ -469,8 +482,9 @@
       addresses may be available.</t>
 
       <t>However, DHCPv6 Prefix Delegation is similar to IPv4
-      addressing and therefore techniques for pool balancing and
-      rebalancing and shorter MCLT times will be needed.</t>
+      addressing regarding number of available leases and therefore
+      techniques for pool balancing and rebalancing and shorter MCLT
+      times will be needed.</t>
 
     </section>
 
@@ -489,15 +503,21 @@
       <t>
       <list style="numbers">
 	<t>The number of supported partners MUST be exactly two,
-	i.e. there are at most two servers that are aware of a specific
-	lease; this approach is often called 1-to-1 model.</t> 
+	i.e. there are at most two servers that are aware of a
+	specific lease.</t>
 
 	<t>For each prefix or address pool, server MUST NOT
 	participate in more than one failover relationship.</t>
 
+        <t>The defined protocol MUST support m-to-1 (i.e. one server
+        may form more than one relationship), but an implementation
+        MAY choose to implement only 1-to-1 model (i.e. everything
+        from one server is backed on another).</t>
+        
+        <!--
 	<t>Server MAY participate in multiple relationships only if
 	those relationships cover different prefix or address
-	pools.</t>
+	pools.</t>-->
 
 	<t>One partner MUST be able to continue serving leases offered
 	by the other partner. This property is also sometimes called
@@ -559,7 +579,8 @@
           and MAY be defined in a separate document. It MUST NOT be
           part of the core protocol, but rather defined as an
           extension. The primary reason for this the desire to limit
-          core protocol complexity.</t>
+          core protocol complexity. Load Balancing is likely to
+          be defined as an extension.</t>
           <t>Configuration synchronization - two failover partners are
           expected to maintain the same configuration. Mismatched
           configuration between partners is a frequent problem in
@@ -585,11 +606,11 @@
       <section title="DHCPv4 failover concepts">
 	<section title="Goals of DHCPv4 Failover">
 	  <t> <list style="numbers">
-	    <t>Provide a high availability DHCP service by leveraging the hooks
-	    built into DHCPv4 <xref target="RFC2131"/> and its usual implementation to support
-	    multiple servers able to respond to client requests.  These hooks
-	    are:
-	      <list style="format (%c)">>
+	    <t>Provide a high availability DHCP service by leveraging
+	    the hooks built into DHCPv4 <xref target="RFC2131"/> and
+	    its usual implementation to support multiple servers able
+	    to respond to client requests.  These hooks are: <list
+	    style="format (%c)">>
 
 		<t>The broadcast of DHCPDISCOVER requests.</t>
 
@@ -842,10 +863,11 @@
     <section title="Acknowledgements">
       <t>This document extensively uses concepts, definitions and
       other parts of <xref target="dhcpv4-failover"/> document.
-      Authors would like to thank Shawn Routhier, Qin Wu,
-      Jean-Francois Tremblay, Frank Sweetser, Jiang Sheng, Yu Fu, Greg
-      Rabil, Bernie Volz, and Vithalprasad Gaitonde for their comments
-      and feedback.</t>
+      Thanks to Bernie Volz and Shawn Routhier for their frequent
+      reviews and substantial contributions.  Authors would also like
+      to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
+      Sheng, Yu Fu, Greg Rabil, and Vithalprasad Gaitonde for their
+      comments and feedback.</t>
 
       <t>This work has been partially supported by Gdansk University of
       Technology and the Polish Ministry of Science and Higher Education
@@ -902,6 +924,8 @@
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
       <?rfc
       include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-redundancy-consider.xml'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.kostur-dhc-loadbv6.xml'?>
 
     </references>
   </back>
