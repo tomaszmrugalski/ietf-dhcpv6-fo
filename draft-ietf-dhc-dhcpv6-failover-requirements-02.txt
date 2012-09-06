@@ -4,8 +4,8 @@
 Dynamic Host Configuration (DHC)                            T. Mrugalski
 Internet-Draft                                                       ISC
 Intended status: Informational                                K. Kinnear
-Expires: March 9, 2013                                             Cisco
-                                                       September 5, 2012
+Expires: March 10, 2013                                            Cisco
+                                                       September 6, 2012
 
 
                       DHCPv6 Failover Requirements
@@ -41,7 +41,7 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 9, 2013.
+   This Internet-Draft will expire on March 10, 2013.
 
 Copyright Notice
 
@@ -52,7 +52,7 @@ Copyright Notice
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 1]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 1]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -108,7 +108,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 2]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 2]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -164,7 +164,7 @@ Table of Contents
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 3]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 3]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -182,13 +182,13 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    to be operating on a single network, however it does not define how
    the servers can share the same address and prefix delegation pools
    and allow a client to seamlessly extend its existing leases when the
-   original server is down. provides for these capabilities, but does
-   not document how the servers cooperate and communicate to provide
-   this capability.  Some sites are interested in running multiple
-   servers in such a way as to provide redundancy in case of server
-   failure.  In order for this to work reliably, the cooperating primary
-   and secondary servers must maintain a consistent database of the
-   lease information.
+   original server is down.  [RFC3315] provides for these capabilities,
+   but does not document how the servers cooperate and communicate to
+   provide this capability.  Some sites are interested in running
+   multiple servers in such a way as to provide redundancy in case of
+   server failure.  In order for this to work reliably, the cooperating
+   primary and secondary servers must maintain a consistent database of
+   the lease information.
 
    This document discusses failover implementations scenarios, failure
    modes, and synchronization approaches to provide background to the
@@ -209,7 +209,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    server means a DHCPv6 server, unless explicitly noted otherwise.  A
    relay is a DHCPv6 relay.
 
-      A binding (or, client binding) is a group of server data records
+      A binding (or client binding) is a group of server data records
       containing the information the server has about the addresses in
       an IA or configuration information explicitly assigned to the
       client.  Configuration information that has been returned to a
@@ -220,7 +220,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 4]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 4]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -276,7 +276,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 5]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 5]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -332,7 +332,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 6]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 6]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -349,17 +349,17 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
    It is also essential to use only databases that are really
    distributed and do not have single point of failure themselves.
-   Otherwise only the single point of failure is only moved to a
-   different location (database rather than DHCPv6 server).  Such
-   configuation does not improve redundancy, but significantly
-   complicates deployment.
+   Otherwise the single point of failure is only moved to a different
+   location (database rather than DHCPv6 server).  Such a configuation
+   does not improve redundancy, but significantly complicates
+   deployment.
 
 4.1.4.  Load Balancing
 
    Sometimes the desire to deploy more than one server is based on the
    assumption that they will will share the client traffic.
    Administrators that are interested in such a capability are advised
-   to deploy load balancing mechanism, defined in
+   to deploy a load balancing mechanism, defined in
    [I-D.kostur-dhc-loadbv6].
 
 
@@ -388,7 +388,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 7]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 7]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -444,7 +444,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 8]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 8]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -500,7 +500,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                 [Page 9]
+Mrugalski & Kinnear      Expires March 10, 2013                 [Page 9]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -544,7 +544,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    partition event and follows procedures specified for such a
    situation.
 
-   It should be noted that recovery after partitioned network is
+   It should be noted that recovery after a partitioned network is
    rejoined is significantly more complicated than recovery from a
    server failure event.  As both servers may have kept serving clients,
    they have two separate lease databases, and they need to agree on the
@@ -556,7 +556,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 10]
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 10]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -612,7 +612,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 11]
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 11]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -668,7 +668,7 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 12]
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 12]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -676,13 +676,13 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    1.   The number of supported partners MUST be exactly two, i.e. there
         are at most two servers that are aware of a specific lease.
 
-   2.   For each prefix or address pool, server MUST NOT participate in
-        more than one failover relationship.
+   2.   For each prefix or address pool, a server MUST NOT participate
+        in more than one failover relationship.
 
-   3.   The defined protocol MUST support m-to-1 (i.e. one server may
-        form more than one relationship), but an implementation MAY
-        choose to implement only 1-to-1 model (i.e. everything from one
-        server is backed on another).
+   3.   The defined protocol MUST support the m-to-1 model (i.e. one
+        server may form more than one relationship), but an
+        implementation MAY choose to implement only the 1-to-1 model
+        (i.e. everything from one server is backed on another).
 
    4.   One partner MUST be able to continue serving leases offered by
         the other partner.  This property is also sometimes called
@@ -718,26 +718,17 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    serving the same addresses and/or prefixes.  This property is also
    called 'lease stability'.
 
-   The core protocol MUST be limited to the 1-to-1 model (see
-   Section 5.4).  In addition, the core protocol MUST restrict each
-   address or prefix pool to participate in at most one failover
+   Despite the lack of standardization of DHCPv4 failover, the
+   coexistence of DHCPv4 and DHCPv6 failover MAY be taken into
+   consideration.  In particular, certain features that are common for
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 13]
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 13]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
-   relationship.  (Note: these are different statements!)  If there is
-   sufficient community support for failover servers to participate in
-   more than one failover relationship (thus providing support for a
-   form of m-to-1 deployment), this capability SHALL be defined as an
-   extension to the core failover protocol.
-
-   Despite the lack of standardization of DHCPv4 failover, the
-   coexistence of DHCPv4 and DHCPv6 failover MAY be taken into
-   consideration.  In particular, certain features that are common for
    both IPv4 and IPv6, like DNS Update mechanism SHOULD be taken into
    consideration.
 
@@ -749,7 +740,8 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
        be defined in a separate document.  It MUST NOT be part of the
        core protocol, but rather defined as an extension.  The primary
        reason for this the desire to limit core protocol complexity.
-       Load Balancing is likely to be defined as an extension.
+       Load Balancing is likely to be defined as an extension.  See
+       [I-D.kostur-dhc-loadbv6].
 
    2.  Configuration synchronization - two failover partners are
        expected to maintain the same configuration.  Mismatched
@@ -778,17 +770,20 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
        support multiple servers able to respond to client requests.
        These hooks are:
 
-
-
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 14]
-
-Internet-Draft        DHCPv6 Failover Requirements        September 2012
-
-
        (a)  The broadcast of DHCPDISCOVER requests.
 
        (b)  The transition from unicast for DHCPREQUEST/RENEW to
             broadcast for DHCPREQUEST/REBIND.
+
+
+
+
+
+
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 14]
+
+Internet-Draft        DHCPv6 Failover Requirements        September 2012
+
 
        (c)  The usual implementation of DHCPv4 relay agents to allow
             forwarding of DHCPv4 requests to multiple different DHCPv4
@@ -833,19 +828,19 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    protocol is designed to ensure that every failover server knows at
    all times, not exactly what its failover partner has told to the
    DHCPv4 clients with which it is communicating, but rather the limits
-
-
-
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 15]
-
-Internet-Draft        DHCPv6 Failover Requirements        September 2012
-
-
    of what its failover partner could have told any DHCPv4 clients with
    which it was communicating.
 
    This is done by ensuring that no DHCPv4 server participating in a
    failover relationship will ever offer a lease time to any DHCPv4
+
+
+
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 15]
+
+Internet-Draft        DHCPv6 Failover Requirements        September 2012
+
+
    client that is more than an agreed-upon value beyond that known by
    its failover partner.
 
@@ -889,19 +884,19 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    time for this client that is known by the failover partner.  From
    this standpoint, it would be good for the MCLT to be as long as
    possible.  However, in a failure situation, waiting the MCLT beyond
-
-
-
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 16]
-
-Internet-Draft        DHCPv6 Failover Requirements        September 2012
-
-
    the current lease time in order to reuse a leased lease would suggest
    that the MCLT should be as short as possible.
 
    This tension is resolved by anticipating the need to extend lease
    times when communicating with the failover partner.  The first lease
+
+
+
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 16]
+
+Internet-Draft        DHCPv6 Failover Requirements        September 2012
+
+
    offered to a DHCPv4 client can be only as long as the MCLT.  However,
    when the failover server updates its partner, it updates the partner
    with the desired lease time plus the MCLT.  Thus, when the client
@@ -945,15 +940,18 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
    network partition events.  Of course, specific implementations can
    assume that an unreachable failover partner is down after a shorter
    or longer time, thus limiting the support for a network partition
+   event.
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 17]
+
+
+
+
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 17]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
-
-   event.
 
 9.1.5.  Conflict Resolution
 
@@ -992,25 +990,23 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
    The design MUST allow secure communication between the failover
    partners.  This requirement applies to the specification only, i.e.
-   the design must include a way to secure communication.  It does dot
-   mandate such security.  It is likely that such a security will be
-   optional, but exact decision will be made during the actual design.
+   the design must include a way to secure communication.  It does not
+   mandate such security be employed, just that it be available.
 
    The design of a security protection MUST take into consideration the
    fact that the protocol MUST operate despite network failures.  In
    particular, relying on any external infrastructure (e.g. any form of
    Certificate Authority) is discouraged (or at least must be optional).
 
-
-
-
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 18]
-
-Internet-Draft        DHCPv6 Failover Requirements        September 2012
-
-
    The security considerations for the design itself will be discussed
    in the design document.
+
+
+
+
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 18]
+
+Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 11.  IANA Considerations
@@ -1060,7 +1056,11 @@ Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 19]
+
+
+
+
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 19]
 
 Internet-Draft        DHCPv6 Failover Requirements        September 2012
 
@@ -1116,5 +1116,5 @@ Authors' Addresses
 
 
 
-Mrugalski & Kinnear       Expires March 9, 2013                [Page 20]
+Mrugalski & Kinnear      Expires March 10, 2013                [Page 20]
 

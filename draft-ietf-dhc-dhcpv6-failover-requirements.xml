@@ -82,7 +82,7 @@
       however it does not define how the servers can share the same
       address and prefix delegation pools and allow a client to
       seamlessly extend its existing leases when the original server
-      is down. <xtef target="RFC3315"/> provides for these
+      is down. <xref target="RFC3315"/> provides for these
       capabilities, but does not document how the servers cooperate
       and communicate to provide this capability. Some sites are
       interested in running multiple servers in such a way as to
@@ -108,7 +108,7 @@
       protocol. A server means a DHCPv6 server, unless explicitly noted
       otherwise. A relay is a DHCPv6 relay.</t>
       <t><list>
-	<t>A binding (or, client binding) is a group of server data
+	<t>A binding (or client binding) is a group of server data
 	records containing the information the server has about the
 	addresses in an IA or configuration information explicitly
 	assigned to the client.  Configuration information that has
@@ -225,9 +225,9 @@
 
 	  <t>It is also essential to use only databases that are
 	  really distributed and do not have single point of failure
-	  themselves. Otherwise only the single point of failure is
+	  themselves. Otherwise the single point of failure is
 	  only moved to a different location (database rather than
-	  DHCPv6 server). Such configuation does not improve
+	  DHCPv6 server). Such a configuation does not improve
 	  redundancy, but significantly complicates deployment.</t>
         </section>
 
@@ -235,7 +235,7 @@
           <t>Sometimes the desire to deploy more than one server
           is based on the assumption that they will will share the
           client traffic. Administrators that are interested in
-          such a capability are advised to deploy load balancing
+          such a capability are advised to deploy a load balancing
           mechanism, defined in <xref target="I-D.kostur-dhc-loadbv6"/>.</t>
         </section>
       </section>
@@ -389,7 +389,7 @@
 	  of the clients. The only valid assumption is that
 	  partner also detected the network partition event and follows
 	  procedures specified for such a situation.</t>
-	  <t>It should be noted that recovery after partitioned network
+	  <t>It should be noted that recovery after a partitioned network
 	  is rejoined is significantly more complicated than
 	  recovery from a server failure event. As both servers may have kept
 	  serving clients, they have two separate lease databases, and
@@ -506,12 +506,12 @@
 	i.e. there are at most two servers that are aware of a
 	specific lease.</t>
 
-	<t>For each prefix or address pool, server MUST NOT
+	<t>For each prefix or address pool, a server MUST NOT
 	participate in more than one failover relationship.</t>
 
-        <t>The defined protocol MUST support m-to-1 (i.e. one server
+        <t>The defined protocol MUST support the m-to-1 model (i.e. one server
         may form more than one relationship), but an implementation
-        MAY choose to implement only 1-to-1 model (i.e. everything
+        MAY choose to implement only the 1-to-1 model (i.e. everything
         from one server is backed on another).</t>
         
         <!--
@@ -556,16 +556,6 @@
       partner, will continue serving the same addresses and/or
       prefixes. This property is also called 'lease stability'.</t>
 
-      <t>The core protocol MUST be limited to the 1-to-1 model (see
-      <xref target="1-to-1"/>). In addition, the core protocol MUST
-      restrict each address or prefix pool to participate in at most
-      one failover relationship. (Note: these are different
-      statements!) If there is sufficient community support for
-      failover servers to participate in more than one failover
-      relationship (thus providing support for a form of m-to-1
-      deployment), this capability SHALL be defined as an extension to
-      the core failover protocol.</t>
-
       <t>Despite the lack of standardization of DHCPv4 failover, the 
       coexistence of DHCPv4 and DHCPv6 failover MAY be taken into
       consideration. In particular, certain features that are common
@@ -580,7 +570,9 @@
           part of the core protocol, but rather defined as an
           extension. The primary reason for this the desire to limit
           core protocol complexity. Load Balancing is likely to
-          be defined as an extension.</t>
+          be defined as an extension.  
+	  See <xref target="I-D.kostur-dhc-loadbv6"/>.</t>
+
           <t>Configuration synchronization - two failover partners are
           expected to maintain the same configuration. Mismatched
           configuration between partners is a frequent problem in
@@ -841,9 +833,8 @@
       <t>The design MUST allow secure communication between the
       failover partners. This requirement applies to the specification
       only, i.e. the design must include a way to secure
-      communication. It does dot mandate such security. It is likely
-      that such a security will be optional, but exact decision will
-      be made during the actual design.</t>
+      communication. It does not mandate such security be employed, just
+      that it be available.</t> 
 
       <t>The design of a security protection MUST take into
       consideration the fact that the protocol MUST operate despite
