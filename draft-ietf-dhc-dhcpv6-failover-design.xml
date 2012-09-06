@@ -155,7 +155,7 @@
       of failure by one or the other of the two servers.</t>
 
       <t>This protocol defines active-passive mode, sometimes also
-      called hot standby model. This means that during normal
+      called a hot standby model. This means that during normal
       operation one server is active (i.e. actively responds to
       clients' requests) while the second is passive (i.e. it does
       receive clients' requests, but does not respond to them and only
@@ -267,19 +267,19 @@
   in which to do so.</t>
 
   <t>The major problem with lazy update mechanism is the case when
-  the server crashes after sending response to client, but before
+  the server crashes after sending a response to client, but before
   sending the lazy update to its partner (or when communication
-  between partners is interrupted). To solve this problem, concept
+  between partners is interrupted). To solve this problem, the concept
   known as the Maximum Client Lead Time (MCLT) (initially designed
   for DHCPv4 failover) is used.  The MCLT is the maximum amount of
   time that one server can extend a lease for a client's binding
   beyond the time known by its failover partner. See <xref
-  target="mclt"/> for detailed desciption how MCLT affects assigned
+  target="mclt"/> for detailed desciption how the MCLT affects assigned
   lease times.</t>
 
   <t>Servers verify each others availability by periodically
   exchanging CONTACT messages. See <xref target="reachability"/> for
-  discussion about detecting partner's unreachability.</t>
+  discussion about detecting a partner's unreachability.</t>
 
   <t>A server that is being shut down transmits a DISCONNECT message,
   closes the connection with its failover partner and stops
@@ -316,10 +316,10 @@
     must follow a defined procedure, in particular, it MUST NOT
     extend any lease more than the MCLT beyond its partner's knowledge
     of the lease expiration time.  This imposes an additional burden
-    on the server, in that clients will be return to the server for
+    on the server, in that clients will return to the server for
     lease renewals more frequently than they would otherwise.
     Therefore it is not recommended to operate for prolonged periods
-    in this state.  Once communication is reestablished, server may
+    in this state.  Once communication is reestablished, a server may
     go into NORMAL, POTENTIAL-CONFLICT or PARTNER-DOWN state. It
     may also stay in COMMUNICATIONS-INTERRUPTED state if certain
     conditions are met.</t>
@@ -328,19 +328,20 @@
     auto-partner-down is used or as a result of administrative
     action), it can extend leases, regardless of the original server
     that initially granted the lease. In that state server handles
-    leases from its own pool, but is albo able to serve pool from
+    leases from its own pool, but is also able to serve pool from
     its downed partner. MCLT restrictions no longer apply. Operation
     in this mode is less demanding for the server that remains operational,
     than in COMMUNICATIONS-INTERRUPTED state, but PARTNER-DOWN does
     not offer any kind of redundancy.</t>
 
-    <t>When server loses its database (e.g. due to first time run or
-    catastrophic failure) or detects that is partner is in
-    PARTNER-DOWN state and additional conditions are met, it switches
-    to RECOVER state. In that state the server acknowledges that content
-    of its database is doubtful and needs to refresh its database
-    from its partner. Once this operation is done, it switches to
-    RECOVER-WAIT and later to RECOVER-DONE.</t>
+    <t>When a server does not have an intact lease state database
+    (e.g. due to first time run or catastrophic failure) or detects
+    that is partner is in PARTNER-DOWN state and additional conditions
+    are met, it switches to RECOVER state. In that state the server
+    acknowledges that content of its database is doubtful and it
+    needs to refresh its database from its partner. Once this
+    operation is complete, it switches to RECOVER-WAIT and later
+    to RECOVER-DONE.</t>
 
     <t>Once servers reestablish connection, they discover each others'
     state. Depending on the conditions, they may return to NORMAL or
@@ -718,7 +719,7 @@
     was not just released, expired or reset by a network administrator.
     When the partner acks the BNDUPD of a FREE lease, the server
     marks the lease as available for assignment by the primary server.
-    Note that secondary server running in PARTNER-DOWN state, after
+    Note that on a secondary server running in PARTNER-DOWN state, after
     waiting the MCLT, the resource MAY be allocated to a client by the
     secondary server if proportional algorithm is used. Client
     identification MAY appear.</t>
@@ -840,10 +841,10 @@
 </artwork></figure>
 
   <!-- issue 3 -->
-  <t>TODO: In case of Active-Passive model, while majority of
-  addresses are owned by the primary server, secondary server will
-  need a portion of addresses to serve new clients while operating in
-  communication-interrupted state as also in partner down state before
+  <t>TODO: In case of Active-Passive model, while a majority of the
+  addresses are owned by the primary server, the secondary server will
+  need a portion of the addresses to serve new clients while operating in
+  communication-interrupted state and also in partner down state before
   it can take over the entire address pool (expiry of MCLT). The
   concept of a percentage of pool reserved for secondary should be
   described here.</t>
@@ -868,8 +869,8 @@
       be available in some scenarios that failover expects to cover.
       Therefore a mechanism to measure and track
       relative time differences between servers is necessary. To do so,
-      each message MUST contain FO_TIMESTAMP option that contains the
-      timestamp of the transmission in the time context of the transmitter.
+      each message MUST contain information about the time 
+      of the transmission in the time context of the transmitter.
       The transmitting server MUST set this as close to the
       actual transmission as possible. The receiving partner MUST store its
       own timestamp of reception as close to the actual reception as
@@ -1100,14 +1101,14 @@
     states.  Each update MUST include at least the following information:
     <list style="numbers">
       <t>resource type - non-temporary address or a prefix. Resource type can
-      be indicated by the container that conveys actual resource (e.g. IA_NA
+      be indicated by the container that conveys the actual resource (e.g. an IA_NA
       option indicates non-temporary IPv6 address).</t>
       <t>resource information - the actual address or prefix. That is conveyed
-      using the appropriate option, e.g. IAADDR for an address or IAPREFIX for
+      using the appropriate option, e.g. an IAADDR for an address or an IAPREFIX for
       prefix.</t>
       <t>valid life time requested by client</t>
       <t>valid life time sent to client</t>
-      <t>IAID - Identity Association used by client, while obtaining
+      <t>IAID - Identity Association used by the client, while obtaining
       a given lease. (Note1: one client may use many IAIDs
       simulatenously. Note2: IAID for IA, TA and PD are orthogonal
       number spaces.)</t>
@@ -1181,13 +1182,13 @@
       with a different resource in the same or related subnet. This does not
       refer to the case where a single client has resources in multiple
       different subnets or administrative domains, but rather the case where on
-      the same subnet the client has as lease on one IP address in one server
+      the same subnet the client has a lease on one IP address in one server
       and on a different IP address on the other server.
       
       <!-- how to start new paragraph within the same bullet? -->
       <vspace/>
 
-      This conflict can or may not be a problem for a given DHCP server
+      This conflict may or may not be a problem for a given DHCP server
       implementation and policy. If implementations and policies allow, both
       resources can be assigned to a given client. In the event that a DHCP
       server requires that a DHCP client have only one outstanding lease of a
@@ -1207,9 +1208,9 @@
 	   based on v4 failover decribe the issue much better -->
       <t>The server receiving a lease update from its partner must evaluate the
       received lease information to see if it is consistent with already known
-      state and decide which information - previously known or just received -
+      state and decide which information - the previously known or that just received -
       is "better". The server should take into consideration the following
-      aspects: if the lease is already assigned to specific client, who had
+      aspects: if the lease is already assigned to a specific client, who had
       contact with client recently, start time of the lease, etc.</t> -->
 
       <t>When analyzing a BNDUPD message from a partner server, if there is
@@ -1234,7 +1235,8 @@
       resolution outcome. To "accept" BNDUPD means to update the server's
       bindings database with the information contained in the BNDUDP and once
       the update is complete, send a BNDACK message corresponding to the BNDUPD
-      message. To "reject" a BNDUPD means to respond to the BNDUPD with BNDACK
+      message. To "reject" a BNDUPD means to lease the server's binding database
+      unchangeg and to respond to the BNDUPD with BNDACK
       with a rejest-reason option included.</t>
 
       <t>When interpreting the information in the following table (<xref
@@ -1361,10 +1363,10 @@ ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
 
         </list></t>
 
-      <t>Whenever the either of the last two of the above state variables
+      <t>Whenever either of the last two of the above state variables
       changes state, the state machine is invoked, which may then trigger a
       change in the current failove state.  Thus, whenever the communications
-      status changes, the state machine is processing is invoked.  This may or
+      status changes, the state machine processing is invoked.  This may or
       may not result in a change in the current failover state.</t>
 
       <t>Whenever a server transitions to a new failover state, the new state
@@ -1494,7 +1496,7 @@ RECOVER-WAIT--------->+------------------+
         <t>The server MUST NOT be responsive in STARTUP state.</t>
 
         <t>Whenever a STATE message is sent to the partner while
-        in STARTUP state the STARTUP flag MUST be set the message
+        in STARTUP state the STARTUP flag MUST be set in the message
         and the previously recorded failover state MUST be placed
         in the server-state option.</t>
 
@@ -1535,7 +1537,7 @@ RECOVER-WAIT--------->+------------------+
         result of the communications failed state transition (if
         such transition exists -- some states don't have a
         communications failed state transition, since they allow
-        both commun- ications OK and failed).</t>
+        both communications OK and failed).</t>
 
         <t>Step 3:</t>
 
@@ -1624,8 +1626,8 @@ RECOVER-WAIT--------->+------------------+
         in a PARTNER-DOWN state, there is a chance of duplicate leases
         assigned. This leads to a POTENTIAL-CONFLICT (unresponsive)
         state when they re-establish contact. The duplicate lease
-        issue can be postponed to a large extent by the server giving
-        new leases from its own pool. Therefore the server operating
+        issue can be postponed to a large extent by the server granting
+        new leases first from its own pool. Therefore the server operating
         in PARTNER-DOWN state MUST use its own pool first for new
         leases before assigning any leases from its downed partner pool.
         </t>
