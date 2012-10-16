@@ -10,25 +10,14 @@ option.
 
  DESIGN
 --------
-2. Reuse rest of description from failover-12, section 5.4.
-3. Describe pool allocation based on percentage [Kim: is this different from #1?].
-4. Describe controlled re-allocation, i.e. that healthy partner in
-   partner-down state can start using resources that belonged to the
-   downed partner. I think it was release/expiration time + MCLT.
-   It is described in v4-failover-12 in section 5.2.2
-   [Kim: what is this?]. [tomek: expanded this description a
-   bit. Also, the issues/todo items are marked in the XML.
-   If in doubt, it may be useful to look up there.]
 9. Describe DNS Update challenges in failover environment.
-10. Describe lease reservation.
+    Kim: I have only ported the v4 information into the document,
+    no editing (other than for xml2rfc) has been done, and 
+    in fact this is *certainly* incorrect at this time!
+
 11. Write security considerations.
 
-Q: Do we want to cover address/prefix reservation in the base
-   draft or do we define an extension for it?
-
-   Kim: I think we probably want to cover reservations in the base
-   draft, but I'm out of time right now to try to write the words
-   that describe this.
+12. Write section "Determining Allocation Approach".
 
  PROTOCOL SPEC
 ---------------
@@ -47,3 +36,25 @@ Q: Do we want to cover address/prefix reservation in the base
 8. Let's try to simplify the FSM a bit. We can get rid of
    PAUSE state. SHUTDOWN state can be used instead, even
    if the unavailability is only brief.
+
+10/16/12
+
+2. Reuse rest of description from failover-12, section 5.4.
+3. Describe pool allocation based on percentage [Kim: is this different from #1? 
+   Yes: see issue in-line in document].
+4. Describe controlled re-allocation, i.e. that healthy partner in
+   partner-down state can start using resources that belonged to the
+   downed partner. I think it was release/expiration time + MCLT.
+   It is described in v4-failover-12 in section 5.2.2
+   [Kim: what is this?]. [tomek: expanded this description a
+   bit. Also, the issues/todo items are marked in the XML.
+   If in doubt, it may be useful to look up there.]
+10. Describe lease reservation.
+Q: Do we want to cover address/prefix reservation in the base
+   draft or do we define an extension for it?
+
+   Kim: I think we probably want to cover reservations in the base
+   draft, but I'm out of time right now to try to write the words
+   that describe this.
+
+
