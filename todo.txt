@@ -10,10 +10,6 @@ option.
 
  DESIGN
 --------
-9. Describe DNS Update challenges in failover environment.
-    Kim: I have only ported the v4 information into the document,
-    no editing (other than for xml2rfc) has been done, and 
-    in fact this is *certainly* incorrect at this time!
 
 11. Write security considerations.
 
@@ -56,5 +52,14 @@ Q: Do we want to cover address/prefix reservation in the base
    Kim: I think we probably want to cover reservations in the base
    draft, but I'm out of time right now to try to write the words
    that describe this.
+
+10/17/12
+
+9. Describe DNS Update challenges in failover environment.
+   Proofread this, included Tomek's edits, and tightened it up.
+
+Proofread #2,3,4,10 as well, and made minor to substantial edits
+to each.
+
 
 

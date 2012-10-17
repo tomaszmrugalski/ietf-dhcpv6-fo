@@ -632,8 +632,8 @@
     <t>The initial allocation when the servers first integrate is
     triggered by the POOLREQ message from the secondary to the
     primary.  This is followed by the POOLRESP message where the
-    primary tells the secondary how many resources it allocated
-    to the secondary.  Then, the primary sends the allocated resources
+    primary tells the secondary how many resources it allocated to
+    the secondary.  Then, the primary sends the allocated resources
     to the secondary via BNDUPD messages.  The POOLREQ/POOLRESP
     message is a trigger to the primary to perform a scan of its
     database and to ensure that the secondary has enough resources
@@ -642,13 +642,13 @@
     <t>Servers frequently have several kinds of resources available
     on a particular network segment.  The failover protocol assumes
     that both primary and secondary servers are configured in such
-    a way that each knows the type and number of resources on
-    every network segment participating in the failover protocol.
-    The primary server is responsible for allocating the secondary
+    a way that each knows the type and number of resources on every
+    network segment participating in the failover protocol.  The
+    primary server is responsible for allocating the secondary
     server the correct proportion of available resources of each
     kind, and the secondary server is responsible for being configured
-    in such a way that it can tell the kind of every resource 
-    based solely on the IP or prefix address itself.</t>
+    in such a way that it can tell the kind of every resource based
+    solely on the IP or prefix address itself.</t>
 
     <t>The resources are sent to the secondary using the BNDUPD
     message with a state of BACKUP, which indicates the resource
@@ -666,17 +666,17 @@
     resources between the failover partners, the primary server
     needs to do additional work to ensure that the secondary server
     has as many resources as it needs (but that it doesn't have
-    more than it needs either).</t>
+    more than it needs).</t>
 
     <t>The primary server SHOULD examine the balance of available
     resources between the primary and secondary for a particular
     prefix whenever the number of available resources for either
-    the primary or secondary changes more than a configured limit.
-    The primary server SHOULD adjust the available resource balance
-    as required to ensure the configured resource balance, excepting
-    that the primary server SHOULD employ some threshold mechanism
-    to such a balance adjustment in order to minimize the over-
-    head of maintaining this balance.</t>
+    the primary or secondary changes by more than a configured
+    limit.  The primary server SHOULD adjust the available resource
+    balance as required to ensure the configured resource balance,
+    excepting that the primary server SHOULD employ some threshold
+    mechanism to such a balance adjustment in order to minimize the
+    overhead of maintaining this balance.</t>
 
     <t>An example of a threshold approach is: do not attempt to
     re-balance the prefixes on the primary and secondary until the
@@ -920,33 +920,32 @@
   -->
 
     <t>In case of servers operating in active-passive mode, while
-    a majority of the address resources are owned by the primary
-    server, the secondary server will need a portion of the address
-    resources to serve new clients while operating in
-    COMMUNICATION-INTERRUPTED state and also in PARTNER-DOWN state
-    before it can take over the entire address pool (after the
-    expiry of MCLT).</t>
+    a majority of the resources are owned by the primary server,
+    the secondary server will need a portion of the resources to
+    serve new clients while operating in COMMUNICATION-INTERRUPTED
+    state and also in PARTNER-DOWN state before it can take over
+    the entire address pool (after the expiry of MCLT).</t>
     
     <t>The secondary server connot simply take over the entire
-    address resource pool immediately, since we have to handle the
-    case where both servers are able to communicate with DHCP
-    clients, but unable to communicate with each other.</t>
+    resource pool immediately, since we have to handle the case
+    where both servers are able to communicate with DHCP clients,
+    but unable to communicate with each other.</t>
 
-    <t>The size of the address resource pool allocated to the
-    secondary is specified as a percentage of the currently available
-    address resources.  Thus, as the number of available address
-    resources changes on the primary server, the number of address
-    resources available to the secondary server MUST also change,
-    although the frequency of the changes made to the secondary
-    server's pool of available address resources SHOULD be low
-    enough to not use significant processing power or network
+    <t>The size of the resource pool allocated to the secondary is
+    specified as a percentage of the currently available resources.
+    Thus, as the number of available resources changes on the primary
+    server, the number of resources available to the secondary
+    server MUST also change, although the frequency of the changes
+    made to the secondary server's pool of address resources SHOULD
+    be low enough to not use significant processing power or network
     bandwidth.</t>
 
     <t>
-    The required size of this private pool is based only on the
-    arrival rate of new DHCP clients and the length of expected
-    downtime, and is not influenced in any way by the total number
-    of DHCP clients supported by the server pair.</t>
+    The required size of this private pool allocated to the secondary
+    server is based only on the arrival rate of new DHCP clients
+    and the length of expected downtime of the primary server, and
+    is not directly influenced by the total number of DHCP clients
+    supported by the server pair.</t>
 
 </section>
 
@@ -2519,22 +2518,23 @@ CONFLICT-DONE                                  |
     <t>The nature of the failover protocol introduces some issues
     concerning dynamic DNS updates that are not part of non-failover
     environments.  This section describes these issues, and defines
-    the information which failover partners should exchange and the
-    protocol which they should follow in order to ensure consistent
-    behavior.  The presence of this section should not be interpreted
-    as requiring that implementations of the DHCPv6 failover protocol
-    must also support DDNS updates.  The purpose of this discussion
-    is to clarify the areas where the failover and DHCP-DDNS protocols
-    intersect for the benefit of implementations which support both
-    protocols, not to introduce a new requirement into the DHCPv6
-    failover protocol.  Thus, a DHCPv6 server which implements the
-    failover protocol MAY also support dynamic DNS updates, but if
-    it does support dynamic DNS updates it SHOULD utilize the
-    techniques described here in order to correctly distribute them
-    between the failover partners.  See <xref target="RFC4704">RFC
-    4704</xref> as well as <xref target="RFC4704">RFC 4703</xref>
-    for information on how DHCPv6 servers deal with potential
-    conflicts when updating DNS even without failover.</t>
+    the information which failover partners should exchange in order
+    to ensure consistent behavior.  The presence of this section
+    should not be interpreted as requiring an implementation of
+    the DHCPv6 failover protocol to also support DDNS updates.</t>
+
+    <t>The purpose of this discussion is to clarify the areas where
+    the failover and DHCP-DDNS protocols intersect for the benefit
+    of implementations which support both protocols, not to introduce
+    a new requirement into the DHCPv6 failover protocol.  Thus, a
+    DHCPv6 server which implements the failover protocol MAY also
+    support dynamic DNS updates, but if it does support dynamic DNS
+    updates it SHOULD utilize the techniques described here in order
+    to correctly distribute them between the failover partners.
+    See <xref target="RFC4704">RFC 4704</xref> as well as <xref
+    target="RFC4704">RFC 4703</xref> for information on how DHCPv6
+    servers deal with potential conflicts when updating DNS even
+    without failover.</t>
 
     <t>From the standpoint of the failover protocol, there is no
     reason why a server which is utilizing the DDNS protocol to
@@ -2565,11 +2565,12 @@ CONFLICT-DONE                                  |
 	allowing the secondary DHCP server to grant new leases even
 	if it is unable to communicate with the primary server.
 	The desired external DDNS behavior for DHCP failover servers
-	is:</t>
+	is similar to that described above for the failover protocol
+	itself:</t>
 
 	<t><list style="numbers">
 	    <t>Allow timely DDNS updates from the server which
-	    grants a a lease to a client. Recognize that there is
+	    grants a lease to a client. Recognize that there is
 	    often a DDNS update lifecycle which parallels the DHCP
 	    lease lifecycle. This is likely to include the addition
 	    of records when the lease is granted, and the removal
@@ -2583,12 +2584,21 @@ CONFLICT-DONE                                  |
 
 	    <t>Avoid redundant or overlapping DDNS updates, where
 	    both failover servers are attempting to perform DDNS
-	    updates for the same lease-client binding. Avoid
-	    situations where one partner is attempting to add RRs
-	    related to a lease binding while the other partner is
-	    attempting to remove RRs related to the same lease
-	    binding.</t>
+	    updates for the same lease-client binding.</t>
+	    
+	    <t>Avoid situations where one partner is attempting to
+	    add RRs related to a lease binding while the other
+	    partner is attempting to remove RRs related to the same
+	    lease binding.</t>
 	</list></t>
+
+	<t>While DHCP servers configured for DDNS typically perform
+	these operations on both the AAAA and the PTR resource records, 
+	this is not required.  It is entirely possible that a DHCP server
+	could be configured to only update the DNS with PTR records, and 
+	the DHCPv6 clients could be responsible for updating the DNS with
+	their own AAAA records.  In this case, the discussions here would
+	apply only to the PTR records.</t>
 
     </section>
 
@@ -2599,8 +2609,9 @@ CONFLICT-DONE                                  |
 	update, or to remove DNS records which were added by its
 	partner, both servers need to know the FQDN associated with
 	the lease-client binding.  In addition, to properly handle
-	DDNS updates, all of the following information needs to be
-	transmitted between the failover partners:</t>
+	DDNS updates, additional information is required.  All of
+	the following information needs to be transmitted between
+	the failover partners:</t>
 
 	<t><list style="numbers">
 	    <t>The FQDN that the client requested be associated
@@ -2608,7 +2619,7 @@ CONFLICT-DONE                                  |
 	    particular FQDN and one is synthesized by the failover
 	    server or if the failover server is configured to replace
 	    a client requested FQDN with a different FQDN, then
-	    this value would be used. </t>
+	    the server generated value would be used. </t>
 
 	    <t>The FQDN that was actually placed in the DNS for
 	    this lease. It may differ from the client requested
@@ -2629,8 +2640,8 @@ CONFLICT-DONE                                  |
 	allocated to clients.</t>
 
 	<t>This information would typically be included in BNDUPD
-	messages sent from one failover partner to the other.<
-	Failover servers MAY choose not to include the this information
+	messages sent from one failover partner to the other.
+	Failover servers MAY choose not to include this information
 	in BNDUPD messages if there has been no change in the status
 	of any DDNS update related to the lease.</t>
 
@@ -2650,7 +2661,8 @@ CONFLICT-DONE                                  |
 
 	<t>The FQDN option contains the FQDN that will be associated
 	with the AAAA RR (if the server is performing an AAAA RR update
-	for the client) and the PTR RR. This FQDN may be composed
+	for the client).  The PTR RR can be generated automatically from
+	the IP address or prefix value. The FQDN may be composed
 	in any of several ways, depending on server configuration
 	and the information provided by the client in its DHCP
 	messages. The client may supply a hostname which it would
@@ -2660,7 +2672,7 @@ CONFLICT-DONE                                  |
 	configured with an FQDN to use for the client, or it may
 	be configured to synthesize an FQDN.</t>
 
-	<t>Since the responsive server may not have completed the
+	<t>Since the server interacting with the client may not have completed the
 	DDNS update at the time it sends the first BNDUPD about the
 	lease binding, there may be cases where the FQDN in later
 	BNDUPD messages does not match the FQDN included in earlier
@@ -2672,12 +2684,13 @@ CONFLICT-DONE                                  |
 	"disambiguation").  Alternatively, at sites which use some
 	or all of the information which clients supply to form the
 	FQDN, it's possible that a client's configuration may be
-	changed so that it begins to supply new data.  The responsive
-	server may react by removing the DNS records which it
+	changed so that it begins to supply new data.  The 
+	server interacting with the client may react by removing the DNS records which it
 	originally added for the client, and replacing them with
 	records that refer to the client's new FQDN. In such cases,
-	the responsive server SHOULD include the actual FQDN that
-	was used in subsequent DDNS options.  The responsive server
+	the server SHOULD include the actual FQDN that
+	was used in subsequent DDNS options in any BNDUPD messages exchanged between
+	the failover partners.  This server
 	SHOULD include relevant information in its BNDUPD messages.
 	This information may be necessary in order to allow the
 	non-responsive partner to detect client configuration changes
@@ -2691,7 +2704,8 @@ CONFLICT-DONE                                  |
 
 	<t>A failover server which is going to perform DDNS updates
 	SHOULD initiate the DDNS update when it grants a new lease
-	to a client. The non-responsive partner SHOULD NOT initiate
+	to a client. The server which did not grant the lease SHOULD NOT
+	initiate
 	a DDNS update when it receives the BNDUPD after the lease
 	has been granted. The failover protocol ensures that only
 	one of the partners will grant a lease to any individual
@@ -2709,12 +2723,8 @@ CONFLICT-DONE                                  |
 	    <t>When the lease was granted before the server was
 	    configured to perform DDNS updates, the server MAY be
 	    configured to perform updates when it next renews
-	    existing leases. Since both servers are responsive to
-	    renewals in NORMAL state, it is not enough to simply
-	    require the non-responsive server to avoid a DNS update
-	    in this case.  The server which would be responsive to
-	    a SOLICIT message from this client is the server which
-	    should initiate the DDNS update.</t>
+	    existing leases.  The server which granted the lease
+	    is the server which should initiate the DDNS update.</t>
 
 	    <t>If a server is in PARTNER-DOWN state, it can conclude
 	    that its partner is no longer attempting to perform an
@@ -2738,12 +2748,13 @@ CONFLICT-DONE                                  |
 
 	<t>A server not in PARTNER-DOWN state "makes a resource
 	FREE" when it initiates a BNDUPD with a binding-status of
-	FREE, EXPIRED, or RELEASED.  Its partner confirms this
-	status by acking that BNDUPD, and upon receipt of the ACK
-	the server has "made the resource FREE".  Conversely, a
-	server in PARTNER-DOWN state "makes a resource FREE" when
-	it sets the binding-status to FREE, since in PARTNER-DOWN
-	state no communications is required with the partner.</t>
+	FREE, FREE_BACKUP, EXPIRED, or RELEASED.  Its partner
+	confirms this status by acking that BNDUPD, and upon receipt
+	of the BNDACK the server has "made the resource FREE".
+	Conversely, a server in PARTNER-DOWN state "makes a resource
+	FREE" when it sets the binding-status to FREE, since in
+	PARTNER-DOWN state no communications is required with the
+	partner.</t>
 
 	<t>It is at this point that it should initiate the DDNS
 	operations to delete RRs from the DDNS. Its partner SHOULD
@@ -2751,7 +2762,7 @@ CONFLICT-DONE                                  |
 	lease binding as part of sending the BNDACK message.   The
 	partner MAY have issued BNDUPD messages with a binding-status
 	of FREE, EXPIRED, or RELEASED previously, but the other
-	server will have NAKed these BNDUPD messages.</t>
+	server will have rejected these BNDUPD messages.</t>
 
 	<t>The failover protocol ensures that only one of the two
 	partner servers will be able to make a resource FREE. The
@@ -2767,8 +2778,22 @@ CONFLICT-DONE                                  |
 	deletes will be performed while either server is in
 	COMMUNICATIONS-INTERRUPTED state, since no resource are
 	moved into the FREE state during that period.</t>
+    </section>
+
+    <section anchor="nameassignment"
+      title="Name Assignment with No Update of DNS">
+
+	<t>In some cases, a DHCP server is configured to return a name
+	to the DHCPv6 client but not enter that name into the DNS.  
+	This is typically a name that it has discovered
+	or generated from information it has received from the client.
+	In this case this name information SHOULD be communicated to the
+	failover partner, if only to ensure that they will return the same
+	name in the event the partner becomes the server to which the 
+	DHCPv6 client begins to interact.</t>
 
     </section>
+
   </section>
 
   <section anchor="reserve" title="Reservations and failover">
@@ -2782,7 +2807,7 @@ CONFLICT-DONE                                  |
     <t>Some DHCP servers support a capability to offer specific preconfigured 
     resources to DHCP clients.  These are real DHCP
     clients, they do the entire DHCP protocol, but these servers always
-    offer the client a specific pre-configured resource -- and they
+    offer the client a specific pre-configured resource, one they
     offer that resource to no other clients.  Such a capability has
     several names, but it is sometimes called a "reservation", in that
     the resource is reserved for a particular DHCP client.</t>
@@ -2792,34 +2817,36 @@ CONFLICT-DONE                                  |
     resource pools, but identical reservations for the DHCP
     clients.</t>
 
-    <t>In a failover context, both servers need to be configured with the
-    proper reservations in an identical manner, but if we stop there
-    problems can occur around the edge conditions where reservations are
-    made for an IP address that has already been leased to a different
-    client.  Different servers handle this conflict in different ways,
-    but the goal of the failover protocol is to allow correct operation
-    with any server's approach to the normal processing of the DHCP protocol.</t>
+    <t>In a failover context, both servers need to be configured
+    with the proper reservations in an identical manner, but if we
+    stop there problems can occur around the edge conditions where
+    reservations are made for resource that has already been leased
+    to a different client.  Different servers handle this conflict
+    in different ways, but the goal of the failover protocol is to
+    allow correct operation with any server's approach to the normal
+    processing of the DHCP protocol.</t>
 
     <t>The general solution with regards to reservations is as follows.
-    Whenever a reserved IP address becomes FREE (i.e., when first configured 
+    Whenever a reserved resource becomes FREE (i.e., when first configured 
     or whenever a client frees it or it expires or is reset), the
     primary server MUST show that resource as FREE (and thus available
     for its own allocation) and it MUST send it to the secondary server
-    in a BNDUPD with a flag set showing that it is reserved and a
+    in a BNDUPD with a flag set showing that it is reserved and with a
     status of BACKUP.</t>
 
-    <t>Note that this implies that a reserved resource goes through the
-    normal state changes from FREE to ACTIVE (and possibly back to FREE).
-    The failover protocol supports this approach to reservations, i.e.,
-    where the IP address undergoes the normal state changes of any IP
-    address, but it can only be offered to the client for which it is
-    reserved.</t>
+    <t>Note that this implies that a reserved resource goes through
+    the normal state changes from FREE to ACTIVE (and possibly back
+    to FREE).  The failover protocol supports this approach to
+    reservations, i.e., where the resource undergoes the normal
+    state changes of any resource, but it can only be offered to
+    the client for which it is reserved.</t>
 
-    <t>From the above, it follows that a reservation soley on the secondary
-    will not necessarily allow the secondary to offer that address to
-    client to whom it is reserved.  The reservation must also appear on
-    the primary as well for the secondary to be able to offer the 
-    resource to the client to which is is reserved.</t>
+    <t>From the above, it follows that a reservation soley on the
+    secondary will not necessarily allow the secondary to offer
+    that address to client to whom it is reserved.  The reservation
+    must also appear on the primary as well for the secondary to
+    be able to offer the resource to the client to which is is
+    reserved.</t>
 
     <t>When the reservation on a resource is cancelled, if the resource 
     is currently FREE and the server is the primary, or BACKUP and the
@@ -2827,8 +2854,10 @@ CONFLICT-DONE                                  |
     server with the binding-status FREE and an indication that the
     resource is no longer reserved.</t>
 
-    <t>TODO: Should we try to pin down the form of "indication that
-    the resource is (or is not) reserved"?</t>
+    <!-- 
+    TODO: Should we try to pin down the form of "indication that
+    the resource is (or is not) reserved"?
+    -->
 
   </section>
 
