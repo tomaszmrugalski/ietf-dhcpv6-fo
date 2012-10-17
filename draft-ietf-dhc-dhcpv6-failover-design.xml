@@ -2500,11 +2500,13 @@ CONFLICT-DONE                                  |
 
   <section anchor="DDNS" title="Dynamic DNS Considerations">
     <!-- issue 9 -->
-    <t>TODO: Describe DNS Updates challenges in failover environment.
-    It is nicely described in Section 5.12 of <xref
-    target="dhcpv4-failover"/>.
+    TODO: Describe DNS Updates challenges in failover environment.
+    It is nicely described in Section 5.12 of xref
+    target="dhcpv4-failover".
     
-    IN PROGRESS, NOT YET COMPLETE 10/16/12</t>
+    Done 10/17/12 Kim
+
+    -->
 
     <t>DHCP servers (and clients) can use DNS Dynamic Updates as
     described in <xref target="RFC2136">RFC 2136</xref> to maintain
@@ -2514,188 +2516,215 @@ CONFLICT-DONE                                  |
     DHCP servers and clients should follow in carrying them out,
     are laid out in <xref target="RFC4704">RFC 4704</xref>.</t>
     
-    <t>The nature of the failover
-    protocol introduces some issues concerning dynamic DNS updates that
-    are not part of non-failover environments.  This section
-    describes these issues, and defines the information which failover
-    partners should exchange and the protocol which they should follow in
-    order to ensure consistent behavior.  The presence of this section
-    should not be interpreted as requiring that implementations of the
-    DHCPv6 failover protocol must also support DDNS updates.  The purpose
-    of this discussion is to clarify the areas where the failover
-    and DHCP-DDNS protocols intersect for the benefit of implementations
-    which support both protocols, not to introduce a new requirement into
-    the DHCPv6 failover protocol.  Thus, a DHCPv6 server which implements the
-    failover protocol MAY also support dynamic DNS updates, but if it
-    does support dynamic DNS updates it SHOULD utilize the techniques
-    described here in order to correctly distribute them between the
-    failover partners.  See 
-    <xref target="RFC4704">RFC 4704</xref> as well as 
-    <xref target="RFC4704">RFC 4703</xref> for information on how DHCPv6
-    servers deal with potential conflicts when updating DNS even without
-    failover.</t>
+    <t>The nature of the failover protocol introduces some issues
+    concerning dynamic DNS updates that are not part of non-failover
+    environments.  This section describes these issues, and defines
+    the information which failover partners should exchange and the
+    protocol which they should follow in order to ensure consistent
+    behavior.  The presence of this section should not be interpreted
+    as requiring that implementations of the DHCPv6 failover protocol
+    must also support DDNS updates.  The purpose of this discussion
+    is to clarify the areas where the failover and DHCP-DDNS protocols
+    intersect for the benefit of implementations which support both
+    protocols, not to introduce a new requirement into the DHCPv6
+    failover protocol.  Thus, a DHCPv6 server which implements the
+    failover protocol MAY also support dynamic DNS updates, but if
+    it does support dynamic DNS updates it SHOULD utilize the
+    techniques described here in order to correctly distribute them
+    between the failover partners.  See <xref target="RFC4704">RFC
+    4704</xref> as well as <xref target="RFC4704">RFC 4703</xref>
+    for information on how DHCPv6 servers deal with potential
+    conflicts when updating DNS even without failover.</t>
 
-    <t>From the standpoint of the failover protocol, there is no reason why
-    a server which is utilizing the DDNS protocol to update a DNS server
-    should not be a partner with a server which is not utilizing the DDNS
-    protocol to update a DNS server.  However, a server which is not able
-    to support DDNS or is not configured to support DDNS SHOULD output a
-    warning message when it receives BNDUPD messages which indicate that
-    its failover partner is configured to support the DDNS protocol to
-    update a DNS server.  An implementation MAY consider this an error
-    and refuse to operate, or it MAY choose to operate anyway, having
+    <t>From the standpoint of the failover protocol, there is no
+    reason why a server which is utilizing the DDNS protocol to
+    update a DNS server should not be a partner with a server which
+    is not utilizing the DDNS protocol to update a DNS server.
+    However, a server which is not able to support DDNS or is not
+    configured to support DDNS SHOULD output a warning message when
+    it receives BNDUPD messages which indicate that its failover
+    partner is configured to support the DDNS protocol to update a
+    DNS server.  An implementation MAY consider this an error and
+    refuse to operate, or it MAY choose to operate anyway, having
     warned the user of the problem in some way.</t>
 
     <section anchor="failover-ddns" 
        title="Relationship between failover and dynamic DNS update">
 
-	<t>The failover protocol describes the conditions under which each failover 
-	server may renew a lease to its current DHCP client, and
-	describes the conditions under which it may grant a lease to a new
-	DHCP client.  An analogous set of conditions determines when a failover 
-	server should initiate a DDNS update, and when it should attempt
-	to remove records from the DNS. The failover protocol's conditions
+	<t>The failover protocol describes the conditions under
+	which each failover server may renew a lease to its current
+	DHCP client, and describes the conditions under which it
+	may grant a lease to a new DHCP client.  An analogous set
+	of conditions determines when a failover server should
+	initiate a DDNS update, and when it should attempt to remove
+	records from the DNS. The failover protocol's conditions
 	are based on the desired external behavior: avoiding duplicate
-	address assignments; allowing clients to continue using leases which
-	they obtained from one failover partner even if they can only communicate 
-	with the other partner; allowing the backup DHCP server to
-	grant new leases even if it is unable to communicate with the primary
-	server.  The desired external DDNS behavior for DHCP failover servers
+	address and prefix assignments; allowing clients to continue
+	using leases which they obtained from one failover partner
+	even if they can only communicate with the other partner;
+	allowing the secondary DHCP server to grant new leases even
+	if it is unable to communicate with the primary server.
+	The desired external DDNS behavior for DHCP failover servers
 	is:</t>
 
 	<t><list style="numbers">
-	    <t>Allow timely DDNS updates from the server which grants a
-	    client a lease. Recognize that there is often a DDNS update
-	    lifecycle which parallels the DHCP lease lifecycle. This is
-	    likely to include the addition of records when the lease is
-	    granted, and the removal of DNS records when the lease is subsequently 
+	    <t>Allow timely DDNS updates from the server which
+	    grants a a lease to a client. Recognize that there is
+	    often a DDNS update lifecycle which parallels the DHCP
+	    lease lifecycle. This is likely to include the addition
+	    of records when the lease is granted, and the removal
+	    of DNS records when the leased resource is subsequently
 	    made available for allocation to a different client.</t>
 
-	    <t>Communicate enough information between the two failover
-	    servers to allow one to complete the DDNS update 'lifecycle'
-	    even if the other server originally granted the lease.</t>
+	    <t>Communicate enough information between the two
+	    failover servers to allow one to complete the DDNS
+	    update 'lifecycle' even if the other server originally
+	    granted the lease.</t>
 
-	    <t>Avoid redundant or overlapping DDNS updates, where both failover 
-	    servers are attempting to perform DDNS updates for the
-	    same lease-client binding. Avoid situations where one partner
-	    is attempting to add RRs related to a lease binding while the
-	    other partner is attempting to remove RRs related to the same
-	    lease binding.</t>
+	    <t>Avoid redundant or overlapping DDNS updates, where
+	    both failover servers are attempting to perform DDNS
+	    updates for the same lease-client binding. Avoid
+	    situations where one partner is attempting to add RRs
+	    related to a lease binding while the other partner is
+	    attempting to remove RRs related to the same lease
+	    binding.</t>
 	</list></t>
 
     </section>
 
     <section anchor="useofddns" 
-       title="Use of the DDNS option">
+       title="Exchanging DDNS Information">
 
-	<t>In order for either server to be able to complete a DDNS update, or
-	to remove DNS records which were added by its partner, both servers
-	need to know the FQDN associated with the lease-client binding. The
-	FQDN associated with the client's A RR and PTR RR SHOULD be communicated 
-	from the server which adds records into the DNS to its partner.
-	The initiating server SHOULD use the DDNS option in the BNDUPD mes-
-	sages to inform the partner server of the status of any DDNS updates
-	associated with a lease binding. Failover servers MAY choose not to
-	include the DDNS option in BNDUPD messages if there has been no
-	change in the status of any DDNS update related to the lease binding.
-	The partner server receiving BNDUPD messages containing the DDNS
-	option SHOULD compare the status flags and the FQDN contained in the
-	option data with the current DDNS information it has associated with
-	the lease binding, and update its notion of the DDNS status accordingly.</t>
+	<t>In order for either server to be able to complete a DDNS
+	update, or to remove DNS records which were added by its
+	partner, both servers need to know the FQDN associated with
+	the lease-client binding.  In addition, to properly handle
+	DDNS updates, all of the following information needs to be
+	transmitted between the failover partners:</t>
 
-	<t>The initiating server MAY send a BNDUPD to its partner before the
-	DDNS update has been successfully completed. If it does so, it SHOULD
-	leave the 'C' bit in the Flags field clear, to indicate to the
-	partner that the DDNS update may not be complete. When the DDNS
-	update has been successfully acknowledged by the DNS server, the initiating 
-	DHCP server SHOULD include the DDNS option in its next BNDUPD
-	message about the binding, so that the partner server will be able to
-	record the final status of the DDNS update. The initiating server
-	SHOULD set the 'C' bit in the DDNS option if the DDNS update was successfully 
-	accepted by the DNS server.</t>
+	<t><list style="numbers">
+	    <t>The FQDN that the client requested be associated
+	    with the resource.  If the client doesn't request a
+	    particular FQDN and one is synthesized by the failover
+	    server or if the failover server is configured to replace
+	    a client requested FQDN with a different FQDN, then
+	    this value would be used. </t>
 
-	<t>Some implementations will choose to send a BNDUPD without waiting for
-	the DDNS update to complete, and then will send a second BNDUPD once
-	the DDNS update is complete. Other implementations will delay sending
-	the partner a BNDUPD until the DDNS update has been acknowledged by
-	the DNS server, or until some time-limit has elapsed, in order to
-	avoid sending a second BNDUPD.</t>
+	    <t>The FQDN that was actually placed in the DNS for
+	    this lease. It may differ from the client requested
+	    FQDN due to some form of disambiguation or other DHCP
+	    server configuration (as described above).</t>
+	    
+	    <t>The status of and DDNS operations in progress or
+	    completed.</t>
 
-	<t>The Domain Name field in the DDNS option contains the FQDN that will
-	be associated with the A RR (if the server is performing an A RR
-	update for the client) and the PTR RR. This FQDN may be composed in
-	any of several ways, depending on server configuration and the information 
-	provided by the client in its DHCP messages. The client may
-	supply a hostname which it would like the server to use in forming
-	the FQDN, or it may supply the entire FQDN. The server may be configured 
-	to attempt to use the information the client supplies, it may be
-	configured with an FQDN to use for the client, or it may be
-	configured to synthesize an FQDN. The responsive server SHOULD
-	include the FQDN that it will be using in DDNS updates it initiates
-	when it sends the DDNS option.</t>
+	    <t>Information sufficient to allow the failover partner
+	    to remove the FQDN from the DNS should that become
+	    necessary.</t>
+	</list></t>
 
-	<t>Since the responsive server may not have completed the DDNS
-	update at the time it sends the first BNDUPD about the lease
-	binding, there may be cases where the FQDN in later BNDUPD
-	messages does not match the FQDN included in earlier messages.
-	For example, the responsive server may be configured to
-	handle situations where two or more DHCP client FQDNs are
-	identical by modifying the most-specific label in the FQDNs
-	of some of the clients in an attempt to generate unique
-	FQDNs for them (a process sometimes called "disambiguation").
-	Alternatively, at sites which use some or all of the
-	information which clients supply to form the FQDN, it's
-	possible that a client's configuration may be changed so
-	that it begins to supply new data.  The responsive server
-	may react by removing the DNS records which it originally
-	added for the client, and replacing them with records that
-	refer to the client's new FQDN. In such cases, the responsive
-	server SHOULD include the actual FQDN that was used in
-	subsequent DDNS options.  The responsive server SHOULD
-	include relevant client-option data in the client-request-options
-	option in its BNDUPD messages.  This information may be
-	necessary in order to allow the non- responsive partner to
-	detect client configuration changes that change the hostname
-	or FQDN data which the client includes in its DHCP requests.</t>
+	<t>These data items are the minimum necessary set to reliably
+	allow two failover partners to successfully share the
+	responsibility to keep the DNS up to date with the resources
+	allocated to clients.</t>
+
+	<t>This information would typically be included in BNDUPD
+	messages sent from one failover partner to the other.<
+	Failover servers MAY choose not to include the this information
+	in BNDUPD messages if there has been no change in the status
+	of any DDNS update related to the lease.</t>
+
+	<t>The partner server receiving BNDUPD messages containing
+	the DDNS information SHOULD compare the status informatin
+	and the FQDN with the current DDNS information it has
+	associated with the lease binding, and update its notion
+	of the DDNS status accordingly.</t>
+
+	<t>Some implementations will instead choose to send a BNDUPD
+	without waiting for the DDNS update to complete, and then
+	will send a second BNDUPD once the DDNS update is complete.
+	Other implementations will delay sending the partner a
+	BNDUPD until the DDNS update has been acknowledged by the
+	DNS server, or until some time-limit has elapsed, in order
+	to avoid sending a second BNDUPD.</t>
+
+	<t>The FQDN option contains the FQDN that will be associated
+	with the AAAA RR (if the server is performing an AAAA RR update
+	for the client) and the PTR RR. This FQDN may be composed
+	in any of several ways, depending on server configuration
+	and the information provided by the client in its DHCP
+	messages. The client may supply a hostname which it would
+	like the server to use in forming the FQDN, or it may supply
+	the entire FQDN. The server may be configured to attempt
+	to use the information the client supplies, it may be
+	configured with an FQDN to use for the client, or it may
+	be configured to synthesize an FQDN.</t>
+
+	<t>Since the responsive server may not have completed the
+	DDNS update at the time it sends the first BNDUPD about the
+	lease binding, there may be cases where the FQDN in later
+	BNDUPD messages does not match the FQDN included in earlier
+	messages.  For example, the responsive server may be
+	configured to handle situations where two or more DHCP
+	client FQDNs are identical by modifying the most-specific
+	label in the FQDNs of some of the clients in an attempt to
+	generate unique FQDNs for them (a process sometimes called
+	"disambiguation").  Alternatively, at sites which use some
+	or all of the information which clients supply to form the
+	FQDN, it's possible that a client's configuration may be
+	changed so that it begins to supply new data.  The responsive
+	server may react by removing the DNS records which it
+	originally added for the client, and replacing them with
+	records that refer to the client's new FQDN. In such cases,
+	the responsive server SHOULD include the actual FQDN that
+	was used in subsequent DDNS options.  The responsive server
+	SHOULD include relevant information in its BNDUPD messages.
+	This information may be necessary in order to allow the
+	non-responsive partner to detect client configuration changes
+	that change the hostname or FQDN data which the client
+	includes in its DHCP requests.</t>
 
     </section>
 
     <section anchor="addingrr" 
        title="Adding RRs to the DNS">
 
-	<t>A failover server which is going to perform DDNS updates SHOULD initiate 
-	the DDNS update when it grants a new lease to a client. The
-	non-responsive partner SHOULD NOT initiate a DDNS update when it
-	receives the BNDUPD after the lease has been granted. The failover
-	protocol ensures that only one of the partners will grant a lease to
-	any individual client, so it follows that this requirement will
-	prevent both partners from initiating updates simultaneously. The
-	server initiating the update SHOULD follow the protocol in [FQDN].
-	The server may be configured to perform an A RR update on behalf of
-	its clients, or not. Ordinarily, a failover server will not initiate
-	DDNS updates when it renews leases. In two cases, however, a failover
-	server MAY initiate a DDNS update when it renews a lease to its
-	existing client:</t>
+	<t>A failover server which is going to perform DDNS updates
+	SHOULD initiate the DDNS update when it grants a new lease
+	to a client. The non-responsive partner SHOULD NOT initiate
+	a DDNS update when it receives the BNDUPD after the lease
+	has been granted. The failover protocol ensures that only
+	one of the partners will grant a lease to any individual
+	client, so it follows that this requirement will prevent
+	both partners from initiating updates simultaneously. The
+	server initiating the update SHOULD follow the protocol in
+	<xref target="RFC4704">RFC 4704</xref>.  The server may be
+	configured to perform a AAAA RR update on behalf of its
+	clients, or not. Ordinarily, a failover server will not
+	initiate DDNS updates when it renews leases. In two cases,
+	however, a failover server MAY initiate a DDNS update when
+	it renews a lease to its existing client:</t>
 
 	<t><list style="numbers">
-	    <t>When the lease was granted before the server was configured to
-	    perform DDNS updates, the server MAY be configured to perform
-	    updates when it next renews existing leases. Since both
-	    servers are responsive to renewals in NORMAL state, it is not
-	    enough to simply require the non-responsive server to avoid a
-	    DNS update in this case.  The server which would be responsive
-	    to a DHCPDISCOVER from this client (even though the current
-	    request is a DHCPREQUEST/RENEW) is the server which should
-	    initiate the DDNS update.</t>
+	    <t>When the lease was granted before the server was
+	    configured to perform DDNS updates, the server MAY be
+	    configured to perform updates when it next renews
+	    existing leases. Since both servers are responsive to
+	    renewals in NORMAL state, it is not enough to simply
+	    require the non-responsive server to avoid a DNS update
+	    in this case.  The server which would be responsive to
+	    a SOLICIT message from this client is the server which
+	    should initiate the DDNS update.</t>
 
-	    <t>If a server is in PARTNER-DOWN state, it can conclude that its
-	    partner is no longer attempting to perform an update for the
-	    existing client. If the remaining server has not recorded that
-	    an update for the binding has been successfully completed, the
-	    server MAY initiate a DDNS update.  It MAY initiate this
-	    update immediately upon entry to PARTNER-DOWN state, it may
-	    perform this in the background, or it MAY initiate this update
-	    upon next hearing from the DHCP client.</t>
+	    <t>If a server is in PARTNER-DOWN state, it can conclude
+	    that its partner is no longer attempting to perform an
+	    update for the existing client. If the remaining server
+	    has not recorded that an update for the binding has
+	    been successfully completed, the server MAY initiate a
+	    DDNS update.  It MAY initiate this update immediately
+	    upon entry to PARTNER-DOWN state, it may perform this
+	    in the background, or it MAY initiate this update upon
+	    next hearing from the DHCP client.</t>
 	</list></t>
 
     </section>
@@ -2703,38 +2732,41 @@ CONFLICT-DONE                                  |
     <section anchor="deletingrr" 
        title="Deleting RRs from the DNS">
 
-	<t>The failover server which makes an IP address FREE SHOULD initiate
-	any DDNS deletes, if it has recorded that DNS records were added on
-	behalf of the client.</t>
+	<t>The failover server which makes a resource FREE SHOULD
+	initiate any DDNS deletes, if it has recorded that DNS
+	records were added on behalf of the client.</t>
 
-	<t>A server not in PARTNER-DOWN state "makes an IP address FREE" when it
-	initiates a BNDUPD with a binding-status of FREE, EXPIRED, or
-	RELEASED.  Its partner confirms this status by acking that BNDUPD,
-	and upon receipt of the ACK the server has "made the IP address
-	FREE".  Conversely, a server in PARTNER-DOWN state "makes an IP
-	address FREE" when it sets the binding-status to FREE, since in
-	PARTNER-DOWN state no communications is required with the partner.</t>
+	<t>A server not in PARTNER-DOWN state "makes a resource
+	FREE" when it initiates a BNDUPD with a binding-status of
+	FREE, EXPIRED, or RELEASED.  Its partner confirms this
+	status by acking that BNDUPD, and upon receipt of the ACK
+	the server has "made the resource FREE".  Conversely, a
+	server in PARTNER-DOWN state "makes a resource FREE" when
+	it sets the binding-status to FREE, since in PARTNER-DOWN
+	state no communications is required with the partner.</t>
 
-	<t>It is at this point that it should initiate the DDNS operations to
-	delete RRs from the DDNS. Its partner SHOULD NOT initiate DDNS
-	deletes for DNS records related to the lease binding as part of sending 
-	the BNDACK message.   The partner MAY have issued BNDUPD messages
-	with a binding-status of FREE, EXPIRED, or RELEASED previously, but
-	the other server will have NAKed these BNDUPD messages.</t>
+	<t>It is at this point that it should initiate the DDNS
+	operations to delete RRs from the DDNS. Its partner SHOULD
+	NOT initiate DDNS deletes for DNS records related to the
+	lease binding as part of sending the BNDACK message.   The
+	partner MAY have issued BNDUPD messages with a binding-status
+	of FREE, EXPIRED, or RELEASED previously, but the other
+	server will have NAKed these BNDUPD messages.</t>
 
-	<t>The failover protocol ensures that only one of the two partner
-	servers will be able to make a lease FREE. The server making the
-	lease FREE may be doing so while it is in NORMAL communication with
-	its partner, or it may be in PARTNER-DOWN state. If a server is in
-	PARTNER-DOWN state, it may be performing DDNS deletes for RRs which
-	its partner added originally. This allows a single remaining partner
-	server to assume responsibility for all of the DDNS activity which
-	the two servers were undertaking.</t>
+	<t>The failover protocol ensures that only one of the two
+	partner servers will be able to make a resource FREE. The
+	server making the resource FREE may be doing so while it
+	is in NORMAL communication with its partner, or it may be
+	in PARTNER-DOWN state. If a server is in PARTNER-DOWN state,
+	it may be performing DDNS deletes for RRs which its partner
+	added originally. This allows a single remaining partner
+	server to assume responsibility for all of the DDNS activity
+	which the two servers were undertaking.</t>
 
-	<t>Another implication of this approach is that no DDNS RR deletes will
-	be performed while either server is in COMMUNICATIONS-INTERRUPTED
-	state, since no IP addresses are moved into the FREE state during
-	that period.</t>
+	<t>Another implication of this approach is that no DDNS RR
+	deletes will be performed while either server is in
+	COMMUNICATIONS-INTERRUPTED state, since no resource are
+	moved into the FREE state during that period.</t>
 
     </section>
   </section>
