@@ -12,8 +12,7 @@ option.
 --------
 
 11. Write security considerations.
-
-12. Write section "Determining Allocation Approach".
+    (Tomek: Couple points added, but it is barely started.)
 
  PROTOCOL SPEC
 ---------------
@@ -61,5 +60,8 @@ Q: Do we want to cover address/prefix reservation in the base
 Proofread #2,3,4,10 as well, and made minor to substantial edits
 to each.
 
+2012-10-22
 
-
+12. Write section "Determining Allocation Approach".
+Allocation algorithm section updated, several editorial changes,
+expanded glossary, started security considerations section.

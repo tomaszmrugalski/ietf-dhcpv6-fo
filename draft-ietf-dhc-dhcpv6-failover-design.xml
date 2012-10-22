@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
 ]>
 <rfc ipr="trust200902" category="std"
-     docName="draft-ietf-dhc-dhcpv6-failover-design-01">
+     docName="draft-ietf-dhc-dhcpv6-failover-design-02">
   <front>
     <title abbrev="DHCPv6 Failover Design">DHCPv6 Failover Design</title>
 
@@ -109,10 +109,19 @@
         to deplete). See <xref target="alloc-separated"/> for
         details.</t>
 
-        <t>Primary Server</t>
+        <t>Partner - name of the other DHCPv6 server that participates
+        in failover relationship. When the role (primary or secondary)
+        is not important, the other server is referred to as a "failover
+        partner" or simply partner.</t>
+
+        <t>Primary Server - First out of two DHCPv6 servers that participate
+        in a failover relationship. In active-passive mode this is the
+        server that handles most of the client traffic. Its failover partner
+        is referred to as secondary server. </t>
 
         <t>Proportional Allocation - a prefix allocation algorithm
-        to split the available free leases between the primary and
+        that splits the available resources (addresses or prefixes) between
+        the primary and
         secondary servers that is particularly well suited for more
         limited resources.  See <xref target="alloc-classic"/> for
         details.</t>
@@ -127,7 +136,10 @@
         <t>Responsive - A server that is responsive, will respond to
         DHCPv6 client requests.</t>
 
-        <t>Secondary Server</t>
+        <t>Secondary Server - Second of out two DHCPv6 servers that participate
+        in a failover relationship. Its failover partner is referred to as
+        primary server. In active-passive mode this server typically does
+        not handle client traffic and acts as a backup.</t>
 
         <t>Server - A DHCPv6 server that implements DHCPv6 failover.
         'Server' and 'failover endpoint' are synonymous only if the
@@ -206,6 +218,10 @@
 	conclusion that each server must be able to handle whole
 	traffic. Therefore in properly provisioned setup, load
 	balancing is not needed.</t>
+
+        <t>It is likely that active-active mode that is essentially
+        a load balancing will be defined as an extension in the
+        near future.</t>
       </section> <!-- features out of Scope -->
 
     </section> <!-- Goals -->
@@ -270,7 +286,7 @@
   the server crashes after sending a response to client, but before
   sending the lazy update to its partner (or when communication
   between partners is interrupted). To solve this problem, the concept
-  known as the Maximum Client Lead Time (MCLT) (initially designed
+  known as the Maximum Client Lead Time (initially designed
   for DHCPv4 failover) is used.  The MCLT is the maximum amount of
   time that one server can extend a lease for a client's binding
   beyond the time known by its failover partner. See <xref
@@ -286,7 +302,7 @@
   operation. A Server SHOULD transmit any pending lease updates before
   transmitting DISCONNECT message.</t>
 
-  <section anchor="states-overview" title="Failover Machine State Overview">
+  <section anchor="states-overview" title="Failover State Machine Overview">
     <t>The following section provides a simplified description of all
     states. For the sake of clarity and simplicity, it omits important
     details. For complete description, see <xref target="states"/>.
@@ -298,7 +314,7 @@
     queries) or unresponsive (clients' queries are ignored).</t>
 
     <t>A server starts its operation in short-lived STARTUP state. A
-    server determines its partner reachibility and state and sets its
+    server determines its partner reachability and state and sets its
     own state based on that determination.  It frequently
     returns back to the state it was in before shutdown.</t>
 
@@ -443,7 +459,7 @@
 
 
 <section title="Connection Management">
-  <section title="Creating Connections">
+  <section anchor="create-connections" title="Creating Connections">
     <t>Every primary server implementing the failover protocol
     SHOULD attempt to connect to all of its partners periodically,
     where the period is implementation dependent and SHOULD be
@@ -600,6 +616,9 @@
     lease on it expires, it will again become available and will be
     owned by the primary.</t>
 
+    <!-- tomek: if we are told that the text is too long, this paragraph
+    is explanatory and does not really add any specific value. Let's
+    keep it for now, though. -->
     <t>A resource will not become owned by the server which allocated
     it initially when it is released or the lease expires because, in
     general, that server will have had to replenish its pool of
@@ -622,7 +641,7 @@
     area of some sensitivity, since the goal is to maintain a more or less
     constant ratio of available addresses between the two servers.</t>
 
-    <!-- issue 2 
+    <!-- issue 2
     TODO: Reuse rest of the description from section 5.4 from <xref
     target="dhcpv4-failover"/> here.
 
@@ -650,11 +669,15 @@
     in such a way that it can tell the kind of every resource based
     solely on the IP or prefix address itself.</t>
 
-    <t>The resources are sent to the secondary using the BNDUPD
-    message with a state of BACKUP, which indicates the resource
+    <t>The resources are delegated to the secondary using the BNDUPD
+    message with a state of FREE_BACKUP, which indicates the resource
     is now available for allocation by the secondary.  Once the
     message is sent, the primary MUST NOT use these resources for
-    allocation to DHCP clients.</t>
+    allocation to DHCPv6 clients.</t>
+
+    <t>Available resources can be delegated back to the primary server
+    in certain cases. BNDUPD will contain state FREE for leases that
+    were previously in FREE_BACKUP state.</t>
 
     <t>The POOLREQ/POOLRESP message exchange initiated by the
     secondary is valid at any time, and the primary server SHOULD,
@@ -690,17 +713,17 @@
     to the PRIMARY and not available to the secondary.  Of course,
     the secondary MUST reject that BNDUPD if it has already used
     that resource for a DHCP client.</t>
-
   </section>
 
   <section anchor="alloc-separated" title="Independent Allocation">
-    <t>In this allocation scheme, available resources are split
+    <t>In this allocation scheme, available resources are permanently (until
+    server configuration changes) split
     between servers. Available resources are split between the primary and
     secondary servers as part of initial connection establishment. Once
     resources are allocated to each server, there is no need to
     reassign them.  This algorithm is simpler than proportional
-    allocation since it requires similar initial communication and does not
-    require a rebalancing mechanism, but it assumes
+    allocation since it requires similar initial communication, but does not
+    require a rebalancing mechanism. It assumes
     that the pool assigned to each server will never deplete. That is
     often a reasonable assumption for IPv6 addresses (e.g. servers are
     often assigned a /64 pool that contains many more addresses than existing
@@ -711,25 +734,57 @@
     <t>Once each server is assigned a resource pool during initial
     connection establishment, it may allocate assigned resources to
     clients. Once a client release a resource or its lease is expired,
-    the returned resource returns to pool for the same server. Resources
-    never changes servers.</t>
+    the returned resource returns to pool for the server that leased it.
+    Resources never changes servers.</t>
 
     <t>During COMMUNICATION-INTERRUPTED events, a partner MAY continue
     extending existing leases when requested by clients. A healthy
     partner MUST NOT lease resources that were assigned to its downed
     partner and later released by a client unless it is in PARTNER-DOWN state.
+    Server SHOULD use its own pool first before starting new assignements
+    from its downed partner's pool. As the assumption is that independent
+    allocation should be used only when available resources are vast and
+    not expected to be fully used at any given time, it is very unlikely
+    that the server will ever need to use its downed partner pools.
     </t>
   </section>
 
-  <section title="Determining Allocation Approach">
-    <!-- issue 10 -->
+  <section title="Choosing Allocation Algorithm">
+    <t>All implementations MUST support proportional allocation algorithm and SHOULD
+    support independent allocation. If the implementation implement both and
+    let the user configure it, the default algorithm used SHOULD be proportional
+    allocation algorithm.</t>
+    <t>Proportional allocation mechanism is more flexible as it can dynamically
+    rebalance available resources between servers. That balance includes additional
+    burden for the servers and generates more traffic between servers. Proportional
+    algorithm can be considered as managing available resources more efficiently
+    than idenpendent. That is important aspect when working in a network that is
+    nearing address and/or prefix depletion.</t>
+
+    <t>Independent allocation can be used when the number of available resources
+    are large and there is no realistic danger of running out of resources.
+    Use of the independent allocation makes communication between partners simpler.</t>
+
+    <t>Typically indepentent allocation is used for IPv6 addresses, because even
+    for /64 pools a server will never run out of addresses to assign, so there is
+    no need to rebalance. For the prefix delegation mechanism, available resources
+    are much smaller, so there is a danger of running out of addresses. Therefore
+    typically proportional allocation will be used for prefix delegations. Independent
+    allocation may be used, but the implication must be well understood. For example
+    in a network that delegates /64 prefixes out out /48 prefix (so there can be up
+    to 65536 prefixes delegated) and a 1000 requesting routers, it is safe to
+    use independent allocation.</t>
+
+    <t>It should be stressed out that independent allocation algorithm SHOULD NOT
+    be used when number of resources is limited and there is a realistic danger of
+    depleting resources. If this recommendation is violated, it may lead to a case,
+    when one server denies clients due to pool depletion despite the fact the the
+    other partner still have many resources available.</t>
+
+    <!-- issue 10
     <t>TODO: Write this section! </t>
-
-    <section title="IPv6 Addresses">
-    </section>
-
-    <section title="IPv6 Prefixes">
-    </section>
+    tomek: done! 2012-10-22
+    -->
   </section> <!-- determining allocation approach -->
 </section> <!-- address allocation -->
 
@@ -869,7 +924,7 @@
   server.</t>
 
   <t>6. The lease belongs to a pool that is governed by the independent
-  allocation is used and the lease belongs to the secondary server.</t>
+  allocation and the lease belongs to the secondary server.</t>
 
   <t>7. Pool rebalance event occurs (POOLREQ/POOLRSP messages are
   exchanged). Addresses (or prefixes) belonging to the primary
@@ -884,7 +939,7 @@
 
   <t>10. An administrative action is taken to recover an abandoned lease back to
   usable state. This transition MAY occur due to an implementation specific
-  handling on ABANDONED resource. One possible example of such use is an
+  handling on ABANDONED resource. One possible example of such use is a
   Neighbor Discovery or ICMP Echo check if the address is still in use.</t>
 </list>
 </t>
@@ -1303,6 +1358,12 @@
       <!-- tomek: v4-failover-12 states that FQDN either MUST or MUST NOT
            appear, depending on whether server did or did not DDNS. Perhaps
            putting it in the optional section is not the right place? -->
+      <!-- tomek: I'm not sure it tying FQDN to the actual DDNS update is a good
+      idea. There's a corner case when FQDN is used only to assign names to
+      hosts, without updating DNSes. It is a use case allowed by the standard,
+      not sure if it has any practical applications or if it is really used.
+      I suggest a different wording: "depending on whether the server did or
+      did not send FQDN option to clients" -->
       <t>assigned FQDN name, defined in <xref target="RFC4704"/></t>
       <t>Options Requested by the client, i.e. content of the ORO</t>
       <t>Remote-ID, defined in <xref target="RFC4649"/></t>
@@ -2904,8 +2965,25 @@ CONFLICT-DONE                                  |
   </section>
 
   <section title="Security Considerations">
-    <!-- issue 11 -->
-    <t>TODO: Security considerations section will contain loose notes
+    <t>DHCPv6 failover is an extension of a standard DHCPv6 protocol, so all
+    security considerations from <xref target="RFC3315" />, Section 23 and
+    <xref target="RFC3633" />, Section 15 related to the server apply.</t>
+
+    <t>As traffic exchange between clients and server is not encrypted,
+    an attacker than penetrated the network and is able to intercept traffic,
+    will not gain anything by also sniffing communication between partners.</t>
+
+    <t>An attacker that can impersonate one partner can efficiently
+    perform a denial of service attack on the remaining uncompromised server.
+    Several techniques may be used: pretending that conflict resolution
+    is required, requesting rebalance, claming that a valid lease was released
+    or declined etc. For that reason the communication between servers
+    SHOULD support failover connections over TLS, as explained in Section
+    <xref target="create-connections" />. Such secure connection SHOULD
+    be optional and configurable by the administrator.</t>
+
+    <!-- issue 11: complete security considerations section -->
+    <t>TODO: Security considerations section contains loose notes
     and will be transformed into consistent text once the core design
     solidifies.</t>
   </section>
