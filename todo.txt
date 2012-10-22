@@ -14,6 +14,18 @@ option.
 11. Write security considerations.
     (Tomek: Couple points added, but it is barely started.)
 
+Things we should probably consider in DESIGN:
+13. What do we do about CGA? Crypto-generate addresses seem to be
+    progressing in DHC. It is alive and kicking (the latest
+    version is from Oct. 10, less than 2 weeks ago).
+http://datatracker.ietf.org/doc/draft-ietf-dhc-cga-config-dhcpv6/
+
+14. There's Prefix Assignment for DHCPv6 draft (adopted) that
+    defines new container type IA_PA. I have not read that draft
+    yet, but we should look at it at some point. I think it is
+    related to CGA, as the same author (Sheng Jiang) works on it.
+    http://datatracker.ietf.org/doc/draft-ietf-dhc-host-gen-id/
+
  PROTOCOL SPEC
 ---------------
 - Write that thing!

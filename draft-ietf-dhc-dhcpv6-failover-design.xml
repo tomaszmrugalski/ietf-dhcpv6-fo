@@ -1474,15 +1474,15 @@
     <artwork><![CDATA[
                           binding-status in received BNDUPD.
 binding-status
-in receiving                                  FREE           RESET
-server          ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
+in receiving                                   FREE           RESET
+server           ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
 
-ACTIVE          accept(5) time(2)   time(1)    time(2)      accept
-EXPIRED         time(1)   accept    accept     accept       accept
-RELEASED        time(1)   time(1)   accept     accept       accept
-FREE/BACKUP     accept    accept    accept     accept       accept
-RESET           time(3)   accept    accept     accept       accept
-ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
+ACTIVE           accept(5) time(2)   time(1)    time(2)      accept
+EXPIRED          time(1)   accept    accept     accept       accept
+RELEASED         time(1)   time(1)   accept     accept       accept
+FREE/FREE_BACKUP accept    accept    accept     accept       accept
+RESET            time(3)   accept    accept     accept       accept
+ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
 ]]></artwork></figure>
 
     <t>time(1): If the client-last-transaction-time in the BNDUPD is later than
@@ -1496,20 +1496,20 @@ ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
     the start-time-of-state in the receiving server's binding, accept it, else
     reject it.</t>
 
-    <t>(1,2,3): If rejecting, use reject reason 15: "Outdated binding
+    <t>(1,2,3): If rejecting, use reject reason "Outdated binding
     information".</t>
 
-    <t>(4): Use reject reason 16: "Less critical binding information".</t>
-    
+    <t>(4): Use reject reason "Less critical binding information".</t>
+
     <t>(5): If the clients in a BNDUPD message and in a receiving server's
     binding differ, then if the receiving server is a secondary accept it, else
-    reject it with a reject reason of 2: "Fatal conflict exists: address in use
+    reject it with a reject reason of "Fatal conflict exists: address in use
     by other client".</t>
 
     <!-- issue 5: Done. The issue was: This is just a loose collection of
          notes. This section will probably need to be rewritten as a a flowchart
          of some kind. -->
-    
+
       <t>The lease update may be accepted or rejected.  Rejection SHOULD NOT
       change the flag in a lease that says that it should be transmitted to the
       failover partner.  If this flag is set, then it should be transmitted, but
@@ -2563,7 +2563,7 @@ CONFLICT-DONE                                  |
     TODO: Describe DNS Updates challenges in failover environment.
     It is nicely described in Section 5.12 of xref
     target="dhcpv4-failover".
-    
+
     Done 10/17/12 Kim
 
     -->
@@ -2575,7 +2575,7 @@ CONFLICT-DONE                                  |
     Descriptions of several of these models, and guidelines that
     DHCP servers and clients should follow in carrying them out,
     are laid out in <xref target="RFC4704">RFC 4704</xref>.</t>
-    
+
     <t>The nature of the failover protocol introduces some issues
     concerning dynamic DNS updates that are not part of non-failover
     environments.  This section describes these issues, and defines
@@ -2593,7 +2593,7 @@ CONFLICT-DONE                                  |
     updates it SHOULD utilize the techniques described here in order
     to correctly distribute them between the failover partners.
     See <xref target="RFC4704">RFC 4704</xref> as well as <xref
-    target="RFC4704">RFC 4703</xref> for information on how DHCPv6
+    target="RFC4703">RFC 4703</xref> for information on how DHCPv6
     servers deal with potential conflicts when updating DNS even
     without failover.</t>
 
@@ -2609,7 +2609,7 @@ CONFLICT-DONE                                  |
     refuse to operate, or it MAY choose to operate anyway, having
     warned the user of the problem in some way.</t>
 
-    <section anchor="failover-ddns" 
+    <section anchor="failover-ddns"
        title="Relationship between failover and dynamic DNS update">
 
 	<t>The failover protocol describes the conditions under
@@ -2922,6 +2922,9 @@ CONFLICT-DONE                                  |
 
   </section>
 
+  <!-- tomek: this is definitely material for protocol draft, not the design
+  draft -->
+  <!--
   <section anchor="protocol-skeleton" title="Protocol entities">
     <t>Discussion: It is unclear if following sections belong to
     design or protocol draft. It is currently kept here as a
@@ -2951,18 +2954,7 @@ CONFLICT-DONE                                  |
       </list></t>
     </section>
 
-  </section>
-
-  <section title="Open questions">
-    <t>This is scratchbook. This section will be removed once questions are answered.</t>
-    <t>Q: Do we want to support temporary addresses? I think not. They
-    are short-lived by definition, so clients should not mind getting new temporary
-    addresses.</t>
-    <t>Q: Do we want to support CGA-registered addresses? There is currently
-    work in DHC WG about this, but I haven't looked at it yet. If that is complicated,
-    we may not define it here, but rather as an extension. [If it moves forward, we need
-    to support it.]</t>
-  </section>
+  </section> -->
 
   <section title="Security Considerations">
     <t>DHCPv6 failover is an extension of a standard DHCPv6 protocol, so all
@@ -3054,8 +3046,6 @@ CONFLICT-DONE                                  |
         value="draft-ietf-dhc-failover-12"/>
       </reference> <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-redundancy-consider.xml'?>
 
     </references>
   </back>
