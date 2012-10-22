@@ -4,12 +4,12 @@
 Dynamic Host Configuration (DHC)                            T. Mrugalski
 Internet-Draft                                                       ISC
 Intended status: Standards Track                              K. Kinnear
-Expires: March 10, 2013                                            Cisco
-                                                       September 6, 2012
+Expires: April 25, 2013                                            Cisco
+                                                        October 22, 2012
 
 
                          DHCPv6 Failover Design
-                draft-ietf-dhc-dhcpv6-failover-design-01
+                draft-ietf-dhc-dhcpv6-failover-design-02
 
 Abstract
 
@@ -38,7 +38,7 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 10, 2013.
+   This Internet-Draft will expire on April 25, 2013.
 
 Copyright Notice
 
@@ -52,9 +52,9 @@ Copyright Notice
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 1]
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 1]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    carefully, as they describe your rights and restrictions with respect
@@ -72,88 +72,85 @@ Table of Contents
      3.1.  Additional Requirements  . . . . . . . . . . . . . . . . .  6
      3.2.  Features out of Scope: Load Balancing  . . . . . . . . . .  6
    4.  Protocol Overview  . . . . . . . . . . . . . . . . . . . . . .  6
-     4.1.  Failover Machine State Overview  . . . . . . . . . . . . .  8
+     4.1.  Failover State Machine Overview  . . . . . . . . . . . . .  8
      4.2.  Messages . . . . . . . . . . . . . . . . . . . . . . . . .  9
    5.  Connection Management  . . . . . . . . . . . . . . . . . . . . 11
      5.1.  Creating Connections . . . . . . . . . . . . . . . . . . . 11
      5.2.  Endpoint Identification  . . . . . . . . . . . . . . . . . 12
    6.  Resource Allocation  . . . . . . . . . . . . . . . . . . . . . 13
-     6.1.  Proportional Allocation  . . . . . . . . . . . . . . . . . 13
-     6.2.  Independent Allocation . . . . . . . . . . . . . . . . . . 14
-     6.3.  Determining Allocation Approach  . . . . . . . . . . . . . 15
-       6.3.1.  IPv6 Addresses . . . . . . . . . . . . . . . . . . . . 15
-       6.3.2.  IPv6 Prefixes  . . . . . . . . . . . . . . . . . . . . 15
-   7.  Information model  . . . . . . . . . . . . . . . . . . . . . . 15
-   8.  Failover Mechanisms  . . . . . . . . . . . . . . . . . . . . . 19
-     8.1.  Time Skew  . . . . . . . . . . . . . . . . . . . . . . . . 19
-     8.2.  Time expression  . . . . . . . . . . . . . . . . . . . . . 19
-     8.3.  Lazy updates . . . . . . . . . . . . . . . . . . . . . . . 19
-     8.4.  MCLT concept . . . . . . . . . . . . . . . . . . . . . . . 20
-       8.4.1.  MCLT example . . . . . . . . . . . . . . . . . . . . . 21
-     8.5.  Unreachability detection . . . . . . . . . . . . . . . . . 22
-     8.6.  Re-allocating Leases . . . . . . . . . . . . . . . . . . . 23
-     8.7.  Sending Binding Update . . . . . . . . . . . . . . . . . . 23
-     8.8.  Receiving Binding Update . . . . . . . . . . . . . . . . . 24
-     8.9.  Conflict Resolution  . . . . . . . . . . . . . . . . . . . 25
-     8.10. Acknowledging Reception  . . . . . . . . . . . . . . . . . 27
-   9.  Endpoint States  . . . . . . . . . . . . . . . . . . . . . . . 27
-     9.1.  State Machine Operation  . . . . . . . . . . . . . . . . . 27
-     9.2.  State Machine Initialization . . . . . . . . . . . . . . . 30
-     9.3.  STARTUP State  . . . . . . . . . . . . . . . . . . . . . . 30
-       9.3.1.  Operation in STARTUP State . . . . . . . . . . . . . . 31
-       9.3.2.  Transition Out of STARTUP State  . . . . . . . . . . . 31
-     9.4.  PARTNER-DOWN State . . . . . . . . . . . . . . . . . . . . 32
-       9.4.1.  Operation in PARTNER-DOWN State  . . . . . . . . . . . 32
-       9.4.2.  Transition Out of PARTNER-DOWN State . . . . . . . . . 33
+     6.1.  Proportional Allocation  . . . . . . . . . . . . . . . . . 14
+     6.2.  Independent Allocation . . . . . . . . . . . . . . . . . . 16
+     6.3.  Choosing Allocation Algorithm  . . . . . . . . . . . . . . 16
+   7.  Information model  . . . . . . . . . . . . . . . . . . . . . . 17
+   8.  Failover Mechanisms  . . . . . . . . . . . . . . . . . . . . . 21
+     8.1.  Time Skew  . . . . . . . . . . . . . . . . . . . . . . . . 21
+     8.2.  Time expression  . . . . . . . . . . . . . . . . . . . . . 22
+     8.3.  Lazy updates . . . . . . . . . . . . . . . . . . . . . . . 22
+     8.4.  MCLT concept . . . . . . . . . . . . . . . . . . . . . . . 22
+       8.4.1.  MCLT example . . . . . . . . . . . . . . . . . . . . . 24
+     8.5.  Unreachability detection . . . . . . . . . . . . . . . . . 25
+     8.6.  Re-allocating Leases . . . . . . . . . . . . . . . . . . . 25
+     8.7.  Sending Binding Update . . . . . . . . . . . . . . . . . . 26
+     8.8.  Receiving Binding Update . . . . . . . . . . . . . . . . . 28
+     8.9.  Conflict Resolution  . . . . . . . . . . . . . . . . . . . 28
+     8.10. Acknowledging Reception  . . . . . . . . . . . . . . . . . 30
+   9.  Endpoint States  . . . . . . . . . . . . . . . . . . . . . . . 30
+     9.1.  State Machine Operation  . . . . . . . . . . . . . . . . . 30
+     9.2.  State Machine Initialization . . . . . . . . . . . . . . . 33
+     9.3.  STARTUP State  . . . . . . . . . . . . . . . . . . . . . . 33
+       9.3.1.  Operation in STARTUP State . . . . . . . . . . . . . . 34
+       9.3.2.  Transition Out of STARTUP State  . . . . . . . . . . . 34
+     9.4.  PARTNER-DOWN State . . . . . . . . . . . . . . . . . . . . 35
+       9.4.1.  Operation in PARTNER-DOWN State  . . . . . . . . . . . 35
+       9.4.2.  Transition Out of PARTNER-DOWN State . . . . . . . . . 36
+     9.5.  RECOVER State  . . . . . . . . . . . . . . . . . . . . . . 37
+       9.5.1.  Operation in RECOVER State . . . . . . . . . . . . . . 37
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 2]
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 2]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
-     9.5.  RECOVER State  . . . . . . . . . . . . . . . . . . . . . . 34
-       9.5.1.  Operation in RECOVER State . . . . . . . . . . . . . . 34
-       9.5.2.  Transition Out of RECOVER State  . . . . . . . . . . . 34
-     9.6.  RECOVER-WAIT State . . . . . . . . . . . . . . . . . . . . 36
-       9.6.1.  Operation in RECOVER-WAIT State  . . . . . . . . . . . 37
-       9.6.2.  Transition Out of RECOVER-WAIT State . . . . . . . . . 37
-     9.7.  RECOVER-DONE State . . . . . . . . . . . . . . . . . . . . 37
-       9.7.1.  Operation in RECOVER-DONE State  . . . . . . . . . . . 38
-       9.7.2.  Transition Out of RECOVER-DONE State . . . . . . . . . 38
-     9.8.  NORMAL State . . . . . . . . . . . . . . . . . . . . . . . 38
-       9.8.1.  Operation in NORMAL State  . . . . . . . . . . . . . . 38
-       9.8.2.  Transition Out of NORMAL State . . . . . . . . . . . . 39
-     9.9.  COMMUNICATIONS-INTERRUPTED State . . . . . . . . . . . . . 40
-       9.9.1.  Operation in COMMUNICATIONS-INTERRUPTED State  . . . . 40
-       9.9.2.  Transition Out of COMMUNICATIONS-INTERRUPTED State . . 41
-     9.10. POTENTIAL-CONFLICT State . . . . . . . . . . . . . . . . . 42
-       9.10.1. Operation in POTENTIAL-CONFLICT State  . . . . . . . . 43
-       9.10.2. Transition Out of POTENTIAL-CONFLICT State . . . . . . 43
-     9.11. RESOLUTION-INTERRUPTED State . . . . . . . . . . . . . . . 44
-       9.11.1. Operation in RESOLUTION-INTERRUPTED State  . . . . . . 45
-       9.11.2. Transition Out of RESOLUTION-INTERRUPTED State . . . . 45
-     9.12. CONFLICT-DONE State  . . . . . . . . . . . . . . . . . . . 45
-       9.12.1. Operation in CONFLICT-DONE State . . . . . . . . . . . 46
-       9.12.2. Transition Out of CONFLICT-DONE State  . . . . . . . . 46
-   10. Proposed extensions  . . . . . . . . . . . . . . . . . . . . . 46
-     10.1. Active-active mode . . . . . . . . . . . . . . . . . . . . 46
-   11. Dynamic DNS Considerations . . . . . . . . . . . . . . . . . . 47
-   12. Reservations and failover  . . . . . . . . . . . . . . . . . . 47
-   13. Protocol entities  . . . . . . . . . . . . . . . . . . . . . . 47
-     13.1. Failover Protocol  . . . . . . . . . . . . . . . . . . . . 47
-     13.2. Protocol constants . . . . . . . . . . . . . . . . . . . . 47
-   14. Open questions . . . . . . . . . . . . . . . . . . . . . . . . 48
-   15. Security Considerations  . . . . . . . . . . . . . . . . . . . 48
-   16. IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 48
-   17. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 48
-   18. References . . . . . . . . . . . . . . . . . . . . . . . . . . 48
-     18.1. Normative References . . . . . . . . . . . . . . . . . . . 48
-     18.2. Informative References . . . . . . . . . . . . . . . . . . 49
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 50
-
-
+       9.5.2.  Transition Out of RECOVER State  . . . . . . . . . . . 37
+     9.6.  RECOVER-WAIT State . . . . . . . . . . . . . . . . . . . . 39
+       9.6.1.  Operation in RECOVER-WAIT State  . . . . . . . . . . . 40
+       9.6.2.  Transition Out of RECOVER-WAIT State . . . . . . . . . 40
+     9.7.  RECOVER-DONE State . . . . . . . . . . . . . . . . . . . . 40
+       9.7.1.  Operation in RECOVER-DONE State  . . . . . . . . . . . 41
+       9.7.2.  Transition Out of RECOVER-DONE State . . . . . . . . . 41
+     9.8.  NORMAL State . . . . . . . . . . . . . . . . . . . . . . . 41
+       9.8.1.  Operation in NORMAL State  . . . . . . . . . . . . . . 41
+       9.8.2.  Transition Out of NORMAL State . . . . . . . . . . . . 42
+     9.9.  COMMUNICATIONS-INTERRUPTED State . . . . . . . . . . . . . 43
+       9.9.1.  Operation in COMMUNICATIONS-INTERRUPTED State  . . . . 43
+       9.9.2.  Transition Out of COMMUNICATIONS-INTERRUPTED State . . 44
+     9.10. POTENTIAL-CONFLICT State . . . . . . . . . . . . . . . . . 45
+       9.10.1. Operation in POTENTIAL-CONFLICT State  . . . . . . . . 46
+       9.10.2. Transition Out of POTENTIAL-CONFLICT State . . . . . . 46
+     9.11. RESOLUTION-INTERRUPTED State . . . . . . . . . . . . . . . 47
+       9.11.1. Operation in RESOLUTION-INTERRUPTED State  . . . . . . 48
+       9.11.2. Transition Out of RESOLUTION-INTERRUPTED State . . . . 48
+     9.12. CONFLICT-DONE State  . . . . . . . . . . . . . . . . . . . 48
+       9.12.1. Operation in CONFLICT-DONE State . . . . . . . . . . . 48
+       9.12.2. Transition Out of CONFLICT-DONE State  . . . . . . . . 49
+   10. Proposed extensions  . . . . . . . . . . . . . . . . . . . . . 49
+     10.1. Active-active mode . . . . . . . . . . . . . . . . . . . . 49
+   11. Dynamic DNS Considerations . . . . . . . . . . . . . . . . . . 50
+     11.1. Relationship between failover and dynamic DNS update . . . 50
+     11.2. Exchanging DDNS Information  . . . . . . . . . . . . . . . 51
+     11.3. Adding RRs to the DNS  . . . . . . . . . . . . . . . . . . 53
+     11.4. Deleting RRs from the DNS  . . . . . . . . . . . . . . . . 54
+     11.5. Name Assignment with No Update of DNS  . . . . . . . . . . 54
+   12. Reservations and failover  . . . . . . . . . . . . . . . . . . 55
+   13. Security Considerations  . . . . . . . . . . . . . . . . . . . 56
+   14. IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 56
+   15. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 56
+   16. References . . . . . . . . . . . . . . . . . . . . . . . . . . 57
+     16.1. Normative References . . . . . . . . . . . . . . . . . . . 57
+     16.2. Informative References . . . . . . . . . . . . . . . . . . 57
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 58
 
 
 
@@ -164,9 +161,12 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 3]
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 3]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
 1.  Requirements Language
@@ -206,31 +206,43 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       available resources are not expected to deplete).  See Section 6.2
       for details.
 
-   o  Primary Server
+   o  Partner - name of the other DHCPv6 server that participates in
+      failover relationship.  When the role (primary or secondary) is
+      not important, the other server is referred to as a "failover
+      partner" or simply partner.
 
-   o  Proportional Allocation - a prefix allocation algorithm to split
-      the available free leases between the primary and secondary
-      servers that is particularly well suited for more limited
-      resources.  See Section 6.1 for details.
+   o  Primary Server - First out of two DHCPv6 servers that participate
+      in a failover relationship.  In active-passive mode this is the
+      server that handles most of the client traffic.  Its failover
+      partner is referred to as secondary server.
+
+
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 4]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   o  Proportional Allocation - a prefix allocation algorithm that
+      splits the available resources (addresses or prefixes) between the
+      primary and secondary servers that is particularly well suited for
+      more limited resources.  See Section 6.1 for details.
 
    o  Resource - Any type of resource that is assignable using DHCPv6.
       Currently there are two types of such resources defined: a non-
       temporary IPv6 address and an IPv6 prefix.  Due to the nature of
       temporary addresses, they are not covered by the failover
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 4]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
       mechanism.  Other resource types may be defined in the future.
 
    o  Responsive - A server that is responsive, will respond to DHCPv6
       client requests.
 
-   o  Secondary Server
+   o  Secondary Server - Second of out two DHCPv6 servers that
+      participate in a failover relationship.  Its failover partner is
+      referred to as primary server.  In active-passive mode this server
+      typically does not handle client traffic and acts as a backup.
 
    o  Server - A DHCPv6 server that implements DHCPv6 failover.
       'Server' and 'failover endpoint' are synonymous only if the server
@@ -261,6 +273,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    does not respond to them and only maintains a copy of lease database
    and is ready to take over incoming queries in case of primary server
    failure).  Active-active mode (i.e. both servers actively handling
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 5]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    clients' requests) is currently not supported for the sake of
    simplicity.  Such mode may be defined as an exension at a later time.
 
@@ -272,14 +292,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    This design attempts to fulfill all DHCPv6 failover requirements
    defined in [I-D.ietf-dhc-dhcpv6-failover-requirements].
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 5]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
 3.1.  Additional Requirements
 
@@ -304,6 +316,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    that each server must be able to handle whole traffic.  Therefore in
    properly provisioned setup, load balancing is not needed.
 
+   It is likely that active-active mode that is essentially a load
+   balancing will be defined as an extension in the near future.
+
 
 4.  Protocol Overview
 
@@ -314,6 +329,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    specified in Section 5.1 of DHCPv6 Bulk Leasequery [RFC5460], but
    uses different message types.  New failover-specific message types
    are listed in Section 4.2.  All information is sent over the
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 6]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    connection as typical DHCPv6 messages that convey DHCPv6 options,
    following format defined in Section 22.1 of [RFC3315].
 
@@ -329,14 +352,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    an UPDREQALL message to request a full lease database transmission
    including all leases (this case applies in case of booting up new
    server after installation, corruption or complete loss of database,
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 6]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    or other catastrophic failure).
 
    Servers exchange lease information by using BNDUPD messages.
@@ -370,9 +385,17 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    The major problem with lazy update mechanism is the case when the
    server crashes after sending a response to client, but before sending
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 7]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    the lazy update to its partner (or when communication between
    partners is interrupted).  To solve this problem, the concept known
-   as the Maximum Client Lead Time (MCLT) (initially designed for DHCPv4
+   as the Maximum Client Lead Time (initially designed for DHCPv4
    failover) is used.  The MCLT is the maximum amount of time that one
    server can extend a lease for a client's binding beyond the time
    known by its failover partner.  See Section 8.4 for detailed
@@ -385,17 +408,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    A server that is being shut down transmits a DISCONNECT message,
    closes the connection with its failover partner and stops operation.
    A Server SHOULD transmit any pending lease updates before
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 7]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    transmitting DISCONNECT message.
 
-4.1.  Failover Machine State Overview
+4.1.  Failover State Machine Overview
 
    The following section provides a simplified description of all
    states.  For the sake of clarity and simplicity, it omits important
@@ -408,7 +423,7 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    unresponsive (clients' queries are ignored).
 
    A server starts its operation in short-lived STARTUP state.  A server
-   determines its partner reachibility and state and sets its own state
+   determines its partner reachability and state and sets its own state
    based on that determination.  It frequently returns back to the state
    it was in before shutdown.
 
@@ -426,6 +441,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    procedure, in particular, it MUST NOT extend any lease more than the
    MCLT beyond its partner's knowledge of the lease expiration time.
    This imposes an additional burden on the server, in that clients will
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 8]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    return to the server for lease renewals more frequently than they
    would otherwise.  Therefore it is not recommended to operate for
    prolonged periods in this state.  Once communication is
@@ -441,13 +464,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    no longer apply.  Operation in this mode is less demanding for the
    server that remains operational, than in COMMUNICATIONS-INTERRUPTED
    state, but PARTNER-DOWN does not offer any kind of redundancy.
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 8]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
    When a server does not have an intact lease state database (e.g. due
    to first time run or catastrophic failure) or detects that is partner
@@ -481,6 +497,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    It should be noted that no specific formats or message type values
    are assigned at this stage.  Appropriate implementation details will
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                 [Page 9]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    be specified in a separate protocol specification document.
 
    o  BNDUPD - The binding update message is used to send the binding
@@ -496,14 +520,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       (typically secondary) to request allocation of resources
       (addresses or prefixes) from its partner.  The partner responds
       with POOLRSP.
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                 [Page 9]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
    o  POOLRSP - The Pool Response message is used by one server
       (typically primary) to repond to its partner's request for
@@ -536,6 +552,15 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       secondary server to respond to a CONNECT message from the primary
       server.
 
+
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 10]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    o  DISCONNECT - The disconnect message is used by either server when
       closing a connection and shutting down.  No response is required
       for this message.
@@ -551,14 +576,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       tional.  It MUST be transmitted periodically over every esta-
       blished connection if other message traffic is not flowing, and it
       MAY be sent at any time.
-
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 10]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 5.  Connection Management
@@ -592,6 +609,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    To summarize -- a primary server MUST use a connection that it has
    initiated in order to send a CONNECT message.  Every server that is a
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 11]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    secondary server in a relationship simply listens for connection
    attempts from the primary server.
 
@@ -609,14 +634,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    Once TLS negotiation is complete, the primary server MUST resend the
    CONNECT message on the newly secured TLS connection and then wait for
    the CONNECTACK message in response.  The TLS-request and TLS-reply
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 11]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    options MUST NOT appear in either this second CONNECT or its
    associated CONNECTACK message as they had in the first messages.
 
@@ -648,6 +665,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    Any failover endpoint can take actions and hold unique states.
 
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 12]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    This document frequently describes the behavior of the protocol in
    terms of primary and secondary servers, not primary and secondary
    failover endpoints.  However, it is important to remember that every
@@ -665,14 +690,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    When a connection is received from the partner, the unique failover
    endpoint to which the message is directed is determined solely by the
    IP address of the partner, the relationship-name, and the role of the
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 12]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    receiving server.
 
 
@@ -704,6 +721,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
        allocation.  This algorithm is particularly well suited for
        scenarios where the there is an abundance of available resources
        which is typically the case for DHCPv6 address allocation.  See
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 13]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
        Section 6.2 for details.
 
 6.1.  Proportional Allocation
@@ -721,14 +746,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    by the primary server.  It may be allocated to the secondary server
    if it is available, and then it is owned by the secondary server.
    Either server can allocate available resources which they own to
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 13]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    clients, in which case they cease to own them.  When the client
    releases the resource or the lease on it expires, it will again
    become available and will be owned by the primary.
@@ -750,50 +767,163 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    maintain a more or less constant ratio of available addresses between
    the two servers.
 
-   TODO: Reuse rest of the description from section 5.4 from
-   [dhcpv4-failover] here.
+   The initial allocation when the servers first integrate is triggered
+   by the POOLREQ message from the secondary to the primary.  This is
+   followed by the POOLRESP message where the primary tells the
+   secondary how many resources it allocated to the secondary.  Then,
+   the primary sends the allocated resources to the secondary via BNDUPD
+   messages.  The POOLREQ/POOLRESP message is a trigger to the primary
+   to perform a scan of its database and to ensure that the secondary
+   has enough resources (based on some configured ratio).
+
+   Servers frequently have several kinds of resources available on a
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 14]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   particular network segment.  The failover protocol assumes that both
+   primary and secondary servers are configured in such a way that each
+   knows the type and number of resources on every network segment
+   participating in the failover protocol.  The primary server is
+   responsible for allocating the secondary server the correct
+   proportion of available resources of each kind, and the secondary
+   server is responsible for being configured in such a way that it can
+   tell the kind of every resource based solely on the IP or prefix
+   address itself.
+
+   The resources are delegated to the secondary using the BNDUPD message
+   with a state of FREE_BACKUP, which indicates the resource is now
+   available for allocation by the secondary.  Once the message is sent,
+   the primary MUST NOT use these resources for allocation to DHCPv6
+   clients.
+
+   Available resources can be delegated back to the primary server in
+   certain cases.  BNDUPD will contain state FREE for leases that were
+   previously in FREE_BACKUP state.
+
+   The POOLREQ/POOLRESP message exchange initiated by the secondary is
+   valid at any time, and the primary server SHOULD, whenever it
+   receives the POOLREQ message, scan its database of prefixes and
+   determine if the secondary needs more resources from any of the
+   prefixes.
+
+   In order to support a reasonably dynamic balance of the resources
+   between the failover partners, the primary server needs to do
+   additional work to ensure that the secondary server has as many
+   resources as it needs (but that it doesn't have more than it needs).
+
+   The primary server SHOULD examine the balance of available resources
+   between the primary and secondary for a particular prefix whenever
+   the number of available resources for either the primary or secondary
+   changes by more than a configured limit.  The primary server SHOULD
+   adjust the available resource balance as required to ensure the
+   configured resource balance, excepting that the primary server SHOULD
+   employ some threshold mechanism to such a balance adjustment in order
+   to minimize the overhead of maintaining this balance.
+
+   An example of a threshold approach is: do not attempt to re-balance
+   the prefixes on the primary and secondary until the out of balance
+   value exceeds a configured value.
+
+   The primary server can, at any time, send an available resource to
+   the secondary using a BNDUPD with the state BACKUP.  The primary
+   server can attempt to take an available resource away from the
+   secondary by sending a BNDUPD with the state FREE.  If the secondary
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 15]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   accepts the BNDUPD, then it is now available to the PRIMARY and not
+   available to the secondary.  Of course, the secondary MUST reject
+   that BNDUPD if it has already used that resource for a DHCP client.
 
 6.2.  Independent Allocation
 
-   In this allocation scheme, available resources are split between
-   servers.  Available resources are split between the primary and
-   secondary servers as part of initial connection establishment.  Once
-   resources are allocated to each server, there is no need to reassign
-   them.  This algorithm is simpler than proportional allocation since
-   it requires similar initial communication and does not require a
-   rebalancing mechanism, but it assumes that the pool assigned to each
-   server will never deplete.  That is often a reasonable assumption for
-   IPv6 addresses (e.g. servers are often assigned a /64 pool that
-   contains many more addresses than existing electronic devices on
-   Earth).  This allocation mechanism SHOULD be used for IPv6 addresses,
-   unless the configured address pool is small or is otherwise
-   administratively limited.
+   In this allocation scheme, available resources are permanently (until
+   server configuration changes) split between servers.  Available
+   resources are split between the primary and secondary servers as part
+   of initial connection establishment.  Once resources are allocated to
+   each server, there is no need to reassign them.  This algorithm is
+   simpler than proportional allocation since it requires similar
+   initial communication, but does not require a rebalancing mechanism.
+   It assumes that the pool assigned to each server will never deplete.
+   That is often a reasonable assumption for IPv6 addresses (e.g.
+   servers are often assigned a /64 pool that contains many more
+   addresses than existing electronic devices on Earth).  This
+   allocation mechanism SHOULD be used for IPv6 addresses, unless the
+   configured address pool is small or is otherwise administratively
+   limited.
 
    Once each server is assigned a resource pool during initial
    connection establishment, it may allocate assigned resources to
    clients.  Once a client release a resource or its lease is expired,
-   the returned resource returns to pool for the same server.  Resources
-   never changes servers.
+   the returned resource returns to pool for the server that leased it.
+   Resources never changes servers.
 
    During COMMUNICATION-INTERRUPTED events, a partner MAY continue
    extending existing leases when requested by clients.  A healthy
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 14]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    partner MUST NOT lease resources that were assigned to its downed
    partner and later released by a client unless it is in PARTNER-DOWN
-   state.
+   state.  Server SHOULD use its own pool first before starting new
+   assignements from its downed partner's pool.  As the assumption is
+   that independent allocation should be used only when available
+   resources are vast and not expected to be fully used at any given
+   time, it is very unlikely that the server will ever need to use its
+   downed partner pools.
 
-6.3.  Determining Allocation Approach
+6.3.  Choosing Allocation Algorithm
 
-6.3.1.  IPv6 Addresses
+   All implementations MUST support proportional allocation algorithm
+   and SHOULD support independent allocation.  If the implementation
+   implement both and let the user configure it, the default algorithm
+   used SHOULD be proportional allocation algorithm.
 
-6.3.2.  IPv6 Prefixes
+   Proportional allocation mechanism is more flexible as it can
+   dynamically rebalance available resources between servers.  That
+   balance includes additional burden for the servers and generates more
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 16]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   traffic between servers.  Proportional algorithm can be considered as
+   managing available resources more efficiently than idenpendent.  That
+   is important aspect when working in a network that is nearing address
+   and/or prefix depletion.
+
+   Independent allocation can be used when the number of available
+   resources are large and there is no realistic danger of running out
+   of resources.  Use of the independent allocation makes communication
+   between partners simpler.
+
+   Typically indepentent allocation is used for IPv6 addresses, because
+   even for /64 pools a server will never run out of addresses to
+   assign, so there is no need to rebalance.  For the prefix delegation
+   mechanism, available resources are much smaller, so there is a danger
+   of running out of addresses.  Therefore typically proportional
+   allocation will be used for prefix delegations.  Independent
+   allocation may be used, but the implication must be well understood.
+   For example in a network that delegates /64 prefixes out out /48
+   prefix (so there can be up to 65536 prefixes delegated) and a 1000
+   requesting routers, it is safe to use independent allocation.
+
+   It should be stressed out that independent allocation algorithm
+   SHOULD NOT be used when number of resources is limited and there is a
+   realistic danger of depleting resources.  If this recommendation is
+   violated, it may lead to a case, when one server denies clients due
+   to pool depletion despite the fact the the other partner still have
+   many resources available.
 
 
 7.  Information model
@@ -815,6 +945,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    The lease binding-status values defined for the failover protocol are
    listed below.  Unless otherwise noted below, there MAY be client
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 17]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    information associated with each of these binding-status value.
 
    ACTIVE  -- The lease is assigned to a client.  Client identification
@@ -833,14 +971,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       FREE*.  Depending on which algorithm and which pool was used to
       allocate a given lease, FREE* may either mean FREE or FREE_BACKUP.
       Implementations do not have to implement this FREE* state, but may
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 15]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
       choose to switch to the destination state directly.  For a clarity
       of representation, this transitional FREE* state is treated as a
       separate state.
@@ -872,30 +1002,18 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       so that the reason that the resource became FREE can be
       determined.  Client identification MAY appear.
 
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 18]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    The lease state machine has been presented in Figure 1.  Most states
    are stationary, i.e. the lease stays in a given state untile exernal
    event triggers transition to another state.  The only transitive
    state is FREE*.  One it is reached, the the state machine immediately
    transitions to either FREE or FREE_BACKUP state.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 16]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
                                 +---------+
                  /------------->|  ACTIVE |<--------------\
@@ -938,6 +1056,15 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
       3.  Client sends RELEASE and the lease is released.
 
+
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 19]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
       4.  Partner acknowledges state change.  This transition MAY also
       occur if the server is in PARTNER-DOWN state and the MCLT has
       passed since the entry in RELEASED, EXPIRED, or RESET states.
@@ -946,16 +1073,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       proportional allocation, or independent allocation is used and
       this lease belongs to primary server.
 
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 17]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
       6.  The lease belongs to a pool that is governed by the
-      independent allocation is used and the lease belongs to the
-      secondary server.
+      independent allocation and the lease belongs to the secondary
+      server.
 
       7.  Pool rebalance event occurs (POOLREQ/POOLRSP messages are
       exchanged).  Addresses (or prefixes) belonging to the primary
@@ -970,7 +1090,7 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       10.  An administrative action is taken to recover an abandoned
       lease back to usable state.  This transition MAY occur due to an
       implementation specific handling on ABANDONED resource.  One
-      possible example of such use is an Neighbor Discovery or ICMP Echo
+      possible example of such use is a Neighbor Discovery or ICMP Echo
       check if the address is still in use.
 
    The resource that is no longer in use (due to expiration or release),
@@ -990,23 +1110,39 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
                      Figure 2: FREE* State Transitions
 
-   TODO: In case of Active-Passive model, while a majority of the
-   addresses are owned by the primary server, the secondary server will
-   need a portion of the addresses to serve new clients while operating
-   in communication-interrupted state and also in partner down state
-   before it can take over the entire address pool (expiry of MCLT).
-   The concept of a percentage of pool reserved for secondary should be
-   described here.
+   In case of servers operating in active-passive mode, while a majority
+   of the resources are owned by the primary server, the secondary
+   server will need a portion of the resources to serve new clients
 
 
 
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 18]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 20]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   while operating in COMMUNICATION-INTERRUPTED state and also in
+   PARTNER-DOWN state before it can take over the entire address pool
+   (after the expiry of MCLT).
+
+   The secondary server connot simply take over the entire resource pool
+   immediately, since we have to handle the case where both servers are
+   able to communicate with DHCP clients, but unable to communicate with
+   each other.
+
+   The size of the resource pool allocated to the secondary is specified
+   as a percentage of the currently available resources.  Thus, as the
+   number of available resources changes on the primary server, the
+   number of resources available to the secondary server MUST also
+   change, although the frequency of the changes made to the secondary
+   server's pool of address resources SHOULD be low enough to not use
+   significant processing power or network bandwidth.
+
+   The required size of this private pool allocated to the secondary
+   server is based only on the arrival rate of new DHCP clients and the
+   length of expected downtime of the primary server, and is not
+   directly influenced by the total number of DHCP clients supported by
+   the server pair.
 
 
 8.  Failover Mechanisms
@@ -1033,6 +1169,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    the transmitter.  The transmitting server MUST set this as close to
    the actual transmission as possible.  The receiving partner MUST
    store its own timestamp of reception as close to the actual reception
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 21]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    as possible.  The received timestamp information is then compared
    with local timestamp.
 
@@ -1057,14 +1201,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    Lazy update refers to the requirement placed on a server implementing
    a failover protocol to update its failover partner whenever the
    binding database changes.  A failover protocol which didn't support
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 19]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    lazy update would require the failover partner update to complete
    before a DHCPv6 server could respond to a DHCPv6 client request.  The
    lazy update mechanism allows a server to allocate a new or extend an
@@ -1089,6 +1225,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    failover partner.
 
    The MCLT is typically much less than the lease time that a server has
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 22]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    been configured to offer a client, and so some strategy must exist to
    allow a server to offer the configured lease time to a client.
    During a lazy update the updating server typically updates its
@@ -1113,14 +1257,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    lease intervals and places specific restrictions on their
    relationships.  The purpose of these restrictions is to allow the
    other server in the pair to be able to make certain assumptions in
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 20]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    the absence of an ability to communicate between servers.
 
    The different times are:
@@ -1141,6 +1277,17 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
       The potential valid lifetime is the potential lease expiration
       interval the local server tells to its partner in a BNDUPD
       message.
+
+
+
+
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 23]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
 
    acknowledged potential valid lifetime:
       The acknowledged potential valid lifetime is the potential lease
@@ -1169,14 +1316,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    update its failover partner with the lease information.  However, the
    desired potential valid lifetime will be composed of one half of the
    current actual valid lifetime added to the desired valid lifetime.
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 21]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    Thus, the failover partner is updated with a BNDUPD with a potential
    valid lifetime of 3 days + 1/2 hour.
 
@@ -1198,6 +1337,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    the secondary was last updated (1/2 hour).  Thus the time remaining
    of the acknowledged potential valid interval is 3 days.  Adding the
    MCLT to this yields 3 days plus 1 hour, which is more than the
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 24]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    desired valid lifetime of 3 days.  So the client is renewed for the
    desired valid lifetime -- 3 days.
 
@@ -1225,20 +1372,56 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    The FO_SEND timer is reset every time any message is transmitted.  If
    the timer reaches the FO_SEND_MAX value, a CONTACT message is
    transmitted and timer is reset.  The CONTACT message may be
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 22]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    transmitted at any time.
 
 8.6.  Re-allocating Leases
 
-   TODO: Describe controlled re-allocation of released/expired leases to
-   different clients.
+   When in PARTNER-DOWN state there is a waiting period after which a
+   resource can be re-allocated to another client.  For resources which
+   are available when the server enters PARTNER-DOWN state, the period
+   is the MCLT from entry into PARTNER-DOWN state.  For resources which
+   are not available when the server enters PARTNER-DOWN state, the
+   period is the MCLT after the later of the following times: the
+   potential valid lifetime, the most recently transmitted potential
+   valid lifetime, the most recently received acknowledged potential
+   valid lifetime, and the most recently transmitted acknowledged
+   potential valid lifetime.  If this time would be earlier than the
+   current time plus the MCLT, then the time the server entered PARTNER-
+   DOWN state plus the maximum-client-lead-time is used.
+
+   In any other state, a server cannot reallocate a resource from one
+   client to another without first notifying its partner (through a
+   BNDUPD message) and receiving acknowledgement (through a BNDACK mes-
+   sage) that its partner is aware that that first client is not using
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 25]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   the resource.
+
+   This could be modeled in the following way.  Though this specific
+   implementation is in no way required, it may serve to better illus-
+   trate the concept.
+
+   An "available" resource on a server may be allocated to any client.
+   A resource which was leased to a client and which expired or was
+   released by that client would take on a new state, EXPIRED or
+   RELEASED respectively.  The partner server would then be notified
+   that this resource was EXPIRED or RELEASED through a BNDUPD.  When
+   the sending server received the BNDACK for that resource showing it
+   was FREE, it would move the resource from EXPIRED or RELEASED to
+   FREE, and it would be available for allocation by the primary server
+   to any clients.
+
+   A server MAY reallocate a resource in the EXPIRED or RELEASED state
+   to the same client with no restrictions provided it has not sent a
+   BNDUPD message to its partner.  This situation would exist if the
+   lease expired or was released after the transition into PARTNER- DOWN
+   state, for instance.
 
 8.7.  Sending Binding Update
 
@@ -1266,6 +1449,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    3.   valid life time requested by client
 
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 26]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    4.   valid life time sent to client
 
    5.   IAID - Identity Association used by the client, while obtaining
@@ -1280,14 +1471,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    7.   potential valid life time - a lifetime that the server is
         willing to set if there were no MCLT/failover restrictions
         imposed.
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 23]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
    8.   preferred life time sent to client - the actual value sent back
         to the client
@@ -1323,6 +1506,13 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    leasequery [RFC5007] or bulk leasequery [RFC5460], which features
    queries based on Relay-ID, by link address and by Remote-ID.
 
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 27]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
 8.8.  Receiving Binding Update
 
    When a server receives a BNDUPD message, it needs to decide how to
@@ -1337,13 +1527,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    1.  Two clients, one resource - This is the duplicate resource
        allocation conflict.  There two different clients each allocated
        the same resource.  See Section 8.9.
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 24]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
    2.  Two resources, one client conflict - This conflict exists when a
        client on one server is associated with a one resource, and on
@@ -1378,6 +1561,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    insufficient information in the BNDUPD to process it, then reject the
    BNDUPD with reject-reason 3: "Missing binding information".
 
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 28]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    If the resource in the BNDUPD is not a resource associated with the
    failover endpoint which received the BNDUPD message, then reject it
    with reject-reason 1: "Illegal IP address (not part of any address
@@ -1393,14 +1584,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    The list in Figure 3 presents the conflict resolution outcome.  To
    "accept" BNDUPD means to update the server's bindings database with
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 25]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    the information contained in the BNDUDP and once the update is
    complete, send a BNDACK message corresponding to the BNDUPD message.
    To "reject" a BNDUPD means to lease the server's binding database
@@ -1418,21 +1601,29 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
                              binding-status in received BNDUPD.
    binding-status
-   in receiving                                  FREE           RESET
-   server          ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
+   in receiving                                   FREE           RESET
+   server           ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
 
-   ACTIVE          accept(5) time(2)   time(1)    time(2)      accept
-   EXPIRED         time(1)   accept    accept     accept       accept
-   RELEASED        time(1)   time(1)   accept     accept       accept
-   FREE/BACKUP     accept    accept    accept     accept       accept
-   RESET           time(3)   accept    accept     accept       accept
-   ABANDONED       reject(4) reject(4) reject(4)  reject(4)    accept
+   ACTIVE           accept(5) time(2)   time(1)    time(2)      accept
+   EXPIRED          time(1)   accept    accept     accept       accept
+   RELEASED         time(1)   time(1)   accept     accept       accept
+   FREE/FREE_BACKUP accept    accept    accept     accept       accept
+   RESET            time(3)   accept    accept     accept       accept
+   ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
 
                        Figure 3: Conflict Resolution
 
    time(1): If the client-last-transaction-time in the BNDUPD is later
    than the client-last-transaction-time in the receiving server's
    binding, accept it, else reject it.
+
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 29]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
 
    time(2): If the current time is later than the receiving servers'
    lease-expiration-time, accept it, else reject it.
@@ -1441,22 +1632,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    than the start-time-of-state in the receiving server's binding,
    accept it, else reject it.
 
-   (1,2,3): If rejecting, use reject reason 15: "Outdated binding
+   (1,2,3): If rejecting, use reject reason "Outdated binding
    information".
 
-   (4): Use reject reason 16: "Less critical binding information".
+   (4): Use reject reason "Less critical binding information".
 
    (5): If the clients in a BNDUPD message and in a receiving server's
    binding differ, then if the receiving server is a secondary accept
-   it, else reject it with a reject reason of 2: "Fatal conflict exists:
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 26]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
+   it, else reject it with a reject reason of "Fatal conflict exists:
    address in use by other client".
 
    The lease update may be accepted or rejected.  Rejection SHOULD NOT
@@ -1490,6 +1673,14 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    o  Allocation Pool -- which pool of addresses (or prefixes) can be
       used for allocation on receipt of a SOLICIT message.
 
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 30]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    o  MCLT -- ensure that valid lifetimes are not beyond what the
       partner has acked plus the MCLT (or not).
 
@@ -1504,14 +1695,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
    Several events can cause the transition from one failover state to
    another.
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 27]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
 
    o  Change in communications status (OK or not OK).
 
@@ -1549,24 +1732,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 28]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 31]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
       +---------------+  V  +--------------+
@@ -1620,9 +1788,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 29]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 32]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
 9.2.  State Machine Initialization
@@ -1676,9 +1844,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 30]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 33]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    obscure other information.
@@ -1732,9 +1900,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 31]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 34]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    STARTUP state (absent any communications with its partner) is
@@ -1788,9 +1956,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 32]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 35]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    entry into PARTNER-DOWN state, it will allocate IP addresses from the
@@ -1844,9 +2012,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 33]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 36]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    as received in a STATE message (either immediately after establishing
@@ -1900,9 +2068,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 34]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 37]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    communicating with it, it MUST send an UPDREQALL message, otherwise
@@ -1956,9 +2124,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 35]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 38]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
                    A                                        B
@@ -2012,9 +2180,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 36]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 39]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    processing that this server might have done prior to losing its
@@ -2068,9 +2236,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 37]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 40]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
 9.7.1.  Operation in RECOVER-DONE State
@@ -2124,9 +2292,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 38]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 41]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
       desired valid lifetime and actual valid lifetime.
@@ -2180,9 +2348,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 39]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 42]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
 9.9.  COMMUNICATIONS-INTERRUPTED State
@@ -2236,9 +2404,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 40]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 43]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
 9.9.2.  Transition Out of COMMUNICATIONS-INTERRUPTED State
@@ -2292,9 +2460,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 41]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 44]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
       Primary                                Secondary
@@ -2348,9 +2516,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 42]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 45]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    the same resource has been offered and accepted by two different
@@ -2404,9 +2572,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 43]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 46]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
        Primary                                Secondary
@@ -2460,9 +2628,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
 
 
 
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 44]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 47]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
    When a server enters RESOLUTION-INTERRUPTED state it SHOULD raise an
@@ -2508,24 +2676,18 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    would be in a "balanced" responsive state, running the load balancing
    algorithm.
 
-   TODO: We do not support load balancing, so CONFLICT-DONE is actually
-   equal to NORMAL.  Need to remove CONFLICT-DONE and replace all its
-   references to NORMAL.
-
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 45]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
 9.12.1.  Operation in CONFLICT-DONE State
 
    A primary server in CONFLICT-DONE state is fully responsive to all
    DHCP clients (similar to the situation in COMMUNICATIONS-INTERRUPTED
    state).
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 48]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
 
    If communications fails, remain in CONFLICT-DONE state.  If
    communications becomes OK, remain in CONFLICT-DONE state until the
@@ -2569,98 +2731,393 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    solution is that there is no delay between primary failure and the
    moment when secondary starts serving requests.
 
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 46]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
    Discussion: The possibility of setting both servers preference to an
    equal value could theoretically work as a crude attempt to provide
    load balancing.  It wouldn't do much good on its own, as one (faster)
    server could be chosen more frequently (assuming that with equal
    preference sets clients will pick first responding server, which is
    not mandated by DHCPv6).  We could design a simple mechanism of
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 49]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    dynamically updating preference depending on usage of available
    resources.  This concept hasn't been investigated in detail yet.
 
 
 11.  Dynamic DNS Considerations
 
-   TODO: Describe DNS Updates challenges in failover environment.  It is
-   nicely described in Section 5.12 of [dhcpv4-failover].
+   DHCP servers (and clients) can use DNS Dynamic Updates as described
+   in RFC 2136 [RFC2136] to maintain DNS name-mappings as they maintain
+   DHCP leases.  Many different administrative models for DHCP-DNS
+   integration are possible.  Descriptions of several of these models,
+   and guidelines that DHCP servers and clients should follow in
+   carrying them out, are laid out in RFC 4704 [RFC4704].
+
+   The nature of the failover protocol introduces some issues concerning
+   dynamic DNS updates that are not part of non-failover environments.
+   This section describes these issues, and defines the information
+   which failover partners should exchange in order to ensure consistent
+   behavior.  The presence of this section should not be interpreted as
+   requiring an implementation of the DHCPv6 failover protocol to also
+   support DDNS updates.
+
+   The purpose of this discussion is to clarify the areas where the
+   failover and DHCP-DDNS protocols intersect for the benefit of
+   implementations which support both protocols, not to introduce a new
+   requirement into the DHCPv6 failover protocol.  Thus, a DHCPv6 server
+   which implements the failover protocol MAY also support dynamic DNS
+   updates, but if it does support dynamic DNS updates it SHOULD utilize
+   the techniques described here in order to correctly distribute them
+   between the failover partners.  See RFC 4704 [RFC4704] as well as RFC
+   4703 [RFC4703] for information on how DHCPv6 servers deal with
+   potential conflicts when updating DNS even without failover.
+
+   From the standpoint of the failover protocol, there is no reason why
+   a server which is utilizing the DDNS protocol to update a DNS server
+   should not be a partner with a server which is not utilizing the DDNS
+   protocol to update a DNS server.  However, a server which is not able
+   to support DDNS or is not configured to support DDNS SHOULD output a
+   warning message when it receives BNDUPD messages which indicate that
+   its failover partner is configured to support the DDNS protocol to
+   update a DNS server.  An implementation MAY consider this an error
+   and refuse to operate, or it MAY choose to operate anyway, having
+   warned the user of the problem in some way.
+
+11.1.  Relationship between failover and dynamic DNS update
+
+   The failover protocol describes the conditions under which each
+   failover server may renew a lease to its current DHCP client, and
+   describes the conditions under which it may grant a lease to a new
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 50]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   DHCP client.  An analogous set of conditions determines when a
+   failover server should initiate a DDNS update, and when it should
+   attempt to remove records from the DNS.  The failover protocol's
+   conditions are based on the desired external behavior: avoiding
+   duplicate address and prefix assignments; allowing clients to
+   continue using leases which they obtained from one failover partner
+   even if they can only communicate with the other partner; allowing
+   the secondary DHCP server to grant new leases even if it is unable to
+   communicate with the primary server.  The desired external DDNS
+   behavior for DHCP failover servers is similar to that described above
+   for the failover protocol itself:
+
+   1.  Allow timely DDNS updates from the server which grants a lease to
+       a client.  Recognize that there is often a DDNS update lifecycle
+       which parallels the DHCP lease lifecycle.  This is likely to
+       include the addition of records when the lease is granted, and
+       the removal of DNS records when the leased resource is
+       subsequently made available for allocation to a different client.
+
+   2.  Communicate enough information between the two failover servers
+       to allow one to complete the DDNS update 'lifecycle' even if the
+       other server originally granted the lease.
+
+   3.  Avoid redundant or overlapping DDNS updates, where both failover
+       servers are attempting to perform DDNS updates for the same
+       lease-client binding.
+
+   4.  Avoid situations where one partner is attempting to add RRs
+       related to a lease binding while the other partner is attempting
+       to remove RRs related to the same lease binding.
+
+   While DHCP servers configured for DDNS typically perform these
+   operations on both the AAAA and the PTR resource records, this is not
+   required.  It is entirely possible that a DHCP server could be
+   configured to only update the DNS with PTR records, and the DHCPv6
+   clients could be responsible for updating the DNS with their own AAAA
+   records.  In this case, the discussions here would apply only to the
+   PTR records.
+
+11.2.  Exchanging DDNS Information
+
+   In order for either server to be able to complete a DDNS update, or
+   to remove DNS records which were added by its partner, both servers
+   need to know the FQDN associated with the lease-client binding.  In
+   addition, to properly handle DDNS updates, additional information is
+   required.  All of the following information needs to be transmitted
+   between the failover partners:
+
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 51]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   1.  The FQDN that the client requested be associated with the
+       resource.  If the client doesn't request a particular FQDN and
+       one is synthesized by the failover server or if the failover
+       server is configured to replace a client requested FQDN with a
+       different FQDN, then the server generated value would be used.
+
+   2.  The FQDN that was actually placed in the DNS for this lease.  It
+       may differ from the client requested FQDN due to some form of
+       disambiguation or other DHCP server configuration (as described
+       above).
+
+   3.  The status of and DDNS operations in progress or completed.
+
+   4.  Information sufficient to allow the failover partner to remove
+       the FQDN from the DNS should that become necessary.
+
+   These data items are the minimum necessary set to reliably allow two
+   failover partners to successfully share the responsibility to keep
+   the DNS up to date with the resources allocated to clients.
+
+   This information would typically be included in BNDUPD messages sent
+   from one failover partner to the other.  Failover servers MAY choose
+   not to include this information in BNDUPD messages if there has been
+   no change in the status of any DDNS update related to the lease.
+
+   The partner server receiving BNDUPD messages containing the DDNS
+   information SHOULD compare the status informatin and the FQDN with
+   the current DDNS information it has associated with the lease
+   binding, and update its notion of the DDNS status accordingly.
+
+   Some implementations will instead choose to send a BNDUPD without
+   waiting for the DDNS update to complete, and then will send a second
+   BNDUPD once the DDNS update is complete.  Other implementations will
+   delay sending the partner a BNDUPD until the DDNS update has been
+   acknowledged by the DNS server, or until some time-limit has elapsed,
+   in order to avoid sending a second BNDUPD.
+
+   The FQDN option contains the FQDN that will be associated with the
+   AAAA RR (if the server is performing an AAAA RR update for the
+   client).  The PTR RR can be generated automatically from the IP
+   address or prefix value.  The FQDN may be composed in any of several
+   ways, depending on server configuration and the information provided
+   by the client in its DHCP messages.  The client may supply a hostname
+   which it would like the server to use in forming the FQDN, or it may
+   supply the entire FQDN.  The server may be configured to attempt to
+   use the information the client supplies, it may be configured with an
+   FQDN to use for the client, or it may be configured to synthesize an
+   FQDN.
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 52]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   Since the server interacting with the client may not have completed
+   the DDNS update at the time it sends the first BNDUPD about the lease
+   binding, there may be cases where the FQDN in later BNDUPD messages
+   does not match the FQDN included in earlier messages.  For example,
+   the responsive server may be configured to handle situations where
+   two or more DHCP client FQDNs are identical by modifying the most-
+   specific label in the FQDNs of some of the clients in an attempt to
+   generate unique FQDNs for them (a process sometimes called
+   "disambiguation").  Alternatively, at sites which use some or all of
+   the information which clients supply to form the FQDN, it's possible
+   that a client's configuration may be changed so that it begins to
+   supply new data.  The server interacting with the client may react by
+   removing the DNS records which it originally added for the client,
+   and replacing them with records that refer to the client's new FQDN.
+   In such cases, the server SHOULD include the actual FQDN that was
+   used in subsequent DDNS options in any BNDUPD messages exchanged
+   between the failover partners.  This server SHOULD include relevant
+   information in its BNDUPD messages.  This information may be
+   necessary in order to allow the non-responsive partner to detect
+   client configuration changes that change the hostname or FQDN data
+   which the client includes in its DHCP requests.
+
+11.3.  Adding RRs to the DNS
+
+   A failover server which is going to perform DDNS updates SHOULD
+   initiate the DDNS update when it grants a new lease to a client.  The
+   server which did not grant the lease SHOULD NOT initiate a DDNS
+   update when it receives the BNDUPD after the lease has been granted.
+   The failover protocol ensures that only one of the partners will
+   grant a lease to any individual client, so it follows that this
+   requirement will prevent both partners from initiating updates
+   simultaneously.  The server initiating the update SHOULD follow the
+   protocol in RFC 4704 [RFC4704].  The server may be configured to
+   perform a AAAA RR update on behalf of its clients, or not.
+   Ordinarily, a failover server will not initiate DDNS updates when it
+   renews leases.  In two cases, however, a failover server MAY initiate
+   a DDNS update when it renews a lease to its existing client:
+
+   1.  When the lease was granted before the server was configured to
+       perform DDNS updates, the server MAY be configured to perform
+       updates when it next renews existing leases.  The server which
+       granted the lease is the server which should initiate the DDNS
+       update.
+
+   2.  If a server is in PARTNER-DOWN state, it can conclude that its
+       partner is no longer attempting to perform an update for the
+       existing client.  If the remaining server has not recorded that
+       an update for the binding has been successfully completed, the
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 53]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+       server MAY initiate a DDNS update.  It MAY initiate this update
+       immediately upon entry to PARTNER-DOWN state, it may perform this
+       in the background, or it MAY initiate this update upon next
+       hearing from the DHCP client.
+
+11.4.  Deleting RRs from the DNS
+
+   The failover server which makes a resource FREE SHOULD initiate any
+   DDNS deletes, if it has recorded that DNS records were added on
+   behalf of the client.
+
+   A server not in PARTNER-DOWN state "makes a resource FREE" when it
+   initiates a BNDUPD with a binding-status of FREE, FREE_BACKUP,
+   EXPIRED, or RELEASED.  Its partner confirms this status by acking
+   that BNDUPD, and upon receipt of the BNDACK the server has "made the
+   resource FREE".  Conversely, a server in PARTNER-DOWN state "makes a
+   resource FREE" when it sets the binding-status to FREE, since in
+   PARTNER-DOWN state no communications is required with the partner.
+
+   It is at this point that it should initiate the DDNS operations to
+   delete RRs from the DDNS.  Its partner SHOULD NOT initiate DDNS
+   deletes for DNS records related to the lease binding as part of
+   sending the BNDACK message.  The partner MAY have issued BNDUPD
+   messages with a binding-status of FREE, EXPIRED, or RELEASED
+   previously, but the other server will have rejected these BNDUPD
+   messages.
+
+   The failover protocol ensures that only one of the two partner
+   servers will be able to make a resource FREE.  The server making the
+   resource FREE may be doing so while it is in NORMAL communication
+   with its partner, or it may be in PARTNER-DOWN state.  If a server is
+   in PARTNER-DOWN state, it may be performing DDNS deletes for RRs
+   which its partner added originally.  This allows a single remaining
+   partner server to assume responsibility for all of the DDNS activity
+   which the two servers were undertaking.
+
+   Another implication of this approach is that no DDNS RR deletes will
+   be performed while either server is in COMMUNICATIONS-INTERRUPTED
+   state, since no resource are moved into the FREE state during that
+   period.
+
+11.5.  Name Assignment with No Update of DNS
+
+   In some cases, a DHCP server is configured to return a name to the
+   DHCPv6 client but not enter that name into the DNS.  This is
+   typically a name that it has discovered or generated from information
+   it has received from the client.  In this case this name information
+   SHOULD be communicated to the failover partner, if only to ensure
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 54]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
+   that they will return the same name in the event the partner becomes
+   the server to which the DHCPv6 client begins to interact.
 
 
 12.  Reservations and failover
 
-   TODO: Describe how lease reservation works with failover.  See
-   Section 5.13 in [dhcpv4-failover].
+   Some DHCP servers support a capability to offer specific
+   preconfigured resources to DHCP clients.  These are real DHCP
+   clients, they do the entire DHCP protocol, but these servers always
+   offer the client a specific pre-configured resource, one they offer
+   that resource to no other clients.  Such a capability has several
+   names, but it is sometimes called a "reservation", in that the
+   resource is reserved for a particular DHCP client.
+
+   In a situation where there are two DHCP servers serving the same
+   subnet without using failover, the two DHCP server's need to have
+   disjoint resource pools, but identical reservations for the DHCP
+   clients.
+
+   In a failover context, both servers need to be configured with the
+   proper reservations in an identical manner, but if we stop there
+   problems can occur around the edge conditions where reservations are
+   made for resource that has already been leased to a different client.
+   Different servers handle this conflict in different ways, but the
+   goal of the failover protocol is to allow correct operation with any
+   server's approach to the normal processing of the DHCP protocol.
+
+   The general solution with regards to reservations is as follows.
+   Whenever a reserved resource becomes FREE (i.e., when first
+   configured or whenever a client frees it or it expires or is reset),
+   the primary server MUST show that resource as FREE (and thus
+   available for its own allocation) and it MUST send it to the
+   secondary server in a BNDUPD with a flag set showing that it is
+   reserved and with a status of BACKUP.
+
+   Note that this implies that a reserved resource goes through the
+   normal state changes from FREE to ACTIVE (and possibly back to FREE).
+   The failover protocol supports this approach to reservations, i.e.,
+   where the resource undergoes the normal state changes of any
+   resource, but it can only be offered to the client for which it is
+   reserved.
+
+   From the above, it follows that a reservation soley on the secondary
+   will not necessarily allow the secondary to offer that address to
+   client to whom it is reserved.  The reservation must also appear on
+   the primary as well for the secondary to be able to offer the
+   resource to the client to which is is reserved.
 
 
-13.  Protocol entities
-
-   Discussion: It is unclear if following sections belong to design or
-   protocol draft.  It is currently kept here as a scratchbook with list
-   of things that will have to be defined eventually.  Whether or not it
-   will stay in this document or will be moved to the protocol spec
-   document is TBD.
-
-13.1.  Failover Protocol
-
-   This section enumerates list of options that will be defined in
-   failover protocol specification.  Rough description of purpose and
-   content for each option is specified.  Exact on wire format will be
-   defined in protocol specification.
-
-   1.  OPTION_FO_TIMESTAMP - convey information about timestamp.  It is
-       used by time skew measurement algorithm (see Section 8.1).
-
-13.2.  Protocol constants
-
-   This section enumerates various constants that have to be defined in
-   actual protocol specification.
-
-   1.  TIME_SKEW_PKTS_AVG - number of packets that are used to calculate
-       average time skew between partners.  See (see Section 8.1).
 
 
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 47]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 55]
 
-Internet-Draft           DHCPv6 Failover Design           September 2012
+Internet-Draft           DHCPv6 Failover Design             October 2012
 
 
-14.  Open questions
-
-   This is scratchbook.  This section will be removed once questions are
-   answered.
-
-   Q: Do we want to support temporary addresses?  I think not.  They are
-   short-lived by definition, so clients should not mind getting new
-   temporary addresses.
-
-   Q: Do we want to support CGA-registered addresses?  There is
-   currently work in DHC WG about this, but I haven't looked at it yet.
-   If that is complicated, we may not define it here, but rather as an
-   extension.  [If it moves forward, we need to support it.]
+   When the reservation on a resource is cancelled, if the resource is
+   currently FREE and the server is the primary, or BACKUP and the
+   server is the secondary, the server MUST send a BNDUPD to the other
+   server with the binding-status FREE and an indication that the
+   resource is no longer reserved.
 
 
-15.  Security Considerations
+13.  Security Considerations
 
-   TODO: Security considerations section will contain loose notes and
-   will be transformed into consistent text once the core design
-   solidifies.
+   DHCPv6 failover is an extension of a standard DHCPv6 protocol, so all
+   security considerations from [RFC3315], Section 23 and [RFC3633],
+   Section 15 related to the server apply.
+
+   As traffic exchange between clients and server is not encrypted, an
+   attacker than penetrated the network and is able to intercept
+   traffic, will not gain anything by also sniffing communication
+   between partners.
+
+   An attacker that can impersonate one partner can efficiently perform
+   a denial of service attack on the remaining uncompromised server.
+   Several techniques may be used: pretending that conflict resolution
+   is required, requesting rebalance, claming that a valid lease was
+   released or declined etc.  For that reason the communication between
+   servers SHOULD support failover connections over TLS, as explained in
+   Section Section 5.1.  Such secure connection SHOULD be optional and
+   configurable by the administrator.
+
+   TODO: Security considerations section contains loose notes and will
+   be transformed into consistent text once the core design solidifies.
 
 
-16.  IANA Considerations
+14.  IANA Considerations
 
    IANA is not requested to perform any actions at this time.
 
 
-17.  Acknowledgements
+15.  Acknowledgements
 
    This document extensively uses concepts, definitions and other parts
    of [dhcpv4-failover] document.  Authors would like to thank Shawn
@@ -2672,26 +3129,26 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
    Communications (a division of Gdansk University of Technology) and
    the Polish Ministry of Science and Higher Education under the
    European Regional Development Fund, Grant No.  POIG.01.01.02-00-045/
+
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 56]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    09-00 (Future Internet Engineering Project).
 
 
-18.  References
+16.  References
 
-18.1.  Normative References
+16.1.  Normative References
 
    [I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt]
               Halwasia, G., Systems, C., and W. Dec, "Client Link-layer
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 48]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
               Address Option in DHCPv6",
-              draft-ietf-dhc-dhcpv6-client-link-layer-addr-opt-01 (work
-              in progress), August 2012.
+              draft-ietf-dhc-dhcpv6-client-link-layer-addr-opt-03 (work
+              in progress), October 2012.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -2704,23 +3161,22 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
               Host Configuration Protocol (DHCP) version 6", RFC 3633,
               December 2003.
 
+   [RFC4703]  Stapp, M. and B. Volz, "Resolution of Fully Qualified
+              Domain Name (FQDN) Conflicts among Dynamic Host
+              Configuration Protocol (DHCP) Clients", RFC 4703,
+              October 2006.
+
    [RFC4704]  Volz, B., "The Dynamic Host Configuration Protocol for
               IPv6 (DHCPv6) Client Fully Qualified Domain Name (FQDN)
               Option", RFC 4704, October 2006.
 
-18.2.  Informative References
+16.2.  Informative References
 
    [I-D.ietf-dhc-dhcpv6-failover-requirements]
               Mrugalski, T. and K. Kinnear, "DHCPv6 Failover
               Requirements",
-              draft-ietf-dhc-dhcpv6-failover-requirements-01 (work in
-              progress), July 2012.
-
-   [I-D.ietf-dhc-dhcpv6-redundancy-consider]
-              Tremblay, J., Brzozowski, J., Chen, J., and T. Mrugalski,
-              "DHCPv6 Redundancy Deployment Considerations",
-              draft-ietf-dhc-dhcpv6-redundancy-consider-02 (work in
-              progress), October 2011.
+              draft-ietf-dhc-dhcpv6-failover-requirements-02 (work in
+              progress), September 2012.
 
    [RFC2136]  Vixie, P., Thomson, S., Rekhter, Y., and J. Bound,
               "Dynamic Updates in the Domain Name System (DNS UPDATE)",
@@ -2730,6 +3186,13 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
               (DHCPv6) Relay Agent Remote-ID Option", RFC 4649,
               August 2006.
 
+
+
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 57]
+
+Internet-Draft           DHCPv6 Failover Design             October 2012
+
+
    [RFC5007]  Brzozowski, J., Kinnear, K., Volz, B., and S. Zeng,
               "DHCPv6 Leasequery", RFC 5007, September 2007.
 
@@ -2737,14 +3200,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2012
               February 2009.
 
    [dhcpv4-failover]
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 49]
-
-Internet-Draft           DHCPv6 Failover Design           September 2012
-
-
               Droms, R., Kinnear, K., Stapp, M., Volz, B., Gonczi, S.,
               Rabil, G., Dooley, M., and A. Kapur, "DHCP Failover
               Protocol", draft-ietf-dhc-failover-12 (work in progress),
@@ -2789,12 +3244,5 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-Mrugalski & Kinnear      Expires March 10, 2013                [Page 50]
+Mrugalski & Kinnear      Expires April 25, 2013                [Page 58]
 
