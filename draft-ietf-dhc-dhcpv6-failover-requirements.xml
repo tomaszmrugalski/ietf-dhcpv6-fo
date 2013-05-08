@@ -135,7 +135,7 @@
 	to each process some portion of the client request traffic in
 	a conflict-free fashion.</t>
 	<t>Lease - an IPv6 address, an IPv6 prefix or other resource
-	that was assigned ('leased') by a server to a specific
+	that was assigned ("leased") by a server to a specific
 	client. A lease may include additional information, like
 	associated fully qualified domain name (FQDN) and/or
 	information about associated DNS updates.</t> 
@@ -250,9 +250,9 @@
       enumerated here to provide a common basis for discussion.</t>
       <section title="Hot Standby Model">
 	<t>In the simplest case, there are two partners that are connected
-	to the same network. Only one of partners ('primary') provides
+	to the same network. Only one of partners ("primary") provides
 	services to clients. In case of its failure, the second partner 
-	('secondary') continues handling services previously handled
+	("secondary") continues handling services previously handled
 	by first partner. As both servers are connected to the same
 	network, a partner that fails to communicate with its partner
 	while also receiving requests from clients may assume with
@@ -427,7 +427,7 @@
 	  consults its lease database and assigns requested
 	  addresses and/or prefixes. To make sure that its partner
 	  maintains a consistent database, it then sends information
-	  about new or just updated lease to the partner and waits for
+	  about a new or just updated lease to the partner and waits for
 	  the partner's response. After the response from partner is
 	  received the REPLY message is transmitted to the client.</t>
 	  <t>This approach has the benefit of having a completely consistent
@@ -513,7 +513,7 @@
       scenarios. Such additional features will be considered
       optional parts of failover, and will be split and defined in
       separate documents. As such, this document can be considered an
-      attempt to define requirements for the DHCPv6 failover 'core'
+      attempt to define requirements for the DHCPv6 failover "core"
       protocol.</t>
 
       <t>The core of the DHCPv6 failover protocol is expected to
@@ -539,7 +539,7 @@
 
 	<t>One partner MUST be able to continue serving leases offered
 	by the other partner. This property is also sometimes called
-	'lease stability'.  The failure of either failover partner
+	"lease stability".  The failure of either failover partner
 	SHOULD pose minimal or no impact on client connectivity. In
 	particular, it MUST NOT force the client to change addresses
 	and/or change prefixes delegated to it.  Long-lived
@@ -574,7 +574,7 @@
       individual DHCPv6 servers. In particular, it means the server
       that takes over providing service to clients from its failed
       partner, will continue serving the same addresses and/or
-      prefixes. This property is also called 'lease stability'.</t>
+      prefixes. This property is also called "lease stability".</t>
 
       <t>Despite the lack of standardization of DHCPv4 failover, the 
       coexistence of DHCPv4 and DHCPv6 failover MAY be taken into
@@ -749,7 +749,7 @@
 	  partner.  The first lease offered to a DHCPv4 client can
 	  be only as long as the MCLT.  However, when the failover
 	  server updates its partner, it updates the partner with
-	  the desired lease time plus the MCLT.  Thus, when the
+	  the desired lease time plus the 1/2 of MCLT.  Thus, when the
 	  client returns with a renewal request at halfway through
 	  the MCLT, the failover server can extend its lease for
 	  only the lease time known by the partner plus the MCLT.
@@ -938,8 +938,9 @@
       </reference> <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
       <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.kostur-dhc-loadbv6.xml'?>
-
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6853'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
     </references>
   </back>
 </rfc>
