@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-03">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-04">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -236,7 +236,7 @@
           is based on the assumption that they will will share the
           client traffic. Administrators that are interested in
           such a capability are advised to deploy a load balancing
-          mechanism, defined in <xref target="I-D.kostur-dhc-loadbv6"/>.</t>
+          mechanism, defined in <xref target="I-D.ietf-dhc-dhcpv6-load-balancing"/>.</t>
         </section>
       </section>
     </section>
@@ -591,7 +591,7 @@
           extension. The primary reason for this the desire to limit
           core protocol complexity. Load Balancing is likely to
           be defined as an extension.
-          See <xref target="I-D.kostur-dhc-loadbv6"/>.</t>
+          See <xref target="I-D.ietf-dhc-dhcpv6-load-balancing"/>.</t>
 
           <t>Configuration synchronization - two failover partners are
           expected to maintain the same configuration. Mismatched
