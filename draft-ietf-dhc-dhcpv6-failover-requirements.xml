@@ -7,10 +7,10 @@
 
 <?rfc symrefs="yes"?>
 
-<!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
+<!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-02">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-03">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -209,7 +209,7 @@
 
 	  <t>There are several well documented approaches how such
 	  deployment works. They are discussed in detail in <xref
-	  target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/>. Each of
+	  target="RFC6853"/>. Each of
 	  those approaches is simpler to deploy and maintain that full
 	  failover.</t>
         </section>
@@ -284,7 +284,7 @@
 	full load normally handled by both servers working together,
 	or there is not a true increase in availability.</t>
       </section>
-      <section anchor="1-to-1" title="1-to-1, m-to-1 and m-to-m models">
+      <section anchor="onetoone" title="1-to-1, m-to-1 and m-to-m models">
 	<t>A failover relationship for a specific network is provided
 	by two failover partners. Those partners communicate with each
 	other and back up all pools. This scenario is sometimes
@@ -302,17 +302,30 @@
 	of addressees into two or more non-overlapping pools, with
 	each server handling its own smaller pool. Several versions of
 	such a scenario are discussed in <xref
-	target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/>.</t>
+	target="RFC6853"/>.</t>
       </section>
       <section title="Long lived connections">
 	<t>Certain nodes may maintain long lived connections. Since
 	the IPv6 address space is large, techniques exist (e.g. 
-	<xref target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/>)
+	<xref target="RFC6853"/>)
 	that use the easy availability of IPv6 addresses in order to
 	provide increased DHCPv6 availability.  However, these
 	approaches do not generally provide for stable IPv6 addresses
 	for DHCPv6 clients should the server with which the client is
 	interacting become unavailable.</t>
+	<t>The obvious benefit of stable addresses is the ability to update
+	DNS infrequently. While the DNS can be updated every time IPv6
+	address changes, it introduces delays and (depending on DNS configuration)
+	old entries may be cached for prolonged periods of time.</t>
+	<t>The other benefit of having stable address is that many 
+	monitoring solutions provide statistics on a per IP basis, so
+	IP changes make measuring characteristics of a given box more difficut.</t>
+
+	<t>It should be noted that lease stability is explicit
+	non-goal in some deployments. One notable example is an ISP
+	who wants to provide addresses that change frequently to
+	prevent his customers from running servers (without paying
+	extra for more enterprise oriented service).</t>
       </section>
 
       <section title="Partial server communication loss">
@@ -405,8 +418,10 @@
       
       <section anchor="sync" title="Synchronization mechanisms">
 	<t>Partners must exchange information about changes made to the 
-	lease database. There are two types of sychronization
-	methods that may be used.</t>
+	lease database. There are at least two types of sychronization
+	methods that may be used. Those concepts are related to distributed 
+	databases, so some familiarity with distributed database 
+	is useful to better understand this topic.</t>
 	<section anchor="lockstep" title="Lockstep">
 	  <t>When a server receives a REQUEST message from a client it
 	  consults its lease database and assigns requested
@@ -424,6 +439,9 @@
 	  partner. The second partner is expected to update its own
 	  copy of the lease database in permanent storage, so this delay
 	  is not negligible, even in fast networks.</t>
+	  <t>Due to advent of SSD disks or battery backed ram disks
+	  technology, this write performance penalty can be limited to
+	  some degree.</t>
 	</section>
 
 	<section anchor="lazy-updates" title="Lazy updates">
@@ -547,6 +565,8 @@
 	be allowed, when possible.</t>
 
       </list>
+      Depending on the specific nature of the failure, the recovery procedures
+      mentioned in points 7 and 8 may require manual intervention.
       </t>
 
       <t>High Availability is a property of the protocol that allows
@@ -582,7 +602,7 @@
           <!-- tomek: I was thinking about something like defining
           DCP - DHCP control protocol. But that is a huge undertaking
           that I'm not willing to start at this time. -->
-          <t>m-to-m model (see section <xref target="1-to-1"/>)</t>
+          <t>m-to-m model (see section <xref target="onetoone"/>)</t>
           <t>servers participating in multiple failover
           relationships for any given pool.</t>
         </list>
@@ -597,12 +617,12 @@
       limitations.</t>
       <section title="DHCPv4 failover concepts">
 	<section title="Goals of DHCPv4 Failover">
-	  <t> <list style="numbers">
+	  <t><list style="numbers">
 	    <t>Provide a high availability DHCP service by leveraging
 	    the hooks built into DHCPv4 <xref target="RFC2131"/> and
 	    its usual implementation to support multiple servers able
-	    to respond to client requests.  These hooks are: <list
-	    style="format (%c)">>
+	    to respond to client requests.  These hooks are: 
+	    <list style="numbers">
 
 		<t>The broadcast of DHCPDISCOVER requests.</t>
 
@@ -628,11 +648,10 @@
 	    interchange of configuration information.</t>
 
 	  </list>
-	  </t>
+	  </t> 
 	</section>
 
 	<section title="Goals lead to Concepts">
-
 	  <t>The goal to have a minimal performance impact on the operation
 	  of the DHCPv4 servers participating in failover is the
 	  driving force behind the design of the DHCPv4 failover protocol.</t>
@@ -710,7 +729,7 @@
 	  periodic rebalancing of the allocation of these available
 	  leases.</t>
 
-	</section>> 
+	</section>
 	<section title="Use of the MCLT in practice">
 
 	  <t>From the above discussion, it should be clear how to
@@ -809,7 +828,7 @@
 	</section>
 
       </section> <section title="DHCPv6 Redundancy Considerations">
-	<t><xref target="I-D.ietf-dhc-dhcpv6-redundancy-consider"/>
+	<t><xref target="RFC6853"/>
 	specifies an interim architecture to provide a semi-redundant
 	DHCPv6 solution before the availability of vendor or standard
 	based solutions.  The proposed architecture may be used in
@@ -857,8 +876,8 @@
       Thanks to Bernie Volz and Shawn Routhier for their frequent
       reviews and substantial contributions.  Authors would also like
       to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
-      Sheng, Yu Fu, Greg Rabil, and Vithalprasad Gaitonde for their
-      comments and feedback.</t>
+      Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof 
+      Nowicki and Steinar Haug for their comments and feedback.</t>
 
       <t>This work has been partially supported by Gdansk University of
       Technology and the Polish Ministry of Science and Higher Education
@@ -881,7 +900,12 @@
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3633'?>
       <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.4704'?>
+
     </references> <references title="Informative References">
+
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6853'?>
+
       <reference anchor="dhcpv4-failover">
 	<front>
 	  <title>DHCP Failover Protocol</title> <author fullname="Ralph
@@ -913,8 +937,6 @@
 	value="draft-ietf-dhc-failover-12"/>
       </reference> <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-redundancy-consider.xml'?>
       <?rfc
       include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.kostur-dhc-loadbv6.xml'?>
 
