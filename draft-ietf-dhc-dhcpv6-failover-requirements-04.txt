@@ -5,8 +5,8 @@
 Dynamic Host Configuration (DHC)                            T. Mrugalski
 Internet-Draft                                                       ISC
 Intended status: Informational                                K. Kinnear
-Expires: November 09, 2013                                         Cisco
-                                                            May 08, 2013
+Expires: November 10, 2013                                         Cisco
+                                                            May 09, 2013
 
 
                       DHCPv6 Failover Requirements
@@ -42,7 +42,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 09, 2013.
+   This Internet-Draft will expire on November 10, 2013.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 1]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 1]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 2]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 2]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -165,7 +165,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 3]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 3]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -221,7 +221,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 4]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 4]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -277,7 +277,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 5]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 5]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -290,7 +290,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
    There are several well documented approaches how such deployment
    works.  They are discussed in detail in [RFC6853].  Each of those
-   approaches is simpler to deploy and maintain that full failover.
+   approaches is simpler to deploy and maintain than full failover.
 
 4.1.3.  Distributed databases
 
@@ -333,7 +333,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 6]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 6]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -389,7 +389,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 7]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 7]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -416,8 +416,8 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
    solutions provide statistics on a per IP basis, so IP changes make
    measuring characteristics of a given box more difficut.
 
-   It should be noted that lease stability is explicit non-goal in some
-   deployments.  One notable example is an ISP who wants to provide
+   It should be noted that lease stability is an explicit non-goal in
+   some deployments.  One notable example is an ISP who wants to provide
    addresses that change frequently to prevent his customers from
    running servers (without paying extra for more enterprise oriented
    service).
@@ -445,7 +445,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 8]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 8]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -501,7 +501,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013                [Page 9]
+Mrugalski & Kinnear    Expires November 10, 2013                [Page 9]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -530,7 +530,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
    Partners must exchange information about changes made to the lease
    database.  There are at least two types of sychronization methods
-   that may be used.  Those concepts are related to distributed
+   that may be used.  These concepts are related to distributed
    databases, so some familiarity with distributed database is useful to
    better understand this topic.
 
@@ -557,7 +557,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 10]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 10]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -613,16 +613,16 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 11]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 11]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
    might not be necessary and can be done mathematically.  And, it may
-   also be possible and reasonable to use a much longer MCLT value -- as
-   reusing an address for a different client is generally not a
-   requirement (at least over the near term) as close to 2^64 addresses
-   may be available.
+   also be possible and reasonable to use a much longer MCLT (see
+   Section 9.1.2) value -- as reusing an address for a different client
+   is generally not a requirement (at least over the near term) as close
+   to 2^64 addresses may be available.
 
    However, DHCPv6 Prefix Delegation is similar to IPv4 addressing
    regarding number of available leases and therefore techniques for
@@ -669,7 +669,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 12]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 12]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -725,7 +725,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 13]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 13]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -781,7 +781,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 14]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 14]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -837,7 +837,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 15]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 15]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -877,13 +877,13 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
    times when communicating with the failover partner.  The first lease
    offered to a DHCPv4 client can be only as long as the MCLT.  However,
    when the failover server updates its partner, it updates the partner
-   with the desired lease time plus the 1/2 of MCLT.  Thus, when the
-   client returns with a renewal request at halfway through the MCLT,
-   the failover server can extend its lease for only the lease time
-   known by the partner plus the MCLT.  But the partner now knows the
-   desired lease time, so that the server can extend the lease for as
-   long as it was configured since it had pre-updated the failover
-   partner with this time.
+   with the desired lease time plus the 1/2 of MCLT (assuming the T1
+   time is 50% of the lease time.  Thus, when the client returns with a
+   renewal request at halfway through the MCLT, the failover server can
+   extend its lease for only the lease time known by the partner plus
+   the MCLT.  But the partner now knows the desired lease time, so that
+   the server can extend the lease for as long as it was configured
+   since it had pre-updated the failover partner with this time.
 
    Using this approach, one can keep the MCLT relatively short, say 1
    hour, and still offer leases of any desired extent to clients -- once
@@ -893,7 +893,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 16]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 16]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -949,7 +949,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 17]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 17]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -1005,7 +1005,7 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 18]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 18]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
@@ -1055,26 +1055,23 @@ Internet-Draft        DHCPv6 Failover Requirements              May 2013
               "DHCPv6 Redundancy Deployment Considerations", BCP 180,
               RFC 6853, February 2013.
 
-   [RFC6853]  Brzozowski, J., Tremblay, J., Chen, J., and T. Mrugalski,
-              "DHCPv6 Redundancy Deployment Considerations", BCP 180,
-              RFC 6853, February 2013.
+   [dhcpv4-failover]
+              Droms, R., Kinnear, K., Stapp, M., Volz, B., Gonczi, S.,
+              Rabil, G., Dooley, M., and A. Kapur, "DHCP Failover
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 19]
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 19]
 
 Internet-Draft        DHCPv6 Failover Requirements              May 2013
 
 
-   [dhcpv4-failover]
-              Droms, R., Kinnear, K., Stapp, M., Volz, B., Gonczi, S.,
-              Rabil, G., Dooley, M., and A. Kapur, "DHCP Failover
               Protocol", draft-ietf-dhc-failover-12 (work in progress),
               March 2003.
 
 Authors' Addresses
 
-   Tomasz Mrugalski
+   Tomek Mrugalski
    Internet Systems Consortium, Inc.
    950 Charter Street
    Redwood City, CA  94063
@@ -1116,4 +1113,7 @@ Authors' Addresses
 
 
 
-Mrugalski & Kinnear    Expires November 09, 2013               [Page 20]
+
+
+
+Mrugalski & Kinnear    Expires November 10, 2013               [Page 20]

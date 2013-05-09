@@ -14,7 +14,7 @@
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
-    <author fullname="Tomasz Mrugalski" initials="T" surname="Mrugalski">
+    <author fullname="Tomek Mrugalski" initials="T" surname="Mrugalski">
       <organization abbrev="ISC">Internet Systems Consortium, Inc.
       </organization>
       <address>
@@ -210,7 +210,7 @@
           <t>There are several well documented approaches how such
           deployment works. They are discussed in detail in <xref
           target="RFC6853"/>. Each of
-          those approaches is simpler to deploy and maintain that full
+          those approaches is simpler to deploy and maintain than full
           failover.</t>
         </section>
         <section title="Distributed databases">
@@ -321,7 +321,7 @@
         monitoring solutions provide statistics on a per IP basis, so
         IP changes make measuring characteristics of a given box more difficut.</t>
 
-        <t>It should be noted that lease stability is explicit
+        <t>It should be noted that lease stability is an explicit
         non-goal in some deployments. One notable example is an ISP
         who wants to provide addresses that change frequently to
         prevent his customers from running servers (without paying
@@ -419,7 +419,7 @@
       <section anchor="sync" title="Synchronization mechanisms">
         <t>Partners must exchange information about changes made to the
         lease database. There are at least two types of sychronization
-        methods that may be used. Those concepts are related to distributed
+        methods that may be used. These concepts are related to distributed
         databases, so some familiarity with distributed database
         is useful to better understand this topic.</t>
         <section anchor="lockstep" title="Lockstep">
@@ -494,7 +494,8 @@
       more limited address space and therefore much of the protocol
       that deals with pool balancing and rebalancing might not be
       necessary and can be done mathematically. And, it may also be
-      possible and reasonable to use a much longer MCLT value -- as
+      possible and reasonable to use a much longer MCLT (see
+      <xref target="mclt"/>) value -- as
       reusing an address for a different client is generally not a
       requirement (at least over the near term) as close to 2^64
       addresses may be available.</t>
@@ -651,7 +652,7 @@
           </t>
         </section>
 
-        <section title="Goals lead to Concepts">
+        <section anchor="mclt" title="Goals lead to Concepts">
           <t>The goal to have a minimal performance impact on the operation
           of the DHCPv4 servers participating in failover is the
           driving force behind the design of the DHCPv4 failover protocol.</t>
@@ -749,7 +750,8 @@
           partner.  The first lease offered to a DHCPv4 client can
           be only as long as the MCLT.  However, when the failover
           server updates its partner, it updates the partner with
-          the desired lease time plus the 1/2 of MCLT.  Thus, when the
+          the desired lease time plus the 1/2 of MCLT (assuming the
+          T1 time is 50% of the lease time.  Thus, when the
           client returns with a renewal request at halfway through
           the MCLT, the failover server can extend its lease for
           only the lease time known by the partner plus the MCLT.
@@ -937,8 +939,6 @@
         value="draft-ietf-dhc-failover-12"/>
       </reference> <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6853'?>
       <?rfc
       include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
     </references>
