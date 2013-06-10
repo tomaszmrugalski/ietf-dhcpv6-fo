@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-04">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-05">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -227,13 +227,13 @@
           really distributed and do not have single point of failure
           themselves. Otherwise the single point of failure is
           only moved to a different location (database rather than
-          DHCPv6 server). Such a configuation does not improve
+          DHCPv6 server). Such a configuration does not improve
           redundancy, but significantly complicates deployment.</t>
         </section>
 
         <section title="Load Balancing">
           <t>Sometimes the desire to deploy more than one server
-          is based on the assumption that they will will share the
+          is based on the assumption that they will share the
           client traffic. Administrators that are interested in
           such a capability are advised to deploy a load balancing
           mechanism, defined in <xref target="I-D.ietf-dhc-dhcpv6-load-balancing"/>.</t>
@@ -319,7 +319,8 @@
         old entries may be cached for prolonged periods of time.</t>
         <t>The other benefit of having stable address is that many
         monitoring solutions provide statistics on a per IP basis, so
-        IP changes make measuring characteristics of a given box more difficut.</t>
+        IP changes make measuring characteristics of a given box more
+        difficult.</t>
 
         <t>It should be noted that lease stability is an explicit
         non-goal in some deployments. One notable example is an ISP
@@ -418,7 +419,7 @@
 
       <section anchor="sync" title="Synchronization mechanisms">
         <t>Partners must exchange information about changes made to the
-        lease database. There are at least two types of sychronization
+        lease database. There are at least two types of synchronization
         methods that may be used. These concepts are related to distributed
         databases, so some familiarity with distributed database
         is useful to better understand this topic.</t>
@@ -451,7 +452,7 @@
           The server sends the REPLY to the client immediately after
           assigning appropriate addresses and/or prefixes and
           initiates the partner update at a later time, depending on the
-          algorithm chosen. Another varation of this approach is to initiate
+          algorithm chosen. Another variation of this approach is to initiate
           transmission to the partner, but not wait for its response
           before sending the REPLY to the client.</t>
           <t>This approach has benefit of a minimal impact on server
@@ -481,7 +482,7 @@
       differences. IPv6 introduced prefix delegation <xref
       target="RFC3633"/> that is a crucial element of the DHCPv6
       protocol. IPv6 also introduced the concept of deprecated
-      addresses with separate prefered and valid lifetimes, both
+      addresses with separate preferred and valid lifetimes, both
       being configured via DHCPv6. Negative response (NACK) in DHCPv4 has
       been replaced with the ability in DHCPv6 to provide corrected
       response in a REPLY message that differs from a REQUEST.</t>
@@ -584,7 +585,7 @@
       be taken into consideration.</t>
 
       <section anchor="out-of-scope" title="Features out of scope">
-        <t>The following features are explictly out of scope.
+        <t>The following features are explicitly out of scope.
         <list style="numbers">
           <t>Load Balancing - a capability is considered an extension
           and MAY be defined in a separate document. It MUST NOT be
@@ -598,13 +599,13 @@
           expected to maintain the same configuration. Mismatched
           configuration between partners is a frequent problem in
           failover solutions. Unfortunately, that is an open-ended
-          problem, since different servers have very different config
-          data models.</t>
+          problem, since different servers have very different
+          configuration data models.</t>
           <!-- tomek: I was thinking about something like defining
           DCP - DHCP control protocol. But that is a huge undertaking
           that I'm not willing to start at this time. -->
-          <t>m-to-m model (see section <xref target="onetoone"/>)</t>
-          <t>servers participating in multiple failover
+          <t>m-to-m model (see <xref target="onetoone"/>)</t>
+          <t>Servers participating in multiple failover
           relationships for any given pool.</t>
         </list>
         </t>
