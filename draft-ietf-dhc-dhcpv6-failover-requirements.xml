@@ -513,9 +513,20 @@
       use a hash or calculated technique to divide the significantly
       more limited address space and therefore much of the protocol
       that deals with pool balancing and rebalancing might not be
-      necessary and can be done mathematically. And, it may also be
+      necessary and can be done mathematically. Also, because of the
+      much lower degree of contention for IP addresses, the DHCPv6
+      failover protocol does not need to be tuned to support rapid
+      reclamation of IPv6 addresses following the loss of a failover
+      peer's database.</t>
+
+      <t>However, DHCPv6 Prefix Delegation is similar to IPv4 addressing
+      in terms of the number of available leases and therefore techniques for
+      pool balancing and rebalancing and more rapid reclamation of prefixes
+      allocated by a failed peer will be needed.</t>
+
+      <!--And, it may also be
       possible and reasonable to use a much longer MCLT (see
-      <xref target="mclt"/>) value -- as
+      <xref target="mclt"/>) value - as
       reusing an address for a different client is generally not a
       requirement (at least over the near term) as close to 2^64
       addresses may be available.</t>
@@ -523,7 +534,7 @@
       <t>However, DHCPv6 Prefix Delegation is similar to IPv4
       addressing regarding number of available leases and therefore
       techniques for pool balancing and rebalancing and shorter MCLT
-      times will be needed.</t>
+      times will be needed.</t>-->
 
     </section>
 

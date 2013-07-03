@@ -635,15 +635,16 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    DHCPv4 it was not possible to use a hash or calculated technique to
    divide the significantly more limited address space and therefore
    much of the protocol that deals with pool balancing and rebalancing
-   might not be necessary and can be done mathematically.  And, it may
-   also be possible and reasonable to use a much longer MCLT (see
-   Appendix A.1.2) value -- as reusing an address for a different client
-   is generally not a requirement (at least over the near term) as close
-   to 2^64 addresses may be available.
+   might not be necessary and can be done mathematically.  Also, because
+   of the much lower degree of contention for IP addresses, the DHCPv6
+   failover protocol does not need to be tuned to support rapid
+   reclamation of IPv6 addresses following the loss of a failover peer's
+   database.
 
-   However, DHCPv6 Prefix Delegation is similar to IPv4 addressing
-   regarding number of available leases and therefore techniques for
-   pool balancing and rebalancing and shorter MCLT times will be needed.
+   However, DHCPv6 Prefix Delegation is similar to IPv4 addressing in
+   terms of the number of available leases and therefore techniques for
+   pool balancing and rebalancing and more rapid reclamation of prefixes
+   allocated by a failed peer will be needed.
 
 7.  DHCPv6 Failover Requirements
 
@@ -664,8 +665,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    2.   For each prefix or address pool, a server must not participate
         in more than one failover relationship.
 
-   3.   The defined protocol must support the m-to-1 model (i.e. one
-        server may form more than one relationship), but an
+
 
 
 
@@ -674,6 +674,8 @@ Mrugalski & Kinnear     Expires January 04, 2014               [Page 12]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+   3.   The defined protocol must support the m-to-1 model (i.e. one
+        server may form more than one relationship), but an
         implementation may choose to implement only the 1-to-1 model
         (i.e. everything from one server is backed on another).
 
@@ -720,8 +722,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    consideration.  In particular, certain features that are common for
    both IPv4 and IPv6, like DNS Update mechanism should be taken into
    consideration.
-
-
 
 
 
