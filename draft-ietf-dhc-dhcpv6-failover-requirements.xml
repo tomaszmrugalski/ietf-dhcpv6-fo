@@ -355,6 +355,23 @@
       These issues form a basis for later documents which deal
       with the solutions to these issues.</t>
 
+      <t>General failover concept assumes that there are backup
+      servers that can provide service in case of the primary server
+      failure.  In theory there could be more than one backup server
+      that could take up the role if such a need arise. However,
+      having more than two servers introduces a very difficult issue
+      of synchronizing between partners. In case of just a pair of
+      cooperating servers, the notification and processes can result
+      in only one of two states: fully successful (got response from a
+      partner) and total failure (no response, failure event
+      occurred). Had there be more than two partners participating in
+      a relationship, there would be a third states in between (some
+      partners updated their state, but some didn't). This would greatly
+      complicate protocol design, and would give little advantage
+      in return. Therefore an approach that assumes a pair of cooperating
+      servers was chosen.</t>
+
+
       <section anchor="failures" title="Failure modes">
         <t>This section documents failure modes.  Each failure mode
         is listed as either an in-scope or out-of-scope requirement for
@@ -615,6 +632,99 @@
 
     </section>
 
+    <section title="Security Considerations">
+      <t>The design must allow secure communication between the
+      failover partners. This requirement applies to the specification
+      only, i.e. the design must include a way to secure
+      communication. It does not mandate such security be employed, just
+      that it be available.</t>
+
+      <t>The design of a security protection must take into
+      consideration the fact that the protocol must operate despite
+      network failures. In particular, relying on any external
+      infrastructure (e.g. any form of Certificate Authority) must
+      must be optional.</t>
+
+      <t>The security considerations for the design itself will be
+      discussed in the design document.</t>
+    </section>
+
+    <section title="IANA Considerations">
+      <t>IANA is not requested to perform any actions at this
+      time.</t>
+    </section>
+
+    <section title="Acknowledgements">
+      <t>This document extensively uses concepts, definitions and
+      other parts of <xref target="dhcpv4-failover"/> document.
+      Thanks to Bernie Volz and Shawn Routhier for their frequent
+      reviews and substantial contributions.  Authors would also like
+      to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
+      Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
+      Nowicki and Steinar Haug for their comments and feedback.</t>
+
+      <t>This work has been partially supported by Gdansk University of
+      Technology and the Polish Ministry of Science and Higher Education
+      under the European Regional Development Fund, Grant No.
+      POIG.01.01.02-00-045/09-00 (Future Internet Engineering Project).</t>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <!--<?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119'?> -->
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2131'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3074'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3315'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3633'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.4704'?>
+
+    </references> <references title="Informative References">
+
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6853'?>
+
+      <reference anchor="dhcpv4-failover">
+        <front>
+          <title>DHCP Failover Protocol</title> <author fullname="Ralph
+          Droms" initials="R." surname="Droms">
+            <organization>Cisco Systems</organization>
+          </author> <author fullname="Kim Kinnear" initials="K."
+          surname="Kinnear">
+            <organization>Cisco Systems</organization>
+          </author> <author fullname="Mark Stapp" initials="M."
+          surname="Stapp">
+            <organization>Cisco Systems</organization>
+          </author> <author fullname="Bernie Volz" initials="B."
+          surname="Volz">
+            <organization>Ericsson</organization>
+          </author> <author fullname="Steve Gonczi" initials="S."
+          surname="Gonczi">
+            <organization>Relicore</organization>
+          </author> <author fullname="Greg Rabil" initials="G."
+          surname="Rabil">
+            <organization>Lucent Technologies</organization>
+          </author> <author fullname="Michael Dooley" initials="M."
+          surname="Dooley">
+            <organization>Diamond IP Technologies</organization>
+          </author> <author fullname="Arun Kapur" initials="A."
+          surname="Kapur">
+            <organization>K5 Networks</organization>
+          </author> <date month="March" year='2003'/>
+        </front> <seriesInfo name="Internet-Draft"
+        value="draft-ietf-dhc-failover-12"/>
+      </reference> <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
+    </references>
+
     <section title="Related work">
       <t>This section describes related work. Readers may benefit from
       familiarizing themselves with these approaches, their advantages and
@@ -853,97 +963,5 @@
 
     </section>
 
-    <section title="Security Considerations">
-      <t>The design must allow secure communication between the
-      failover partners. This requirement applies to the specification
-      only, i.e. the design must include a way to secure
-      communication. It does not mandate such security be employed, just
-      that it be available.</t>
-
-      <t>The design of a security protection must take into
-      consideration the fact that the protocol must operate despite
-      network failures. In particular, relying on any external
-      infrastructure (e.g. any form of Certificate Authority) is
-      discouraged (or at least must be optional).</t>
-
-      <t>The security considerations for the design itself will be
-      discussed in the design document.</t>
-    </section>
-
-    <section title="IANA Considerations">
-      <t>IANA is not requested to perform any actions at this
-      time.</t>
-    </section>
-
-    <section title="Acknowledgements">
-      <t>This document extensively uses concepts, definitions and
-      other parts of <xref target="dhcpv4-failover"/> document.
-      Thanks to Bernie Volz and Shawn Routhier for their frequent
-      reviews and substantial contributions.  Authors would also like
-      to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
-      Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
-      Nowicki and Steinar Haug for their comments and feedback.</t>
-
-      <t>This work has been partially supported by Gdansk University of
-      Technology and the Polish Ministry of Science and Higher Education
-      under the European Regional Development Fund, Grant No.
-      POIG.01.01.02-00-045/09-00 (Future Internet Engineering Project).</t>
-    </section>
-  </middle>
-
-  <back>
-    <references title="Normative References">
-      <!--<?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119'?> -->
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2131'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3074'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3315'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3633'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.4704'?>
-
-    </references> <references title="Informative References">
-
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6853'?>
-
-      <reference anchor="dhcpv4-failover">
-        <front>
-          <title>DHCP Failover Protocol</title> <author fullname="Ralph
-          Droms" initials="R." surname="Droms">
-            <organization>Cisco Systems</organization>
-          </author> <author fullname="Kim Kinnear" initials="K."
-          surname="Kinnear">
-            <organization>Cisco Systems</organization>
-          </author> <author fullname="Mark Stapp" initials="M."
-          surname="Stapp">
-            <organization>Cisco Systems</organization>
-          </author> <author fullname="Bernie Volz" initials="B."
-          surname="Volz">
-            <organization>Ericsson</organization>
-          </author> <author fullname="Steve Gonczi" initials="S."
-          surname="Gonczi">
-            <organization>Relicore</organization>
-          </author> <author fullname="Greg Rabil" initials="G."
-          surname="Rabil">
-            <organization>Lucent Technologies</organization>
-          </author> <author fullname="Michael Dooley" initials="M."
-          surname="Dooley">
-            <organization>Diamond IP Technologies</organization>
-          </author> <author fullname="Arun Kapur" initials="A."
-          surname="Kapur">
-            <organization>K5 Networks</organization>
-          </author> <date month="March" year='2003'/>
-        </front> <seriesInfo name="Internet-Draft"
-        value="draft-ietf-dhc-failover-12"/>
-      </reference> <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
-    </references>
   </back>
 </rfc>
