@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-05">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-06">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -125,8 +125,8 @@
         impact on clients.</t>
         <t>FQDN - a fully qualified domain
         name. A fully qualified domain name generally is a host name
-        with at least one zone name. For example "dhcp.example.org" is
-        a fully qualified domain name.</t>
+        with at least one domain label under the top-level domain. For
+        example "dhcp.example.org" is a fully qualified domain name.</t>
         <t>High Availability - a desired
         property of DHCPv6 servers to continue providing services
         despite experiencing unwanted events such as server crashes, link
