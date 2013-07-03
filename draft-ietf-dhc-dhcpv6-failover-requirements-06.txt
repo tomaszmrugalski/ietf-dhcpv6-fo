@@ -762,7 +762,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    The design of a security protection must take into consideration the
    fact that the protocol must operate despite network failures.  In
    particular, relying on any external infrastructure (e.g. any form of
-   Certificate Authority) must must be optional.
+   Certificate Authority) must be optional.
 
    The security considerations for the design itself will be discussed
    in the design document.

@@ -643,7 +643,7 @@
       consideration the fact that the protocol must operate despite
       network failures. In particular, relying on any external
       infrastructure (e.g. any form of Certificate Authority) must
-      must be optional.</t>
+      be optional.</t>
 
       <t>The security considerations for the design itself will be
       discussed in the design document.</t>
