@@ -7,7 +7,7 @@
 
 <?rfc symrefs="yes"?>
 
-<!DOCTYPE rfc SYSTEM 'rfc2629bis.dtd' [
+<!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="std"
      docName="draft-ietf-dhc-dhcpv6-failover-design-03">
@@ -82,6 +82,10 @@
 
       <list style="symbols">
 
+        <t>auto-partner-down - a capability where a failover server
+	will move from COMMUNICATIONS-INTERRUPTED state to 
+	PARTNER-DOWN state automatically, without operator intervention.</t>
+
 	<t>Failover endpoint - The failover protocol allows for
 	there to be a unique failover 'endpoint' for each failover
 	relationship in which a failover server participates.  The
@@ -99,7 +103,7 @@
 	is used throughout the document to refer to a failover
 	endpoint unless to do so would be confusing.</t>
 
-        <t>Failover transmission - all messages exchanged between
+        <t>Failover communication - all messages exchanged between
         partners.</t>
 
         <t>Independent Allocation - an allocation algorithm
@@ -179,20 +183,17 @@
       later time.</t>
 
       <t>The failover protocol is designed to provide lease stability
-      for leases with lease times beyond a short period.  Due to the
-      additional overhead required, failover is not suitable for
-      leases shorter than 30 seconds. The DHCPv6 Failover protocol
-      MUST NOT be used for leases shorter than 30 seconds.</t>
-
-      <cref source="tomek">Otherwise we would spawn a nice packet storm
-      between partners. Even though 30 seconds it reasonable minimum, we
-      may also add something about recommendations. Something like: Lease
-      lifetime of at least 30 minutes SHOULD be used if possible.</cref>
+      for leases with lease times beyond a short period.  Due in part to the
+      additional overhead required as well as requirements to handle
+      time skew between failover partners (See <xref target="time-skew"/>),
+      failover is not suitable for leases shorter than 30 seconds. 
+      The DHCPv6 Failover protocol MUST NOT be used for leases shorter 
+      than 30 seconds.</t>
 
       <t>This design attempts to fulfill all DHCPv6 failover requirements
       defined in <xref target="I-D.ietf-dhc-dhcpv6-failover-requirements"/>.</t>
 
-      <section title="Additional Requirements">
+      <section title="Design Requirements">
         <t>The following requirements are not related to failover
         mechanism in general, but rather to this particular design.
 
@@ -224,7 +225,7 @@
         near future.</t>
       </section> <!-- features out of Scope -->
 
-    </section> <!-- Goals -->
+    </section> 
 
 <section title="Protocol Overview">
 
@@ -241,6 +242,10 @@
   <t>After initialization, the primary server establishes a TCP connection
   with its partner. The primary server sends a CONNECT message with initial
   parameters. Secondary server responds with CONNECTACK.</t>
+
+  <t> If the primary server cannot immediately establish a connection with
+  its partner, it will continue to attempt to establish a connection.  See
+  <xref target="create-connections"/> for details. </t>
 
   <t>Depending on the failover state of each partner, they MUST
   initiate one of the binding update procedures. Each server MAY
@@ -316,11 +321,13 @@
     <t>A server starts its operation in short-lived STARTUP state. A
     server determines its partner reachability and state and sets its
     own state based on that determination.  It typically
-    returns back to the state it was in before shutdown.</t>
+    returns back to the state it was in before shutdown, though the 
+    details can be complicated.  
+    See <xref target="transition-out-of-startup-state"/>.</t>
 
     <t>During typical operation when servers maintain communication,
     both are in NORMAL state. In that state only the primary responds to
-    clients' requests. A secondary server in unresponsive.</t>
+    clients' requests. A secondary server is unresponsive.</t>
 
     <t>If a server discovers that its partner is no longer reachable,
     it goes to COMMUNICATIONS-INTERRUPTED state. A server must be
@@ -348,16 +355,26 @@
     its downed partner. MCLT restrictions no longer apply. Operation
     in this mode is less demanding for the server that remains operational,
     than in COMMUNICATIONS-INTERRUPTED state, but PARTNER-DOWN does
-    not offer any kind of redundancy.</t>
+    not offer any kind of redundancy.  Even when in PARTNER-DOWN
+    state, a failover server continues to attempt to connect with
+    its failover partner.</t>
 
-    <t>When a server does not have an intact lease state database
-    (e.g. due to first time run or a recovery after catastrophic failure) or detects
-    that its partner is in PARTNER-DOWN state and additional conditions
-    are met, it switches to RECOVER state. In that state the server
-    acknowledges that content of its database is doubtful and it
-    needs to refresh its database from its partner. Once this
+    <t>A server switches into RECOVER state when any of a variety 
+    of conditions are encountered:
+    <list style="symbols">
+      <t>When a backup server contacts its failover partner for the
+      first time.</t>
+      <t>When either server discovers that its failover partner has
+      contacted it before but it has no local record of this contact.
+      If the record of previous contact is held in the lease-state
+      database, then this situation implies that the server has lost
+      its lease state database.</t>
+      <t>When its failover partner is in PARTNER-DOWN state.</t>
+    </list>
+    Any of these conditions signal that the server 
+    needs to refresh its lease-state database from its partner. Once this
     operation is complete, it switches to RECOVER-WAIT and later
-    to RECOVER-DONE.</t>
+    to RECOVER-DONE.  See <xref target="transition-out-of-recover-wait-state"/>.</t>
 
     <t>Once servers reestablish connection, they discover each others'
     state. Depending on the conditions, they may return to NORMAL or
@@ -368,11 +385,13 @@
     POTENTIAL-CONFLICT do not respond to clients' requests and work only on
     resolving potential conflicts. Once outstanding lease updates are
     exchanged, servers move to CONFLICT-DONE or NORMAL states.</t>
+
     <t>Servers that are recovering from potential conflicts and loose
     communication, switch to RESOLUTION-INTERRUPTED.</t>
 
-    <t>A Server that is being shut down sends a DISCONNECT message.
-    See <xref target="msg-list"/>.</t>
+    <t>A server that is being shut down sends a DISCONNECT message.
+    See <xref target="msg-list"/>.  A server that receives a DISCONNECT message 
+    moves into COMMUNICATIONS-INTERRUPTED state.</t>
 
   </section>
 
@@ -384,6 +403,7 @@
     in a separate protocol specification document. The following list enumerates
     these messages:</t>
 
+    <t>
     <list style="symbols">
       <t>BNDUPD - The binding update message is used to send the binding lease
       changes to the partner. One message may contain one or more lease
@@ -394,11 +414,11 @@
       
       <t>POOLREQ - The Pool Request message is used by one server (typically
       secondary) to request allocation of resources (addresses or prefixes) from
-      its partner. The partner responds with POOLRSP.</t>
+      its partner. The partner responds with POOLRESP.</t>
 
-      <t>POOLRSP - The Pool Response message is used by one server (typically
+      <t>POOLRESP - The Pool Response message is used by one server (typically
       primary) to repond to its partner's request for resources allocation. One
-      POOLRSP message may contain more than one pool.</t>
+      POOLRESP message may contain more than one pool.</t>
 
       <t>UPDREQ - The update request message is used by one server to request
       that its partner send all binding database changes that has not been
@@ -452,6 +472,7 @@
       <!-- tomek: what about link failing in only one direction, e.g. uplink
       broken? Perhaps there should be some way to acknowledge CONTACT? -->
     </list>
+    </t>
 
   </section>
 </section>
@@ -484,7 +505,9 @@
     this connection is to serve.</t>
 
     <t>If it has no secondary relationships with the connecting
-    server, it SHOULD drop the connection.</t>
+    server, it SHOULD drop the connection.  The goal is to limit
+    the resources expended dealing with attempts to create a spurious
+    failover connection.</t>
 
     <t>To summarize -- a primary server MUST use a connection that it has
     initiated in order to send a CONNECT message.  Every server that
@@ -568,6 +591,7 @@
   resources (addresses or prefixes). Additional allocation schemes
   may be defined as future extensions.</t>
 
+  <t>
   <list style="numbers">
     <t>Proportional Allocation - This allocation algorithm is a
     direct application of the algorithm defined in <xref target="dhcpv4-failover"/>
@@ -594,6 +618,7 @@
     which is typically the case for DHCPv6 address
     allocation.  See <xref target="alloc-separated"/> for details.</t>
   </list>
+  </t>
 
   <section anchor="alloc-classic" title="Proportional Allocation">
 
@@ -659,6 +684,14 @@
     database and to ensure that the secondary has enough resources
     (based on some configured ratio).</t>
 
+    <t>The primary server SHOULD examine some or all of its database
+    from time to time to determine if resources should be shifted
+    between the primary and secondary (in either direction).  The
+    POOLREQ/POOLRESP message exchange allows the secondary server
+    to explicitly request that the primary server examine the
+    entirety of its database to ensure that the secondary has the
+    approprite resources available.</t>
+
     <t>Servers frequently have several kinds of resources available
     on a particular network segment.  The failover protocol assumes
     that both primary and secondary servers are configured in such
@@ -666,7 +699,7 @@
     network segment participating in the failover protocol.  The
     primary server is responsible for allocating the secondary
     server the correct proportion of available resources of each
-    kind, and the secondary server is responsible for being configured
+    kind, and the secondary server MUST be configured
     in such a way that it can tell the kind of every resource based
     solely on the IP or prefix address itself.</t>
 
@@ -723,7 +756,9 @@
     between servers. Available resources are split between the primary and
     secondary servers as part of initial connection establishment. Once
     resources are allocated to each server, there is no need to
-    reassign them.  This algorithm is simpler than proportional
+    reassign them. The resource allocation is algorithmic in nature,
+    and does not a message exchange for each resources allocated.
+    This algorithm is simpler than proportional
     allocation since it requires similar initial communication, but does not
     require a rebalancing mechanism. It assumes
     that the pool assigned to each server will never deplete. That is
@@ -735,9 +770,12 @@
 
     <t>Once each server is assigned a resource pool during initial
     connection establishment, it may allocate assigned resources to
-    clients. Once a client release a resource or its lease is expired,
+    clients. Once a client releases a resource or its lease is expired,
     the returned resource returns to pool for the server that leased it.
     Resources never changes servers.</t>
+
+    <t>Resources using the independent allocation approach are ignored
+    when a server processes a POOLREQ message.</t>
 
     <t>During COMMUNICATION-INTERRUPTED events, a partner MAY continue
     extending existing leases when requested by clients. A healthy
@@ -769,7 +807,7 @@
     Use of the independent allocation makes communication between partners simpler.
     It also makes recovery easier and potential conflict less likely to appear.</t>
 
-    <t>Typically indepentent allocation is used for IPv6 addresses, because even
+    <t>Typically independent allocation is used for IPv6 addresses, because even
     for /64 pools a server will never run out of addresses to assign, so there
     is no need to rebalance. For the prefix delegation mechanism, available
     resources are typically much smaller, so there is a danger of running out of
@@ -802,7 +840,7 @@
   <t>In most DHCP servers a resource (an IP address or a prefix) can
   take on several different binding-status values, sometimes also
   called lease states.  While no two DHCP server implementations probably have
-  exactly the same possible binding-status values, the DHCP RFC
+  exactly the same possible binding-status values, <xref target="RFC3315"/>
   enforces some commonality among the general semantics of the
   binding-status values used by various DHCP server implementations.</t>
 
@@ -825,6 +863,7 @@
   are listed below. Unless otherwise noted below, there MAY be client
   information associated with each of these binding-status value.</t>
 
+  <t>
   <list style="hanging">
     <t hangText="ACTIVE"> -- The lease is assigned to a client. Client
     identification data MUST appear.</t>
@@ -874,10 +913,11 @@
     distinct state so that the reason that the resource became FREE
     can be determined. Client identification MAY appear.</t>
   </list>
+  </t>
 
   <t>The lease state machine has been presented in <xref
   target="lease-state-machine"/>. Most states are stationary, i.e. the lease
-  stays in a given state untile exernal event triggers transition to another
+  stays in a given state until exernal event triggers transition to another
   state. The only transitive state is FREE*. One it is reached, the the state
   machine immediately transitions to either FREE or FREE_BACKUP state.</t>
 
@@ -913,7 +953,7 @@
  |    +-------+         +-----------+     |
  \----|  FREE |<--(7)-->|FREE_BACKUP|-----/
       +-------+         +-----------+]]>
-</artwork><caption>FREE* transition</caption></figure>
+</artwork><postamble>FREE* transition</postamble></figure>
 
 <t>Transitions between states are results of the following events:
 
@@ -935,7 +975,7 @@
   <t>6. The lease belongs to a pool that is governed by the independent
   allocation and the lease belongs to the secondary server.</t>
 
-  <t>7. Pool rebalance event occurs (POOLREQ/POOLRSP messages are
+  <t>7. Pool rebalance event occurs (POOLREQ/POOLRESP messages are
   exchanged). Addresses (or prefixes) belonging to the primary
   server can be assigned to the secondary server pool (transition
   from FREE to FREE_BACKUP) or vice versa.  </t>
@@ -1018,9 +1058,7 @@
     partners and other mechanisms required for failover operation. As
     this is a design document, not a protocol specification,
     high level ideas are presented without implementation
-    specific details (e.g. on-wire protocol formats). Specific protocol details
-    are out of the scope of this document, and will be specified in a separate
-    draft.</t>
+    specific details (e.g. on-wire protocol formats).</t>
     <section anchor="time-skew" title="Time Skew">
       <t>Partners exchange information about known lease states. To
       reliably compare a known lease state with an update received from a
@@ -1096,9 +1134,9 @@
 
       <t>The fundamental relationship on which much of the correctness
       of this protocol depends is that the lease expiration time
-      known to a DHCPv6 client MUST NOT under any circumstances be
-      more than the maximum client lead time (MCLT) greater than the
-      potential expiration time known to a server's partner.</t>
+      known to a DHCPv6 client MUST NOT be greater by more than the MCLT
+      beyond the potential expiration time known to that server's
+      failover partner.</t>
 
       <t>The remainder of this section makes the above fundamental
       relationship more explicit.</t>
@@ -1360,12 +1398,12 @@
       transmission from a client*;</t>
       <t>Client DUID*.</t>
     </list>
+    </t>
     <t>Items marked with asterisk MUST appear only if the lease is/was associated
     with a client. Otherwise it MUST NOT appear, e.g. for updates from FREE to
     FREE_BACKUP state. Server MUST reject updates that does not include any of
     the aforementioned information.</t>
     <!-- TODO: point out that in some states client DUID MUST NOT appear -->
-    </t>
     <!-- tomek: we don't really care about preferred lifetime. Since it is
          defined in IAADDR/IAPREFIX options that we will be reusing, we will
          need to send something. We may just send actual preferred lifetime, but
@@ -1469,7 +1507,7 @@
       state and decide which information - the previously known or that just received -
       is "better". The server should take into consideration the following
       aspects: if the lease is already assigned to a specific client, who had
-      contact with client recently, start time of the lease, etc.</t> -->
+      contact with client recently, start time of the lease, etc.</t>
 
       <t>When analyzing a BNDUPD message from a partner server, if there is
       insufficient information in the BNDUPD to process it, then reject the
@@ -1564,10 +1602,12 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
     </section>
 
     <section title="Acknowledging Reception">
+
       <t>Upon acceptance of a binding lease, server must notify its partner
       that it updated its database. Server SHOULD not send BNDACK before its
       database is updated. BNDACK MUST contain at lease minimum set of information
       required to unabiguously identify BNDUDP.</t>
+
     </section>
 
 </section> <!-- partner update -->
@@ -1801,12 +1841,20 @@ RECOVER-WAIT--------->+------------------+
 
         <t>Step 2:</t>
 
-        <t>If the previous state is one where communications was
-        "OK", then set the previous state to the state that is the
-        result of the communications failed state transition (if
-        such transition exists -- some states don't have a
-        communications failed state transition, since they allow
-        both communications OK and failed).</t>
+	<t>Implementations will differ in the ways that they deal
+	with the state machine for failover endpoint states.  In
+	many cases, state transitions will occur when communications
+	goes from "OK" to failoed, or from failed to "OK", and some
+	implementations will implement a portion of their state
+	machine processing based on these changes.</t>
+	
+	<t>In these cases, during startup, if the previous state
+	is one where communications was "OK", then set the previous
+	state to the state that is the result of the communications
+	failed state transition when in that state (if such transition
+	exists -- some states don't have a communications failed
+	state transition, since they allow both communications OK
+	and failed).</t>
 
         <t>Step 3:</t>
 
@@ -1856,6 +1904,13 @@ RECOVER-WAIT--------->+------------------+
     in this state, the server assumes that it is the only server
     operating and serving the client base. If one server is in
     PARTNER-DOWN state, the other server MUST NOT be operating.</t>
+
+    <t>A server can enter PARTNER-DOWN state either as a result of 
+    operator intervention (when an operator determines that the server's
+    partner is, indeed, down), or as a result of the auto-partner-down
+    capability where PARTNER-DOWN state is entered automatically after
+    a server has been in COMMUNICATIONS-INTERRUPTED state for a pre-determined
+    period of time.</t>
 
       <section anchor="operation-in-partner-down-state" title="Operation in PARTNER-DOWN State">
 
@@ -2622,14 +2677,6 @@ CONFLICT-DONE                                  |
   </section>
 
   <section anchor="DDNS" title="Dynamic DNS Considerations">
-    <!-- issue 9 -->
-    TODO: Describe DNS Updates challenges in failover environment.
-    It is nicely described in Section 5.12 of xref
-    target="dhcpv4-failover".
-
-    Done 10/17/12 Kim
-
-    -->
 
     <t>DHCP servers (and clients) can use DNS Dynamic Updates as
     described in <xref target="RFC2136">RFC 2136</xref> to maintain
@@ -3091,8 +3138,8 @@ CONFLICT-DONE                                  |
     </references>
     <references title="Informative References">
       <?rfc include='reference.RFC.4649'?>
-      <?rfc include="reference.RFC.5007"?>
-      <?rfc include="reference.RFC.5460"?>
+      <?rfc include='reference.RFC.5007'?>
+      <?rfc include='reference.RFC.5460'?>
       <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-failover-requirements.xml'?>
       <reference anchor="dhcpv4-failover">
         <front>
