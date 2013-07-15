@@ -1430,8 +1430,7 @@
       <t>Options Requested by the client, i.e. content of the ORO;</t>
       <t>Remote-ID, defined in <xref target="RFC4649"/>;</t>
       <t>Relay-ID, defined in  <xref target="RFC5460"/>, section 5.4.1;</t>
-      <t>Link-layer address <xref
-      target="I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt"/>;</t>
+      <t>Link-layer address <xref target="RFC6939"/>;</t>
       <t>Any other options the updating partner deems useful.</t>
     </list>
     </t>
@@ -1604,7 +1603,7 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
     <section title="Acknowledging Reception">
 
       <t>Upon acceptance of a binding lease, server must notify its partner
-      that it updated its database. Server SHOULD not send BNDACK before its
+      that it updated its database. Server SHOULD NOT send BNDACK before its
       database is updated. BNDACK MUST contain at lease minimum set of information
       required to unabiguously identify BNDUDP.</t>
 
@@ -1697,45 +1696,45 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
     |(unresponsive) |  +->+(unresponsive)|
     +------+--------+     +--------------+
     +-Comm. OK             +-----------------+
-    |     Other State:     |  PARTNER DOWN - +<----------------------+
-    |    RESOLUTION-INTER. | (responsive)    |                       ^
-   All     POTENTIAL-      +----+------------+                       |
-  Others   CONFLICT------------ | --------+                          |
-    |      CONFLICT-DONE     Comm. OK     |     +--------------+     |
- UPDREQ or                 Other State:   |  +--+ RESOLUTION - |     |
- UPDREQALL                  |       |     |  |  | INTERRUPTED  |     |
- Rcv UPDDONE             RECOVER    All   |  |  | (responsive) |     |
-    |  +---------------+    |      Others |  |  +------------+-+     |
-    +->+RECOVER-WAIT +-| RECOVER    |     |  |         ^     |       |
-       |(unresponsive) |  WAIT or   |     |  Comm.     |    Ext.     |
-       +-----------+---+  DONE      |     |  OK     Comm.   Cmd----->+
-Comm.---+     Wait MCLT     |       V     V  V     Failed            |
-Changed |          V    +---+   +---+-----+--+-+       |             |
- |  +---+----------++   |       |  POTENTIAL + +-------+             |
- |  |RECOVER-DONE +-|  Wait     |  CONFLICT    +------+              |
- +->+(unresponsive) |  for      |(unresponsive)|   Primary           |
-    +------+--------+  Other  +>+----+--------++   resolve     Comm. |
-     Comm. OK          State: |      |        ^    conflict  Changed |
-+---Other State:-+   RECOVER  |   Secondary   |       V       V   |  |
-|    |           |     DONE   |    resolve    |   ++----------+---++ |
-| All Others:  POTENT.  |     |   conflict    |   |CONFLICT-DONE-|+| |
-| Wait for    CONFLICT--|-----+      |        |   | (responsive)   | |
-| Other State:          V            V        |   +------+---------+ |
-| NORMAL or RECOVER    ++------------+---+    | Other State: NORMAL  |
-|    |       DONE      |     NORMAL    + +<--------------+           |
-|    +--+----------+-->+   (balanced)    +-------External Command--->+
-|       ^          ^   +--------+--------+                           |
-|       |          |            |             |                      |
-|   Wait for   Comm. OK  Comm. Failed         |                      |
-|    Other      Other           |             |               External
-|    State:     State:          |             |                Command
-| RECOVER-DONE  NORMAL     Start Safe      Comm. OK                or
-|       |     COMM. INT.  Period Timer    Other State:            Safe
-|    Comm. OK.     |            V          All Others           Period
-|   Other State:   |  +---------+--------+    |             expiration
-|     RECOVER      +--+ COMMUNICATIONS - +----+                      |
-|       +-------------+   INTERRUPTED    |                           |
-RECOVER               |  (responsive)    +-------------------------->+
+    |     Other State:     |  PARTNER DOWN - +<---------------------+
+    |    RESOLUTION-INTER. | (responsive)    |                      ^
+   All     POTENTIAL-      +----+------------+                      |
+  Others   CONFLICT------------ | --------+                         |
+    |      CONFLICT-DONE     Comm. OK     |     +--------------+    |
+ UPDREQ or                 Other State:   |  +--+ RESOLUTION - |    |
+ UPDREQALL                  |       |     |  |  | INTERRUPTED  |    |
+ Rcv UPDDONE             RECOVER    All   |  |  | (responsive) |    |
+    |  +---------------+    |      Others |  |  +------------+-+    |
+    +->+RECOVER-WAIT +-| RECOVER    |     |  |         ^     |      |
+       |(unresponsive) |  WAIT or   |     |  Comm.     |    Ext.    |
+       +-----------+---+  DONE      |     |  OK     Comm.   Cmd---->+
+Comm.---+     Wait MCLT     |       V     V  V     Failed           |
+Changed |          V    +---+   +---+-----+--+-+       |            |
+ |  +---+----------++   |       |  POTENTIAL + +-------+            |
+ |  |RECOVER-DONE +-|  Wait     |  CONFLICT    +------+             |
+ +->+(unresponsive) |  for      |(unresponsive)|   Primary          |
+    +------+--------+  Other  +>+----+--------++   resolve    Comm. |
+     Comm. OK          State: |      |        ^    conflict  Changed|
++---Other State:-+   RECOVER  |   Secondary   |       V       V   | |
+|    |           |     DONE   |    resolve    |  ++----------+---++ |
+| All Others:  POTENT.  |     |   conflict    |  |CONFLICT-DONE-|+| |
+| Wait for    CONFLICT--|-----+      |        |  | (responsive)   | |
+| Other State:          V            V        |  +------+---------+ |
+| NORMAL or RECOVER    ++------------+---+    | Other State: NORMAL |
+|    |       DONE      |     NORMAL    + +<--------------+          |
+|    +--+----------+-->+   (balanced)    +-------External Command-->+
+|       ^          ^   +--------+--------+                          |
+|       |          |            |             |                     |
+|   Wait for   Comm. OK  Comm. Failed         |                     |
+|    Other      Other           |             |             External
+|    State:     State:          |             |             Command
+| RECOVER-DONE  NORMAL     Start Safe      Comm. OK            or
+|       |     COMM. INT.  Period Timer    Other State:        Safe
+|    Comm. OK.     |            V          All Others        Period
+|   Other State:   |  +---------+--------+    |            expiration
+|     RECOVER      +--+ COMMUNICATIONS - +----+                     |
+|       +-------------+   INTERRUPTED    |                          |
+RECOVER               |  (responsive)    +------------------------->+
 RECOVER-WAIT--------->+------------------+
 ]]></artwork></figure>
 
@@ -3115,7 +3114,8 @@ CONFLICT-DONE                                  |
     parts of <xref target="dhcpv4-failover"/> document.  Authors would
     like to thank Shawn Routher, Greg Rabil, and Bernie Volz for their
     significant involvement and contributions. Authors would like to
-    thank VithalPrasad Gaitonde for his insightful comments.</t>
+    thank Marcin Siodelski for his thorough review and VithalPrasad
+    Gaitonde for his insightful comments.</t>
 
     <t>This work has been partially supported by Department of
     Computer Communications (a division of Gdansk University of
@@ -3134,7 +3134,7 @@ CONFLICT-DONE                                  |
       <?rfc include='reference.RFC.3633'?>
       <?rfc include='reference.RFC.4703'?>
       <?rfc include='reference.RFC.4704'?>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt.xml'?>
+      <?rfc include='reference.RFC.6939'?>
     </references>
     <references title="Informative References">
       <?rfc include='reference.RFC.4649'?>

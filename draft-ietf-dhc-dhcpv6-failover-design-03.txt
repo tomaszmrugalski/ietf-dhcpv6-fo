@@ -5,8 +5,8 @@
 Dynamic Host Configuration (DHC)                            T. Mrugalski
 Internet-Draft                                                       ISC
 Intended status: Standards Track                              K. Kinnear
-Expires: January 13, 2014                                          Cisco
-                                                           July 12, 2013
+Expires: January 16, 2014                                          Cisco
+                                                           July 15, 2013
 
 
                          DHCPv6 Failover Design
@@ -39,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on January 13, 2014.
+   This Internet-Draft will expire on January 16, 2014.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 1]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 1]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 2]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 2]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -149,7 +149,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
    15. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  58
    16. References  . . . . . . . . . . . . . . . . . . . . . . . . .  58
      16.1.  Normative References . . . . . . . . . . . . . . . . . .  58
-     16.2.  Informative References . . . . . . . . . . . . . . . . .  59
+     16.2.  Informative References . . . . . . . . . . . . . . . . .  58
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  59
 
 1.  Requirements Language
@@ -165,7 +165,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 3]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 3]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -221,7 +221,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 4]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 4]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -277,7 +277,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 5]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 5]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -333,7 +333,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 6]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 6]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -389,7 +389,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 7]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 7]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -445,7 +445,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 8]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 8]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -501,7 +501,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014                [Page 9]
+Mrugalski & Kinnear     Expires January 16, 2014                [Page 9]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -557,7 +557,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 10]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 10]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -613,7 +613,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 11]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 11]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -669,7 +669,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 12]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 12]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -725,7 +725,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 13]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 13]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -781,7 +781,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 14]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 14]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -837,7 +837,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 15]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 15]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -893,7 +893,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 16]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 16]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -949,7 +949,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 17]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 17]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1005,7 +1005,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 18]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 18]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1061,7 +1061,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 19]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 19]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1117,7 +1117,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 20]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 20]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1173,7 +1173,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 21]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 21]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1229,7 +1229,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 22]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 22]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1285,7 +1285,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 23]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 23]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1341,7 +1341,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 24]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 24]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1397,7 +1397,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 25]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 25]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1453,7 +1453,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 26]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 26]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1509,7 +1509,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 27]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 27]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1565,7 +1565,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 28]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 28]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1587,8 +1587,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
    4.  Relay-ID, defined in [RFC5460], section 5.4.1;
 
-   5.  Link-layer address
-       [I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt];
+   5.  Link-layer address [RFC6939];
 
    6.  Any other options the updating partner deems useful.
 
@@ -1617,17 +1616,16 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
        allocation conflict.  There two different clients each allocated
        the same resource.  See Section 8.9.
 
+   2.  Two resources, one client conflict - This conflict exists when a
+       client on one server is associated with a one resource, and on
 
 
 
-
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 29]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 29]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
-   2.  Two resources, one client conflict - This conflict exists when a
-       client on one server is associated with a one resource, and on
        the other server with a different resource in the same or related
        subnet.  This does not refer to the case where a single client
        has resources in multiple different subnets or administrative
@@ -1677,7 +1675,9 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 30]
+
+
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 30]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1733,7 +1733,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 31]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 31]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1764,7 +1764,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 8.10.  Acknowledging Reception
 
    Upon acceptance of a binding lease, server must notify its partner
-   that it updated its database.  Server SHOULD not send BNDACK before
+   that it updated its database.  Server SHOULD NOT send BNDACK before
    its database is updated.  BNDACK MUST contain at lease minimum set of
    information required to unabiguously identify BNDUDP.
 
@@ -1789,7 +1789,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 32]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 32]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1845,7 +1845,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 33]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 33]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1859,49 +1859,49 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
        |(unresponsive) |  +->+(unresponsive)|
        +------+--------+     +--------------+
        +-Comm. OK             +-----------------+
-       |     Other State:     |  PARTNER DOWN - +<----------------------+
-       |    RESOLUTION-INTER. | (responsive)    |                       ^
-      All     POTENTIAL-      +----+------------+                       |
-     Others   CONFLICT------------ | --------+                          |
-       |      CONFLICT-DONE     Comm. OK     |     +--------------+     |
-    UPDREQ or                 Other State:   |  +--+ RESOLUTION - |     |
-    UPDREQALL                  |       |     |  |  | INTERRUPTED  |     |
-    Rcv UPDDONE             RECOVER    All   |  |  | (responsive) |     |
-       |  +---------------+    |      Others |  |  +------------+-+     |
-       +->+RECOVER-WAIT +-| RECOVER    |     |  |         ^     |       |
-          |(unresponsive) |  WAIT or   |     |  Comm.     |    Ext.     |
-          +-----------+---+  DONE      |     |  OK     Comm.   Cmd----->+
-   Comm.---+     Wait MCLT     |       V     V  V     Failed            |
-   Changed |          V    +---+   +---+-----+--+-+       |             |
-    |  +---+----------++   |       |  POTENTIAL + +-------+             |
-    |  |RECOVER-DONE +-|  Wait     |  CONFLICT    +------+              |
-    +->+(unresponsive) |  for      |(unresponsive)|   Primary           |
-       +------+--------+  Other  +>+----+--------++   resolve     Comm. |
-        Comm. OK          State: |      |        ^    conflict  Changed |
-   +---Other State:-+   RECOVER  |   Secondary   |       V       V   |  |
-   |    |           |     DONE   |    resolve    |   ++----------+---++ |
-   | All Others:  POTENT.  |     |   conflict    |   |CONFLICT-DONE-|+| |
-   | Wait for    CONFLICT--|-----+      |        |   | (responsive)   | |
-   | Other State:          V            V        |   +------+---------+ |
-   | NORMAL or RECOVER    ++------------+---+    | Other State: NORMAL  |
-   |    |       DONE      |     NORMAL    + +<--------------+           |
-   |    +--+----------+-->+   (balanced)    +-------External Command--->+
-   |       ^          ^   +--------+--------+                           |
-   |       |          |            |             |                      |
-   |   Wait for   Comm. OK  Comm. Failed         |                      |
-   |    Other      Other           |             |               External
-   |    State:     State:          |             |                Command
-   | RECOVER-DONE  NORMAL     Start Safe      Comm. OK                or
-   |       |     COMM. INT.  Period Timer    Other State:            Safe
-   |    Comm. OK.     |            V          All Others           Period
-   |   Other State:   |  +---------+--------+    |             expiration
-   |     RECOVER      +--+ COMMUNICATIONS - +----+                      |
-   |       +-------------+   INTERRUPTED    |                           |
-   RECOVER               |  (responsive)    +-------------------------->+
+       |     Other State:     |  PARTNER DOWN - +<---------------------+
+       |    RESOLUTION-INTER. | (responsive)    |                      ^
+      All     POTENTIAL-      +----+------------+                      |
+     Others   CONFLICT------------ | --------+                         |
+       |      CONFLICT-DONE     Comm. OK     |     +--------------+    |
+    UPDREQ or                 Other State:   |  +--+ RESOLUTION - |    |
+    UPDREQALL                  |       |     |  |  | INTERRUPTED  |    |
+    Rcv UPDDONE             RECOVER    All   |  |  | (responsive) |    |
+       |  +---------------+    |      Others |  |  +------------+-+    |
+       +->+RECOVER-WAIT +-| RECOVER    |     |  |         ^     |      |
+          |(unresponsive) |  WAIT or   |     |  Comm.     |    Ext.    |
+          +-----------+---+  DONE      |     |  OK     Comm.   Cmd---->+
+   Comm.---+     Wait MCLT     |       V     V  V     Failed           |
+   Changed |          V    +---+   +---+-----+--+-+       |            |
+    |  +---+----------++   |       |  POTENTIAL + +-------+            |
+    |  |RECOVER-DONE +-|  Wait     |  CONFLICT    +------+             |
+    +->+(unresponsive) |  for      |(unresponsive)|   Primary          |
+       +------+--------+  Other  +>+----+--------++   resolve    Comm. |
+        Comm. OK          State: |      |        ^    conflict  Changed|
+   +---Other State:-+   RECOVER  |   Secondary   |       V       V   | |
+   |    |           |     DONE   |    resolve    |  ++----------+---++ |
+   | All Others:  POTENT.  |     |   conflict    |  |CONFLICT-DONE-|+| |
+   | Wait for    CONFLICT--|-----+      |        |  | (responsive)   | |
+   | Other State:          V            V        |  +------+---------+ |
+   | NORMAL or RECOVER    ++------------+---+    | Other State: NORMAL |
+   |    |       DONE      |     NORMAL    + +<--------------+          |
+   |    +--+----------+-->+   (balanced)    +-------External Command-->+
+   |       ^          ^   +--------+--------+                          |
+   |       |          |            |             |                     |
+   |   Wait for   Comm. OK  Comm. Failed         |                     |
+   |    Other      Other           |             |             External
+   |    State:     State:          |             |             Command
+   | RECOVER-DONE  NORMAL     Start Safe      Comm. OK            or
+   |       |     COMM. INT.  Period Timer    Other State:        Safe
+   |    Comm. OK.     |            V          All Others        Period
+   |   Other State:   |  +---------+--------+    |            expiration
+   |     RECOVER      +--+ COMMUNICATIONS - +----+                     |
+   |       +-------------+   INTERRUPTED    |                          |
+   RECOVER               |  (responsive)    +------------------------->+
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 34]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 34]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -1957,7 +1957,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 35]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 35]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2013,7 +2013,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 36]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 36]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2069,7 +2069,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 37]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 37]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2125,7 +2125,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 38]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 38]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2181,7 +2181,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 39]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 39]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2237,7 +2237,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 40]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 40]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2293,7 +2293,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 41]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 41]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2349,7 +2349,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 42]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 42]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2405,7 +2405,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 43]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 43]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2461,7 +2461,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 44]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 44]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2517,7 +2517,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 45]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 45]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2573,7 +2573,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 46]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 46]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2629,7 +2629,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 47]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 47]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2685,7 +2685,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 48]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 48]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2741,7 +2741,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 49]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 49]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2797,7 +2797,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 50]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 50]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2853,7 +2853,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 51]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 51]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2909,7 +2909,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 52]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 52]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -2965,7 +2965,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 53]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 53]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -3021,7 +3021,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 54]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 54]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -3077,7 +3077,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 55]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 55]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -3133,7 +3133,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 56]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 56]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -3189,7 +3189,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 57]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 57]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
@@ -3203,8 +3203,9 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
    This document extensively uses concepts, definitions and other parts
    of [dhcpv4-failover] document.  Authors would like to thank Shawn
    Routher, Greg Rabil, and Bernie Volz for their significant
-   involvement and contributions.  Authors would like to thank
-   VithalPrasad Gaitonde for his insightful comments.
+   involvement and contributions.  Authors would like to thank Marcin
+   Siodelski for his thorough review and VithalPrasad Gaitonde for his
+   insightful comments.
 
    This work has been partially supported by Department of Computer
    Communications (a division of Gdansk University of Technology) and
@@ -3215,11 +3216,6 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
 16.  References
 
 16.1.  Normative References
-
-   [I-D.ietf-dhc-dhcpv6-client-link-layer-addr-opt]
-              Halwasia, G., Systems, C., and W. Dec, "Client Link-layer
-              Address Option in DHCPv6", draft-ietf-dhc-dhcpv6-client-
-              link-layer-addr-opt-05 (work in progress), March 2013.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -3241,16 +3237,18 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
               IPv6 (DHCPv6) Client Fully Qualified Domain Name (FQDN)
               Option", RFC 4704, October 2006.
 
+   [RFC6939]  Halwasia, G., Bhandari, S., and W. Dec, "Client Link-Layer
+              Address Option in DHCPv6", RFC 6939, May 2013.
+
+16.2.  Informative References
 
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 58]
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 58]
 
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
-
-16.2.  Informative References
 
    [I-D.ietf-dhc-dhcpv6-failover-requirements]
               Mrugalski, T. and K. Kinnear, "DHCPv6 Failover
@@ -3301,4 +3299,6 @@ Authors' Addresses
 
 
 
-Mrugalski & Kinnear     Expires January 13, 2014               [Page 59]
+
+
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 59]
