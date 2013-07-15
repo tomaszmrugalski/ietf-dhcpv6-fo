@@ -270,10 +270,10 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
    failure).  Active-active mode (i.e. both servers actively handling
    clients' requests) is currently not supported for the sake of
    simplicity.  Such a mode is likely to be defined as an exension at a
-   later time.
+   later time and will probably be based on
+   [I-D.ietf-dhc-dhcpv6-load-balancing].
 
-   The failover protocol is designed to provide lease stability for
-   leases with lease times beyond a short period.  Due in part to the
+
 
 
 
@@ -282,6 +282,8 @@ Mrugalski & Kinnear     Expires January 16, 2014                [Page 5]
 Internet-Draft           DHCPv6 Failover Design                July 2013
 
 
+   The failover protocol is designed to provide lease stability for
+   leases with lease times beyond a short period.  Due in part to the
    additional overhead required as well as requirements to handle time
    skew between failover partners (See Section 8.1), failover is not
    suitable for leases shorter than 30 seconds.  The DHCPv6 Failover
@@ -327,8 +329,6 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
    are listed in Section 4.2.  All information is sent over the
    connection as typical DHCPv6 messages that convey DHCPv6 options,
    following format defined in Section 22.1 of [RFC3315].
-
-
 
 
 
@@ -690,7 +690,7 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
    there is one failover endpoint for that relationship on each failover
    partner.  This failover relationship MUST have a unique name.
 
-   There is typically little need for addi1tional relationships between
+   There is typically little need for additional relationships between
    any two servers but there MAY be more than one failover relationship
    between two servers -- however each MUST have a unique relationship
    name.
@@ -886,9 +886,9 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
    resources are split between the primary and secondary servers as part
    of initial connection establishment.  Once resources are allocated to
    each server, there is no need to reassign them.  The resource
-   allocation is algorithmic in nature, and does not a message exchange
-   for each resources allocated.  This algorithm is simpler than
-   proportional allocation since it requires similar initial
+   allocation is algorithmic in nature, and does not require a message
+   exchange for each resources allocated.  This algorithm is simpler
+   than proportional allocation since it requires similar initial
    communication, but does not require a rebalancing mechanism.  It
 
 
@@ -1645,10 +1645,10 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
        assignments based on (client DUID, resource type, iaid) triplet.
        The possibility of using different IAIDs was omitted in this
        paragraph for clarity.  If one client is assigned multiple
-       resources of the same type for the same client, but with
-       different IAIDs, there is no conflict.  Also, iaid values for
-       different resource types are orthogonal, i.e. IA_NA with iaid=1
-       is different than IA_PD with iaid=1 and there is no conflict.
+       resources of the same type, but with different IAIDs, there is no
+       conflict.  Also, iaid values for different resource types are
+       orthogonal, i.e. IA_NA with iaid=1 is different than IA_PD with
+       iaid=1 and there is no conflict.
 
    3.  binding-status conflict - This is normal conflict, where one
        server is updating the other with newer information.  See
@@ -3255,6 +3255,11 @@ Internet-Draft           DHCPv6 Failover Design                July 2013
               Requirements", draft-ietf-dhc-dhcpv6-failover-
               requirements-06 (work in progress), July 2013.
 
+   [I-D.ietf-dhc-dhcpv6-load-balancing]
+              Kostur, A., "DHC Load Balancing Algorithm for DHCPv6",
+              draft-ietf-dhc-dhcpv6-load-balancing-00 (work in
+              progress), December 2012.
+
    [RFC2136]  Vixie, P., Thomson, S., Rekhter, Y., and J. Bound,
               "Dynamic Updates in the Domain Name System (DNS UPDATE)",
               RFC 2136, April 1997.
@@ -3287,6 +3292,20 @@ Authors' Addresses
    Email: tomasz.mrugalski@gmail.com
 
 
+
+
+
+
+
+
+
+
+
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 59]
+
+Internet-Draft           DHCPv6 Failover Design                July 2013
+
+
    Kim Kinnear
    Cisco Systems, Inc.
    1414 Massachusetts Ave.
@@ -3301,4 +3320,41 @@ Authors' Addresses
 
 
 
-Mrugalski & Kinnear     Expires January 16, 2014               [Page 59]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Mrugalski & Kinnear     Expires January 16, 2014               [Page 60]

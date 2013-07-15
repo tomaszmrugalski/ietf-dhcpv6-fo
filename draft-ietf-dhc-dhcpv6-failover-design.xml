@@ -180,7 +180,8 @@
       failure). Active-active mode (i.e. both servers actively
       handling clients' requests) is currently not supported for the
       sake of simplicity. Such a mode is likely to be defined as an exension at a
-      later time.</t>
+      later time and will probably be based on <xref
+      target="I-D.ietf-dhc-dhcpv6-load-balancing" />.</t>
 
       <t>The failover protocol is designed to provide lease stability
       for leases with lease times beyond a short period.  Due in part to the
@@ -557,7 +558,7 @@
     each failover partner.  This failover relationship MUST have a
     unique name.</t>
 
-    <t>There is typically little need for addi1tional relationships between
+    <t>There is typically little need for additional relationships between
     any two servers but there MAY be more than one failover relationship
     between two servers -- however each MUST have a unique relationship
     name.</t>
@@ -757,7 +758,7 @@
     secondary servers as part of initial connection establishment. Once
     resources are allocated to each server, there is no need to
     reassign them. The resource allocation is algorithmic in nature,
-    and does not a message exchange for each resources allocated.
+    and does not require a message exchange for each resources allocated.
     This algorithm is simpler than proportional
     allocation since it requires similar initial communication, but does not
     require a rebalancing mechanism. It assumes
@@ -1481,13 +1482,14 @@
       the latest CLTT.
 
       <vspace blankLines="1"/>
-      It should be further clarified that DHCPv6 protocol makes assignments
-      based on (client DUID, resource type, iaid) triplet. The possibility of
-      using different IAIDs was omitted in this paragraph for clarity. If one
-      client is assigned multiple resources of the same type for the same
-      client, but with different IAIDs, there is no conflict. Also, iaid
-      values for different resource types are orthogonal, i.e. IA_NA with
-      iaid=1 is different than IA_PD with iaid=1 and there is no conflict.
+      It should be further clarified that DHCPv6 protocol makes
+      assignments based on (client DUID, resource type, iaid)
+      triplet. The possibility of using different IAIDs was omitted in
+      this paragraph for clarity. If one client is assigned multiple
+      resources of the same type, but with different IAIDs, there is
+      no conflict. Also, iaid values for different resource types are
+      orthogonal, i.e. IA_NA with iaid=1 is different than IA_PD with
+      iaid=1 and there is no conflict.
       </t>
 
       <t>binding-status conflict - This is normal conflict, where one server is
@@ -3140,7 +3142,8 @@ CONFLICT-DONE                                  |
       <?rfc include='reference.RFC.4649'?>
       <?rfc include='reference.RFC.5007'?>
       <?rfc include='reference.RFC.5460'?>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-failover-requirements.xml'?>
+      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-failover-requirements'?>
+      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
       <reference anchor="dhcpv4-failover">
         <front>
           <title>DHCP Failover Protocol</title> <author fullname="Ralph
