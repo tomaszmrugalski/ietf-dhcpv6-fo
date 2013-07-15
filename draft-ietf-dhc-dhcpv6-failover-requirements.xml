@@ -650,11 +650,12 @@
       communication. It does not mandate such security be employed, just
       that it be available.</t>
 
-      <t>The design of a security protection must take into
-      consideration the fact that the protocol must operate despite
-      network failures. In particular, relying on any external
-      infrastructure (e.g. any form of Certificate Authority) must
-      be optional.</t>
+      <t>The protocol specification, when it is written, should
+      provide operational guidelines in the case of authentication
+      mechanisms that require access to network servers that have the
+      potential to be unreachable (e.g. what to do if a partner is
+      reachable, but remote Certificate Authority is unreachable due
+      to network partition event).</t>
 
       <t>The security considerations for the design itself will be
       discussed in the design document.</t>
@@ -685,10 +686,10 @@
     <references title="Normative References">
       <!--<?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119'?> -->
+      <!--<?rfc
+       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2131'?>
       <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2131'?>
-      <?rfc
-      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3074'?>
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3074'?> -->
       <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3315'?>
       <?rfc
@@ -736,6 +737,7 @@
       include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
     </references>
 
+    <!--
     <section title="Related work">
       <t>This section describes related work. Readers may benefit from
       familiarizing themselves with these approaches, their advantages and
@@ -886,7 +888,7 @@
 
           <t>Using this approach, one can keep the MCLT relatively
           short, say 1 hour, and still offer leases of any desired
-          extent to clients -- once the failover partner has been
+          extent to clients - once the failover partner has been
           updated with the desired lease time.</t>
 
 
@@ -948,9 +950,9 @@
           the way that each server decides which DHCPv4 clients to
           process.  Use of load balancing with the DHCPv4 failover
           protocol is an optional extension to the failover protocol.
-          Both a simple active -- passive relationship without
+          Both a simple active - passive relationship without
           load balancing is defined as well as a more complex active
-          -- active relationship.</t>
+          - active relationship.</t>
         </section>
 
       </section> <section title="DHCPv6 Redundancy Considerations">
@@ -964,15 +966,7 @@
         implemented DHCPv6 standards.</t>
       </section>
 
-      <!--
-      </section> <section title="DHCP Best Practices">
-        <t>
-          TODO: Qin Wu provided this best practices link. Describe
-          it briefly.
-          http://technet.microsoft.com/en-us/library/cc780311(WS.10).aspx
-        </t> -->
-
-    </section>
+    </section> -->
 
   </back>
 </rfc>
