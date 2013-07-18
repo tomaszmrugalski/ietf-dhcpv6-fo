@@ -326,7 +326,7 @@
         full load normally handled by both servers working together,
         or there is not a true increase in availability.</t>
       </section>
-      <section anchor="onetoone" title="1-to-1, m-to-1 and m-to-m models">
+      <section anchor="onetoone" title="1-to-1, m-to-1 and m-to-n models">
         <t>A failover relationship for a specific network is provided
         by two failover partners. Those partners communicate with each
         other and back up all pools. This scenario is sometimes
@@ -335,7 +335,7 @@
         several failover relationships, i.e., it provides failover for
         several address or prefix pools, each served by separate
         partners. Such a scenario can be referred to as m-to-1. The
-        most complex scenario - m-to-m - assumes that each partner
+        most complex scenario - m-to-n - assumes that each partner
         participates in multiple failover relationships.</t>
       </section>
       <section title="Split prefixes">
@@ -646,11 +646,15 @@
       partner, will continue serving the same addresses and/or
       prefixes. This property is also called "lease stability".</t>
 
-      <t>Despite the lack of standardization of DHCPv4 failover, the
-      coexistence of DHCPv4 and DHCPv6 failover may be taken into
-      consideration. In particular, certain features that are common
-      for both IPv4 and IPv6, like DNS Update mechanism should
-      be taken into consideration.</t>
+      <t>Although progress on a standardized inter-operable DHCPv4
+      failover protocol has stalled, vendor-specific DHCPv4 failover
+      protocols have been deployed that meet these requirements to a
+      large extent.  Accordingly it would be appropriate to take into
+      account the likely coexistence of DHCPv4 and DHCPv6 failover
+      solutions. In particular, certain features that are common to
+      both IPv4 and IPv6 implementations, such as DNS Update
+      mechanism, should be taken into consideration to ensure
+      compatible operation.</t>
 
       <section anchor="out-of-scope" title="Features out of scope">
         <t>The following features are explicitly out of scope.
@@ -672,7 +676,7 @@
           <!-- tomek: I was thinking about something like defining
           DCP - DHCP control protocol. But that is a huge undertaking
           that I'm not willing to start at this time. -->
-          <t>m-to-m model (see <xref target="onetoone"/>)</t>
+          <t>m-to-n model (see <xref target="onetoone"/>)</t>
           <t>Servers participating in multiple failover
           relationships for any given prefix or address pool.</t>
         </list>
@@ -711,8 +715,8 @@
       reviews and substantial contributions.  Authors would also like
       to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
       Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
-      Nowicki, Steinar Haug, Elwyn Davies, Ted Lemon and Benoit Claise
-      for their comments and feedback.</t>
+      Nowicki, Steinar Haug, Elwyn Davies, Ted Lemon, Benoit Claise and
+      Stephen Farrell for their comments and feedback.</t>
 
       <t>This work has been partially supported by Department of
       Computer Communications (a division of Gdansk University of
