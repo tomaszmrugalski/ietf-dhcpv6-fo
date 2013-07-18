@@ -109,6 +109,13 @@
       failover service for multiple primary servers.  However the
       requirements will not preclude a future load-balancing extension
       where there is a symmetric failover relationship. </t>
+
+      <t>The DHCPv6 failover concept borrows heavily from its DHCPv4
+      counterpart <xref target="dhcpv4-failover"/> that never
+      completed standardization process, but has several successful,
+      operationally proven vendor-specific implementations. For a
+      dicussion about commonalities and differences, see <xref
+      target="v4-v6-compare"/>.</t>
     </section>
 
     <section title="Definitions">
@@ -197,8 +204,11 @@
           <t>There are cases when IPv6 addresses are used only for a
           short time, but there is a need to have high degree of
           confidence that those addresses will be served. A notable
-          example is a PXE (Pre eXecution Environment, see <xref
-          target="RFC5970"/>) scenario where hosts require an address
+          example is a PXE (Pre eXecution Environment, an early
+          phase of a disk-less device boot when it aquires an address just to
+          load the operating system image and continue booting, see
+          see <xref
+          target="RFC5970"/> for details) scenario where hosts require an address
           during boot. Address and possibly other configuration
           parameters are used during the boot process and are discarded
           thereafter. Any lack of available DHCPv6 service at this
@@ -515,7 +525,7 @@
       </section>
     </section>
 
-    <section title="DHCPv4 and DHCPv6 Failover Comparison">
+    <section anchor="v4-v6-compare" title="DHCPv4 and DHCPv6 Failover Comparison">
       <t>There are significant similarities between existing DHCPv4
       and envisaged DHCPv6 failovers. In particular both serve IP
       addresses to clients, require maintaining consistent databases
@@ -664,7 +674,7 @@
           that I'm not willing to start at this time. -->
           <t>m-to-m model (see <xref target="onetoone"/>)</t>
           <t>Servers participating in multiple failover
-          relationships for any given pool.</t>
+          relationships for any given prefix or address pool.</t>
         </list>
         </t>
       </section>
@@ -701,8 +711,8 @@
       reviews and substantial contributions.  Authors would also like
       to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
       Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
-      Nowicki, Steinar Haug, Elwyn Davies and Ted Lemon for their
-      comments and feedback.</t>
+      Nowicki, Steinar Haug, Elwyn Davies, Ted Lemon and Benoit Claise
+      for their comments and feedback.</t>
 
       <t>This work has been partially supported by Department of
       Computer Communications (a division of Gdansk University of
