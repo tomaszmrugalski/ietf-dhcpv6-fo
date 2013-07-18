@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-06">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-07">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -100,19 +100,30 @@
       failover must provide to be useful, while acknowledging that
       additional features may be specified as extensions. This
       document does not define a DHCPv6 failover protocol.</t>
+
+      <t>The failover model, to which these requirements apply, will
+      initially be a pairwise "hot standby" model (see <xref
+      target="active-passive" />) with a primary server used in normal
+      operation switching over to a backup secondary server in the
+      event of failure.  Optionally, a secondary server may provide
+      failover service for multiple primary servers.  However the
+      requirements will not preclude a future load-balancing extension
+      where there is a symmetric failover relationship. </t>
     </section>
 
     <section title="Definitions">
       <t>This section defines terms that are relevant to DHCPv6 failover.</t>
-      <t>Definitions from <xref target="RFC3315"/> are included by reference. In
-      particular, client means any device (e.g., end user host, CPE or
-      other router) that implements client functionality of the DHCPv6
-      protocol. A server means a DHCPv6 server, unless explicitly noted
-      otherwise. A relay is a DHCPv6 relay.</t>
+      <t>Definitions from <xref target="RFC3315"/> are included by
+      reference. In particular, client means any device e.g., end user
+      host, CPE (Customer Premises Equipment) or other router that
+      implements client functionality of the DHCPv6 protocol. A server
+      means a DHCPv6 server, unless explicitly noted otherwise. A
+      relay is a DHCPv6 relay.</t>
       <t><list>
         <t>A binding (or client binding) is a group of server data
         records containing the information the server has about the
-        addresses in an IA or configuration information explicitly
+        addresses in an IA (Identity Assocation, see Section 10 of
+        <xref target="RFC3315"/>) or configuration information explicitly
         assigned to the client.  Configuration information that has
         been returned to a client through a policy - for example, the
         information returned to all clients on the same link - does
@@ -140,7 +151,8 @@
         that was assigned ("leased") by a server to a specific
         client. A lease may include additional information, like
         associated fully qualified domain name (FQDN) and/or
-        information about associated DNS updates.</t>
+        information about associated DNS updates. A client obtains a
+        lease for a specified period of time (valid lifetime).</t>
         <t>Partner - A
         "partner", for the purpose of this document, refers to a
         failover server, typically the other failover server in a failover
@@ -185,32 +197,33 @@
           <t>There are cases when IPv6 addresses are used only for a
           short time, but there is a need to have high degree of
           confidence that those addresses will be served. A notable
-          example is a PXE scenario where hosts require an address during
-          boot. Address and possibly other configuration parameters
-          are used during boot process and are discarded
-          afterwards. Any lack of available DHCPv6 service at this
+          example is a PXE (Pre eXecution Environment, see <xref
+          target="RFC5970"/>) scenario where hosts require an address
+          during boot. Address and possibly other configuration
+          parameters are used during the boot process and are discarded
+          thereafter. Any lack of available DHCPv6 service at this
           time may render the devices unbootable.</t>
           <t>Instead of deploying failover, it is better to use the
           much simpler preference mechanism, defined in <xref
           target="RFC3315"/>. For example, consider two or more
-          servers with each having distinct preference set (e.g. 10
+          servers with each having a distinct preference set (e.g., 10
           and 20). Both will answer to a client's request. The client
           should choose the one with larger preference value. In case
           of failure of the most preferred server, the next server
           will keep responding to clients' queries. This approach is
-          simple to deploy, but does not offer lease stability, i.e.
+          simple to deploy, but does not offer lease stability, i.e.,
           in case of server failure, clients' addresses and prefixes
           will change.</t>
         </section>
         <section title="Redundant servers">
           <t>In some cases the desire to deploy failover is motivated by
-          high availability, i.e. to continue providing services
+          high availability, i.e., to continue providing services
           despite server failure. If there are no additional
           requirements, that goal may be fulfilled with simply
           deploying two or more independent servers on the same link.</t>
 
-          <t>There are several well documented approaches how such
-          deployment works. They are discussed in detail in <xref
+          <t>There are several well-documented approaches showing how such
+          a deployment could work. They are discussed in detail in <xref
           target="RFC6853"/>. Each of
           those approaches is simpler to deploy and maintain than full
           failover.</t>
@@ -225,12 +238,29 @@
           are solved in such database backends and how such conflict
           resolutions affect DHCPv6 server operation.</t>
 
-          <t>It is also essential to use only databases that are
-          really distributed and do not have single point of failure
-          themselves. Otherwise the single point of failure is
-          only moved to a different location (database rather than
-          DHCPv6 server). Such a configuration does not improve
-          redundancy, but significantly complicates deployment.</t>
+          <t>It is also essential to use only a database that provides
+          equivalent reliability and failover capability. Otherwise
+          the single point of failure is only moved to a different
+          location (database rather than DHCPv6 server). Such a
+          configuration does not improve redundancy, but significantly
+          complicates deployment.</t>
+
+          <t>A common miscoception regarding database-based redundancy
+          is the assumption that a conflict resolution after
+          recovering from a network partition is not necessary.  To
+          explain that fallacy, let's consider an example where there
+          is a very small pool with only one address. There are two
+          servers, each connected to a co-located database node
+          (i.e., running on the same hardware). Network partition
+          occurs.  Each server is operating, but has lost connection
+          to its partner.  Two clients request an address, one from
+          each server. Each server consults its database and discovers
+          that the sole address is available, so it is assigned to the
+          client. Unfortunately, each server assigned the same address
+          to a different client. Making the scenario more realistic
+          (millions of addresses rather than one) just decreased
+          failure probability, but did not eliminate the underlying
+          issue.</t>
         </section>
 
         <section title="Load Balancing">
@@ -246,13 +276,13 @@
     <section title="Failover Scenarios">
       <t>The following section provides several examples of deployment
       scenarios and use cases that may be associated with capabilities
-      commonly referred to as failover. These scenarios may be inside
-      or outside of scope for DHCPv6 failover protocol as defined by
-      this document. They are
-      enumerated here to provide a common basis for discussion.</t>
-      <section title="Hot Standby Model">
+      commonly referred to as failover. These scenarios may be in or out
+      of scope for the DHCPv6 failover protocol to which this document's
+      requirements apply; they are enumerated here to provide a common
+      basis for discussion.</t>
+      <section anchor="active-passive" title="Hot Standby Model">
         <t>In the simplest case, there are two partners that are connected
-        to the same network. Only one of partners ("primary") provides
+        to the same network. Only one of the partners ("primary") provides
         services to clients. In case of its failure, the second partner
         ("secondary") continues handling services previously handled
         by first partner. As both servers are connected to the same
@@ -292,7 +322,7 @@
         other and back up all pools. This scenario is sometimes
         referred to as the 1-to-1 model and is considered relatively
         simple. In larger networks one server may be participating in
-        several failover relationships, i.e. it provides failover for
+        several failover relationships, i.e., it provides failover for
         several address or prefix pools, each served by separate
         partners. Such a scenario can be referred to as m-to-1. The
         most complex scenario - m-to-m - assumes that each partner
@@ -308,7 +338,7 @@
       </section>
       <section title="Long lived connections">
         <t>Certain nodes may maintain long lived connections. Since
-        the IPv6 address space is large, techniques exist (e.g.
+        the IPv6 address space is large, techniques exist (e.g.,
         <xref target="RFC6853"/>)
         that use the easy availability of IPv6 addresses in order to
         provide increased DHCPv6 availability.  However, these
@@ -316,10 +346,10 @@
         for DHCPv6 clients should the server with which the client is
         interacting become unavailable.</t>
         <t>The obvious benefit of stable addresses is the ability to update
-        DNS infrequently. While the DNS can be updated every time IPv6
+        DNS infrequently. While the DNS can be updated every time an IPv6
         address changes, it introduces delays and (depending on DNS configuration)
         old entries may be cached for prolonged periods of time.</t>
-        <t>The other benefit of having stable address is that many
+        <t>The other benefit of having a stable address is that many
         monitoring solutions provide statistics on a per IP basis, so
         IP changes make measuring characteristics of a given box more
         difficult.</t>
@@ -355,27 +385,24 @@
       These issues form a basis for later documents which deal
       with the solutions to these issues.</t>
 
-      <t>General failover concept assumes that there are backup
-      servers that can provide service in case of the primary server
+      <t>The general failover concept assumes that there are backup
+      servers that can provide service in case of a primary server
       failure.  In theory there could be more than one backup server
       that could take up the role if such a need arise. However,
       having more than two servers introduces a very difficult issue
-      of synchronizing between partners. In case of just a pair of
+      of synchronizing between partners. In the case of just a pair of
       cooperating servers, the notification and processes can result
       in only one of two states: fully successful (got response from a
       partner) and total failure (no response, failure event
-      occurred). Had there be more than two partners participating in
-      a relationship, there would be a third states in between (some
-      partners updated their state, but some didn't). This would greatly
-      complicate protocol design, and would give little advantage
-      in return. Therefore an approach that assumes a pair of cooperating
-      servers was chosen.</t>
-
+      occurred). Were there more than two partners participating in a
+      relationship, there would be intermediate, inconsistent states
+      where some partners had updated their state and some had
+      not. This would greatly complicate protocol design, and would
+      give little advantage in return. Therefore an approach that
+      assumes a pair of cooperating servers was chosen.</t>
 
       <section anchor="failures" title="Failure modes">
-        <t>This section documents failure modes.  Each failure mode
-        is listed as either an in-scope or out-of-scope requirement for
-        the failover protocol.</t>
+        <t>This section documents failure modes.</t>
         <section anchor="partner-down" title="Server Failure">
           <t>Servers may become unresponsive due to a software crash,
           hardware failure, power outage or any number of other
@@ -420,7 +447,7 @@
           that its partner is down. They must consider the fact that
           the partner may continue operating and interacting with a subset
           of the clients. The only valid assumption is that
-          partner also detected the network partition event and follows
+          the partner also detected the network partition event and follows
           procedures specified for such a situation.</t>
           <t>It should be noted that recovery after a partitioned network
           is rejoined is significantly more complicated than
@@ -440,7 +467,7 @@
         <t>Partners must exchange information about changes made to the
         lease database. There are at least two types of synchronization
         methods that may be used. These concepts are related to distributed
-        databases, so some familiarity with distributed database
+        databases, so some familiarity with distributed database technology
         is useful to better understand this topic.</t>
         <section anchor="lockstep" title="Lockstep">
           <t>When a server receives a REQUEST message from a client it
@@ -448,20 +475,21 @@
           addresses and/or prefixes. To make sure that its partner
           maintains a consistent database, it then sends information
           about a new or just updated lease to the partner and waits for
-          the partner's response. After the response from partner is
+          the partner's response. After the response from its partner is
           received the REPLY message is transmitted to the client.</t>
           <t>This approach has the benefit of having a completely consistent
           lease database between partners at all times.
-          Unfortunately, there is a large performance penalty for
+          Unfortunately, there is typically a significant performance penalty for
           this approach as each response sent to a client is delayed
           by the total sum of the delays caused by two
           transmissions between partners and the processing by the second
           partner. The second partner is expected to update its own
           copy of the lease database in permanent storage, so this delay
           is not negligible, even in fast networks.</t>
-          <t>Due to advent of SSD disks or battery backed ram disks
-          technology, this write performance penalty can be limited to
-          some degree.</t>
+          <t>Due to the advent of fast SSD (solid state disk) and
+          battery backed RAM (random access memory) disk technology,
+          this write performance penalty can be limited to some
+          degree.</t>
         </section>
 
         <section anchor="lazy-updates" title="Lazy updates">
@@ -481,7 +509,7 @@
           synchronization more complex (and particularly the re-integration
           after a network partition event), as there may be cases where one
           client has been given a lease on an address or prefix of which the
-          partner is not aware (e.g. if server crashes after sending REPLY to the client,
+          partner is not aware (e.g., if the server crashes after sending REPLY to the client,
           but before sending update information to its partner).</t>
         </section>
       </section>
@@ -553,15 +581,15 @@
       <t>
       <list style="numbers">
         <t>The number of supported partners must be exactly two,
-        i.e. there are at most two servers that are aware of a
+        i.e., there are at most two servers that are aware of a
         specific lease.</t>
 
         <t>For each prefix or address pool, a server must not
         participate in more than one failover relationship.</t>
 
-        <t>The defined protocol must support the m-to-1 model (i.e. one server
+        <t>The defined protocol must support the m-to-1 model (i.e., one server
         may form more than one relationship), but an implementation
-        may choose to implement only the 1-to-1 model (i.e. everything
+        may choose to implement only the 1-to-1 model (i.e., everything
         from one server is backed on another).</t>
 
         <!--
@@ -572,10 +600,10 @@
         <t>One partner must be able to continue serving leases offered
         by the other partner. This property is also sometimes called
         "lease stability".  The failure of either failover partner
-        should pose minimal or no impact on client connectivity. In
+        should have minimal or no impact on client connectivity. In
         particular, it must not force the client to change addresses
-        and/or change prefixes delegated to it.  Long-lived
-        connections must not be disturbed.</t>
+        and/or change prefixes delegated to it. Lease stability has
+        the aim of avoiding disturbance to long-lived connections.</t>
 
         <t>Prefix delegation must be supported.</t>
 
@@ -646,14 +674,14 @@
     <section title="Security Considerations">
       <t>The design must allow secure communication between the
       failover partners. This requirement applies to the specification
-      only, i.e. the design must include a way to secure
+      only, i.e., the design must include a way to secure
       communication. It does not mandate such security be employed, just
       that it be available.</t>
 
       <t>The protocol specification, when it is written, should
       provide operational guidelines in the case of authentication
       mechanisms that require access to network servers that have the
-      potential to be unreachable (e.g. what to do if a partner is
+      potential to be unreachable (e.g., what to do if a partner is
       reachable, but remote Certificate Authority is unreachable due
       to network partition event).</t>
 
@@ -673,12 +701,15 @@
       reviews and substantial contributions.  Authors would also like
       to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
       Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
-      Nowicki and Steinar Haug for their comments and feedback.</t>
+      Nowicki, Steinar Haug, and Elwyn Davies for their comments and
+      feedback.</t>
 
-      <t>This work has been partially supported by Gdansk University of
-      Technology and the Polish Ministry of Science and Higher Education
-      under the European Regional Development Fund, Grant No.
-      POIG.01.01.02-00-045/09-00 (Future Internet Engineering Project).</t>
+      <t>This work has been partially supported by Department of
+      Computer Communications (a division of Gdansk University of
+      Technology) and the National Centre for Research and Development
+      (Poland) under the European Regional Development Fund, Grant
+      No. POIG.01.01.02-00-045 / 09-00 (Future Internet Engineering
+      Project).</t>
     </section>
   </middle>
 
@@ -699,6 +730,8 @@
 
     </references> <references title="Informative References">
 
+      <?rfc
+      include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5970'?>
       <?rfc
       include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6853'?>
 
