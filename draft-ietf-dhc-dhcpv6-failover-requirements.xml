@@ -672,16 +672,16 @@
     </section>
 
     <section title="Security Considerations">
-      <t>The design must allow secure communication between the
-      failover partners. This requirement applies to the specification
-      only, i.e., the design must include a way to secure
-      communication. It does not mandate such security be employed, just
-      that it be available.</t>
+      <t>The design must provide a mechanism whereby each peer in a
+      failover relationship can identify the other peer, authenticate
+      that identification, and validate that the identified peer is
+      the one with which communication is intended.  This mechanism
+      should also optionally provide support for confidentiality.</t>
 
       <t>The protocol specification, when it is written, should
       provide operational guidelines in the case of authentication
       mechanisms that require access to network servers that have the
-      potential to be unreachable (e.g., what to do if a partner is
+      potential to be unreachable (e.g. what to do if a partner is
       reachable, but remote Certificate Authority is unreachable due
       to network partition event).</t>
 
@@ -701,8 +701,8 @@
       reviews and substantial contributions.  Authors would also like
       to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
       Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
-      Nowicki, Steinar Haug, and Elwyn Davies for their comments and
-      feedback.</t>
+      Nowicki, Steinar Haug, Elwyn Davies and Ted Lemon for their
+      comments and feedback.</t>
 
       <t>This work has been partially supported by Department of
       Computer Communications (a division of Gdansk University of

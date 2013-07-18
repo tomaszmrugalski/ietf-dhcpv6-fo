@@ -98,7 +98,7 @@ Table of Contents
      7.1.  Features out of scope . . . . . . . . . . . . . . . . . .  14
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
    9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  14
+   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  15
    11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
      11.1.  Normative References . . . . . . . . . . . . . . . . . .  15
      11.2.  Informative References . . . . . . . . . . . . . . . . .  15
@@ -754,15 +754,16 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 8.  Security Considerations
 
-   The design must allow secure communication between the failover
-   partners.  This requirement applies to the specification only, i.e.,
-   the design must include a way to secure communication.  It does not
-   mandate such security be employed, just that it be available.
+   The design must provide a mechanism whereby each peer in a failover
+   relationship can identify the other peer, authenticate that
+   identification, and validate that the identified peer is the one with
+   which communication is intended.  This mechanism should also
+   optionally provide support for confidentiality.
 
    The protocol specification, when it is written, should provide
    operational guidelines in the case of authentication mechanisms that
    require access to network servers that have the potential to be
-   unreachable (e.g., what to do if a partner is reachable, but remote
+   unreachable (e.g. what to do if a partner is reachable, but remote
    Certificate Authority is unreachable due to network partition event).
 
    The security considerations for the design itself will be discussed
@@ -772,12 +773,11 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
    IANA is not requested to perform any actions at this time.
 
-10.  Acknowledgements
 
-   This document extensively uses concepts, definitions and other parts
-   of [dhcpv4-failover] document.  Thanks to Bernie Volz and Shawn
-   Routhier for their frequent reviews and substantial contributions.
-   Authors would also like to thank Qin Wu, Jean-Francois Tremblay,
+
+
+
+
 
 
 
@@ -786,9 +786,15 @@ Mrugalski & Kinnear     Expires January 19, 2014               [Page 14]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+10.  Acknowledgements
+
+   This document extensively uses concepts, definitions and other parts
+   of [dhcpv4-failover] document.  Thanks to Bernie Volz and Shawn
+   Routhier for their frequent reviews and substantial contributions.
+   Authors would also like to thank Qin Wu, Jean-Francois Tremblay,
    Frank Sweetser, Jiang Sheng, Yu Fu, Greg Rabil, Vithalprasad
-   Gaitonde, Krzysztof Nowicki, Steinar Haug, and Elwyn Davies for their
-   comments and feedback.
+   Gaitonde, Krzysztof Nowicki, Steinar Haug, Elwyn Davies and Ted Lemon
+   for their comments and feedback.
 
    This work has been partially supported by Department of Computer
    Communications (a division of Gdansk University of Technology) and
@@ -826,12 +832,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    [RFC5970]  Huth, T., Freimann, J., Zimmer, V., and D. Thaler, "DHCPv6
               Options for Network Boot", RFC 5970, September 2010.
 
-   [RFC6853]  Brzozowski, J., Tremblay, J., Chen, J., and T. Mrugalski,
-              "DHCPv6 Redundancy Deployment Considerations", BCP 180,
-              RFC 6853, February 2013.
-
-   [dhcpv4-failover]
-
 
 
 
@@ -842,6 +842,11 @@ Mrugalski & Kinnear     Expires January 19, 2014               [Page 15]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+   [RFC6853]  Brzozowski, J., Tremblay, J., Chen, J., and T. Mrugalski,
+              "DHCPv6 Redundancy Deployment Considerations", BCP 180,
+              RFC 6853, February 2013.
+
+   [dhcpv4-failover]
               Droms, R., Kinnear, K., Stapp, M., Volz, B., Gonczi, S.,
               Rabil, G., Dooley, M., and A. Kapur, "DHCP Failover
               Protocol", draft-ietf-dhc-failover-12 (work in progress),
@@ -867,11 +872,6 @@ Authors' Addresses
 
    Phone: +1 (978) 936-0000
    Email: kkinnear@cisco.com
-
-
-
-
-
 
 
 
