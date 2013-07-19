@@ -10,7 +10,7 @@
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
 ]>
 <rfc ipr="trust200902" category="info"
-     docName="draft-ietf-dhc-dhcpv6-failover-requirements-07">
+     docName="draft-ietf-dhc-dhcpv6-failover-requirements-08">
   <front>
     <title abbrev="DHCPv6 Failover Requirements">DHCPv6 Failover Requirements</title>
 
@@ -271,6 +271,11 @@
           (millions of addresses rather than one) just decreased
           failure probability, but did not eliminate the underlying
           issue.</t>
+
+	  <t>Any solution that involves a distributed database
+	  implementation of DHCPv6 failover must take into account
+	  the requirements for security.
+	  See <xref target="security"/> for additional information.</t>
         </section>
 
         <section title="Load Balancing">
@@ -363,12 +368,6 @@
         monitoring solutions provide statistics on a per IP basis, so
         IP changes make measuring characteristics of a given box more
         difficult.</t>
-
-        <t>It should be noted that lease stability is an explicit
-        non-goal in some deployments. One notable example is an ISP
-        who wants to provide addresses that change frequently to
-        prevent his customers from running servers (without paying
-        extra for more enterprise oriented service).</t>
       </section>
 
       <section title="Partial server communication loss">
@@ -685,7 +684,7 @@
 
     </section>
 
-    <section title="Security Considerations">
+    <section anchor="security" title="Security Considerations">
       <t>The design must provide a mechanism whereby each peer in a
       failover relationship can identify the other peer, authenticate
       that identification, and validate that the identified peer is
