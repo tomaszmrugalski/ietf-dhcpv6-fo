@@ -1,7 +1,6 @@
 
 
 
-
 Dynamic Host Configuration (DHC)                            T. Mrugalski
 Internet-Draft                                                       ISC
 Intended status: Informational                                K. Kinnear
@@ -27,7 +26,7 @@ Abstract
    discusses the proposed scope of work to be conducted.  This document
    does not define a DHCPv6 failover protocol.
 
-Status of This Memo
+Status of this Memo
 
    This Internet-Draft is submitted in full conformance with the
    provisions of BCP 78 and BCP 79.
@@ -49,7 +48,7 @@ Copyright Notice
    Copyright (c) 2013 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
-
+   This document is subject to BCP 78 and the IETF Trust's Legal
 
 
 
@@ -58,7 +57,6 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 1]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
-   This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
    (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
@@ -68,43 +66,44 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
 
+
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-   2.  Definitions . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  Scope of work . . . . . . . . . . . . . . . . . . . . . . . .   4
-     3.1.  Alternatives to Failover  . . . . . . . . . . . . . . . .   5
-       3.1.1.  Short-lived addresses . . . . . . . . . . . . . . . .   5
-       3.1.2.  Redundant servers . . . . . . . . . . . . . . . . . .   5
-       3.1.3.  Distributed databases . . . . . . . . . . . . . . . .   6
-       3.1.4.  Load Balancing  . . . . . . . . . . . . . . . . . . .   6
-   4.  Failover Scenarios  . . . . . . . . . . . . . . . . . . . . .   7
-     4.1.  Hot Standby Model . . . . . . . . . . . . . . . . . . . .   7
-     4.2.  Geographically Distributed Failover . . . . . . . . . . .   7
-     4.3.  Load balancing  . . . . . . . . . . . . . . . . . . . . .   7
-     4.4.  1-to-1, m-to-1 and m-to-n models  . . . . . . . . . . . .   8
-     4.5.  Split prefixes  . . . . . . . . . . . . . . . . . . . . .   8
-     4.6.  Long lived connections  . . . . . . . . . . . . . . . . .   8
-     4.7.  Partial server communication loss . . . . . . . . . . . .   8
-   5.  Principles of DHCPv6 Failover . . . . . . . . . . . . . . . .   9
-     5.1.  Failure modes . . . . . . . . . . . . . . . . . . . . . .   9
-       5.1.1.  Server Failure  . . . . . . . . . . . . . . . . . . .   9
-       5.1.2.  Network partition . . . . . . . . . . . . . . . . . .  10
-     5.2.  Synchronization mechanisms  . . . . . . . . . . . . . . .  10
-       5.2.1.  Lockstep  . . . . . . . . . . . . . . . . . . . . . .  11
-       5.2.2.  Lazy updates  . . . . . . . . . . . . . . . . . . . .  11
-   6.  DHCPv4 and DHCPv6 Failover Comparison . . . . . . . . . . . .  12
-   7.  DHCPv6 Failover Requirements  . . . . . . . . . . . . . . . .  12
-     7.1.  Features out of scope . . . . . . . . . . . . . . . . . .  14
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  15
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  15
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  16
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   2.  Definitions  . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   3.  Scope of work  . . . . . . . . . . . . . . . . . . . . . . . .  5
+     3.1.  Alternatives to Failover . . . . . . . . . . . . . . . . .  5
+       3.1.1.  Short-lived addresses  . . . . . . . . . . . . . . . .  5
+       3.1.2.  Redundant servers  . . . . . . . . . . . . . . . . . .  6
+       3.1.3.  Distributed databases  . . . . . . . . . . . . . . . .  6
+       3.1.4.  Load Balancing . . . . . . . . . . . . . . . . . . . .  7
+   4.  Failover Scenarios . . . . . . . . . . . . . . . . . . . . . .  7
+     4.1.  Hot Standby Model  . . . . . . . . . . . . . . . . . . . .  7
+     4.2.  Geographically Distributed Failover  . . . . . . . . . . .  7
+     4.3.  Load balancing . . . . . . . . . . . . . . . . . . . . . .  7
+     4.4.  1-to-1, m-to-1 and m-to-n models . . . . . . . . . . . . .  8
+     4.5.  Split prefixes . . . . . . . . . . . . . . . . . . . . . .  8
+     4.6.  Long lived connections . . . . . . . . . . . . . . . . . .  8
+     4.7.  Partial server communication loss  . . . . . . . . . . . .  8
+   5.  Principles of DHCPv6 Failover  . . . . . . . . . . . . . . . .  9
+     5.1.  Failure modes  . . . . . . . . . . . . . . . . . . . . . .  9
+       5.1.1.  Server Failure . . . . . . . . . . . . . . . . . . . .  9
+       5.1.2.  Network partition  . . . . . . . . . . . . . . . . . . 10
+     5.2.  Synchronization mechanisms . . . . . . . . . . . . . . . . 11
+       5.2.1.  Lockstep . . . . . . . . . . . . . . . . . . . . . . . 11
+       5.2.2.  Lazy updates . . . . . . . . . . . . . . . . . . . . . 11
+   6.  DHCPv4 and DHCPv6 Failover Comparison  . . . . . . . . . . . . 12
+   7.  DHCPv6 Failover Requirements . . . . . . . . . . . . . . . . . 12
+     7.1.  Features out of scope  . . . . . . . . . . . . . . . . . . 14
+   8.  Security Considerations  . . . . . . . . . . . . . . . . . . . 14
+   9.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 15
+   10. Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 15
+   11. References . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+     11.1. Normative References . . . . . . . . . . . . . . . . . . . 15
+     11.2. Informative References . . . . . . . . . . . . . . . . . . 16
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 16
 
-1.  Introduction
+
 
 
 
@@ -113,6 +112,8 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 2]
 
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
+
+1.  Introduction
 
    The DHCPv6 protocol, defined in [RFC3315] allows for multiple servers
    to be operating on a single network, however it does not define how
@@ -148,6 +149,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    specific implementations.  For a dicussion about commonalities and
    differences, see Section 6.
 
+
 2.  Definitions
 
    This section defines terms that are relevant to DHCPv6 failover.
@@ -158,10 +160,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    the DHCPv6 protocol.  A server means a DHCPv6 server, unless
    explicitly noted otherwise.  A relay is a DHCPv6 relay.
 
-      A binding (or client binding) is a group of server data records
-      containing the information the server has about the addresses in
-      an IA (Identity Assocation, see Section 10 of [RFC3315]) or
-      configuration information explicitly assigned to the client.
+
 
 
 
@@ -170,6 +169,10 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 3]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+      A binding (or client binding) is a group of server data records
+      containing the information the server has about the addresses in
+      an IA (Identity Assocation, see Section 10 of [RFC3315]) or
+      configuration information explicitly assigned to the client.
       Configuration information that has been returned to a client
       through a policy - for example, the information returned to all
       clients on the same link - does not require a binding.
@@ -214,10 +217,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
       other type of failure that renders a partner unable to continue
       its operation.
 
-3.  Scope of work
-
-   In order to fit within the IETF process effectively and efficiently,
-   the standardization effort for DHCPv6 failover is expected to proceed
 
 
 
@@ -226,6 +225,10 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 4]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+3.  Scope of work
+
+   In order to fit within the IETF process effectively and efficiently,
+   the standardization effort for DHCPv6 failover is expected to proceed
    with the creation of documents of increasing specificity.  It begins
    with this document specifying the requirements for DHCPv6 failover
    ("requirements document").  Later documents are expected to address
@@ -251,14 +254,15 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
    There are cases when IPv6 addresses are used only for a short time,
    but there is a need to have high degree of confidence that those
-   addresses will be served.  A notable example is a PXE (Pre eXecution
-   Environment, an early phase of a disk-less device boot when it
-   aquires an address just to load the operating system image and
-   continue booting, see see [RFC5970] for details) scenario where hosts
-   require an address during boot.  Address and possibly other
+   addresses will be served.  A notable example is PXE: Pre eXecution
+   Environment [RFC5970].  This is a mechanism for obtaining
+   configuration early in the process of bootstrapping over the network.
+
+   The PXE BIOS acquires an address in order to load the operating
+   system image and continue booting.  Address and possibly other
    configuration parameters are used during the boot process and are
    discarded thereafter.  Any lack of available DHCPv6 service at this
-   time may render the devices unbootable.
+   time will prevent such devices from booting.
 
    Instead of deploying failover, it is better to use the much simpler
    preference mechanism, defined in [RFC3315].  For example, consider
@@ -270,11 +274,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    but does not offer lease stability, i.e., in case of server failure,
    clients' addresses and prefixes will change.
 
-3.1.2.  Redundant servers
-
-   In some cases the desire to deploy failover is motivated by high
-   availability, i.e., to continue providing services despite server
-
 
 
 Mrugalski & Kinnear     Expires January 20, 2014                [Page 5]
@@ -282,6 +281,10 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 5]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+3.1.2.  Redundant servers
+
+   In some cases the desire to deploy failover is motivated by high
+   availability, i.e., to continue providing services despite server
    failure.  If there are no additional requirements, that goal may be
    fulfilled with simply deploying two or more independent servers on
    the same link.
@@ -315,7 +318,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    (i.e., running on the same hardware).  Network partition occurs.
    Each server is operating, but has lost connection to its partner.
    Two clients request an address, one from each server.  Each server
-   consults its database and discovers that the sole address is
+   consults its database and discovers that only one address is
    available, so it is assigned to the client.  Unfortunately, each
    server assigned the same address to a different client.  Making the
    scenario more realistic (millions of addresses rather than one) just
@@ -326,10 +329,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    DHCPv6 failover must take into account the requirements for security.
    See Section 8 for additional information.
 
-3.1.4.  Load Balancing
-
-   Sometimes the desire to deploy more than one server is based on the
-   assumption that they will share the client traffic.  Administrators
 
 
 
@@ -338,8 +337,13 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 6]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+3.1.4.  Load Balancing
+
+   Sometimes the desire to deploy more than one server is based on the
+   assumption that they will share the client traffic.  Administrators
    that are interested in such a capability are advised to deploy a load
    balancing mechanism, defined in [I-D.ietf-dhc-dhcpv6-load-balancing].
+
 
 4.  Failover Scenarios
 
@@ -382,17 +386,17 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    strictly, require failover - it is clear that failover makes such an
    architecture more straightforward.
 
-   Note that in a load balancing situation which includes failover, each
-   individual server must be able to handle the full load normally
-   handled by both servers working together, or there is not a true
-   increase in availability.
-
 
 
 Mrugalski & Kinnear     Expires January 20, 2014                [Page 7]
 
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
+
+   Note that in a load balancing situation which includes failover, each
+   individual server must be able to handle the full load normally
+   handled by both servers working together, or there is not a true
+   increase in availability.
 
 4.4.  1-to-1, m-to-1 and m-to-n models
 
@@ -437,11 +441,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
    There is a scenario where the DHCPv6 server may be configured to
    serve clients on one network adapter and communicate with a partner
-   server (server to server traffic) on a different network adapter.  In
-   this scenario, if the server loses connectivity on the network
-   adapter used to communicate with the clients because of network
-   adapter (hardware) failure, there is no intimation of the loss of
-   service to the partner in the DHCPv6 failover protocol.  Since the
 
 
 
@@ -450,8 +449,14 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 8]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+   server (server to server traffic) on a different network adapter.  In
+   this scenario, if the server loses connectivity on the network
+   adapter used to communicate with the clients because of network
+   adapter (hardware) failure, there is no intimation of the loss of
+   service to the partner in the DHCPv6 failover protocol.  Since the
    servers are able to communicate with each other, the partner remains
    ignorant of the loss of service to clients.
+
 
 5.  Principles of DHCPv6 Failover
 
@@ -492,12 +497,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
    When working under the assumption that this is the only type of
    failure that can happen, the server may safely assume that its
-   partner unreachability means that it is down, so other nodes (clients
-   in particular) are not able to reach it either and no services are
-   provided.
-
-   It should be noted that recovery after the failed server is brought
-   back on-line is straightforward, due to the fact that it just needs
 
 
 
@@ -506,6 +505,12 @@ Mrugalski & Kinnear     Expires January 20, 2014                [Page 9]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+   partner unreachability means that it is down, so other nodes (clients
+   in particular) are not able to reach it either and no services are
+   provided.
+
+   It should be noted that recovery after the failed server is brought
+   back on-line is straightforward, due to the fact that it just needs
    to download current information from the lease database of the
    healthy partner and there is no conflict resolution required.
 
@@ -548,12 +553,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    This failure mode is more likely (though still rare) in the situation
    where two servers are in physically distant locations with multiple
    network elements between them.  This is the case in geographically
-   distributed failover (see Section 4.2).
-
-5.2.  Synchronization mechanisms
-
-   Partners must exchange information about changes made to the lease
-   database.  There are at least two types of synchronization methods
 
 
 
@@ -562,6 +561,12 @@ Mrugalski & Kinnear     Expires January 20, 2014               [Page 10]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+   distributed failover (see Section 4.2).
+
+5.2.  Synchronization mechanisms
+
+   Partners must exchange information about changes made to the lease
+   database.  There are at least two types of synchronization methods
    that may be used.  These concepts are related to distributed
    databases, so some familiarity with distributed database technology
    is useful to better understand this topic.
@@ -604,18 +609,19 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    times, thus it is much better from a performance perspective.
    However, it makes the lease databases loosely synchronized between
    partners.  This makes the synchronization more complex (and
-   particularly the re-integration after a network partition event), as
-   there may be cases where one client has been given a lease on an
-   address or prefix of which the partner is not aware (e.g., if the
-   server crashes after sending REPLY to the client, but before sending
-   update information to its partner).
-
 
 
 
 Mrugalski & Kinnear     Expires January 20, 2014               [Page 11]
 
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
+
+
+   particularly the re-integration after a network partition event), as
+   there may be cases where one client has been given a lease on an
+   address or prefix of which the partner is not aware (e.g., if the
+   server crashes after sending REPLY to the client, but before sending
+   update information to its partner).
 
 
 6.  DHCPv4 and DHCPv6 Failover Comparison
@@ -653,19 +659,12 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    pool balancing and rebalancing and more rapid reclamation of prefixes
    allocated by a failed peer will be needed.
 
+
 7.  DHCPv6 Failover Requirements
 
    This section summarizes the requirements for DHCPv6 failover.
 
    Certain capabilities may be useful in some, but not all scenarios.
-   Such additional features will be considered optional parts of
-   failover, and will be split and defined in separate documents.  As
-   such, this document can be considered an attempt to define
-   requirements for the DHCPv6 failover "core" protocol.
-
-   The core of the DHCPv6 failover protocol is expected to provide the
-   following properties:
-
 
 
 
@@ -673,6 +672,14 @@ Mrugalski & Kinnear     Expires January 20, 2014               [Page 12]
 
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
+
+   Such additional features will be considered optional parts of
+   failover, and will be split and defined in separate documents.  As
+   such, this document can be considered an attempt to define
+   requirements for the DHCPv6 failover "core" protocol.
+
+   The core of the DHCPv6 failover protocol is expected to provide the
+   following properties:
 
    1.   The number of supported partners must be exactly two, i.e.,
         there are at most two servers that are aware of a specific
@@ -690,8 +697,8 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
         the other partner.  This property is also sometimes called
         "lease stability".  The failure of either failover partner
         should have minimal or no impact on client connectivity.  In
-        particular, it must not force the client to change addresses and
-        /or change prefixes delegated to it.  Lease stability has the
+        particular, it must not force the client to change addresses
+        and/or change prefixes delegated to it.  Lease stability has the
         aim of avoiding disturbance to long-lived connections.
 
    5.   Prefix delegation must be supported.
@@ -714,14 +721,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
         allowed, when possible.
 
    Depending on the specific nature of the failure, the recovery
-   procedures mentioned in points 7 and 8 may require manual
-   intervention.
-
-
-
-
-
-
 
 
 
@@ -729,6 +728,9 @@ Mrugalski & Kinnear     Expires January 20, 2014               [Page 13]
 
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
+
+   procedures mentioned in points 7 and 8 may require manual
+   intervention.
 
    High Availability is a property of the protocol that allows clients
    to receive DHCPv6 services despite the failure of individual DHCPv6
@@ -768,16 +770,13 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    4.  Servers participating in multiple failover relationships for any
        given prefix or address pool.
 
+
 8.  Security Considerations
 
    The design must provide a mechanism whereby each peer in a failover
    relationship can identify the other peer, authenticate that
    identification, and validate that the identified peer is the one with
    which communication is intended.  This mechanism should also
-   optionally provide support for confidentiality.
-
-   The protocol specification, when it is written, should provide
-   operational guidelines in the case of authentication mechanisms that
 
 
 
@@ -786,6 +785,10 @@ Mrugalski & Kinnear     Expires January 20, 2014               [Page 14]
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
 
+   optionally provide support for confidentiality.
+
+   The protocol specification, when it is written, should provide
+   operational guidelines in the case of authentication mechanisms that
    require access to network servers that have the potential to be
    unreachable (e.g. what to do if a partner is reachable, but remote
    Certificate Authority is unreachable due to network partition event).
@@ -793,9 +796,11 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    The security considerations for the design itself will be discussed
    in the design document.
 
+
 9.  IANA Considerations
 
    IANA is not requested to perform any actions at this time.
+
 
 10.  Acknowledgements
 
@@ -813,6 +818,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
    European Regional Development Fund, Grant No.  POIG.01.01.02-00-045 /
    09-00 (Future Internet Engineering Project).
 
+
 11.  References
 
 11.1.  Normative References
@@ -827,13 +833,6 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
    [RFC4704]  Volz, B., "The Dynamic Host Configuration Protocol for
               IPv6 (DHCPv6) Client Fully Qualified Domain Name (FQDN)
-              Option", RFC 4704, October 2006.
-
-
-
-
-
-
 
 
 
@@ -841,6 +840,8 @@ Mrugalski & Kinnear     Expires January 20, 2014               [Page 15]
 
 Internet-Draft        DHCPv6 Failover Requirements             July 2013
 
+
+              Option", RFC 4704, October 2006.
 
 11.2.  Informative References
 
@@ -866,6 +867,7 @@ Internet-Draft        DHCPv6 Failover Requirements             July 2013
               Protocol", draft-ietf-dhc-failover-12 (work in progress),
               March 2003.
 
+
 Authors' Addresses
 
    Tomek Mrugalski
@@ -890,7 +892,5 @@ Authors' Addresses
 
 
 
-
-
-
 Mrugalski & Kinnear     Expires January 20, 2014               [Page 16]
+

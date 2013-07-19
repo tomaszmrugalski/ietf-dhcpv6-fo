@@ -203,16 +203,19 @@
         <section title="Short-lived addresses">
           <t>There are cases when IPv6 addresses are used only for a
           short time, but there is a need to have high degree of
-          confidence that those addresses will be served. A notable
-          example is a PXE (Pre eXecution Environment, an early
-          phase of a disk-less device boot when it aquires an address just to
-          load the operating system image and continue booting, see
-          see <xref
-          target="RFC5970"/> for details) scenario where hosts require an address
-          during boot. Address and possibly other configuration
-          parameters are used during the boot process and are discarded
-          thereafter. Any lack of available DHCPv6 service at this
-          time may render the devices unbootable.</t>
+          confidence that those addresses will be served.  A notable
+          example is PXE: Pre eXecution Environment <xref
+          target="RFC5970"/>.  This is a mechanism for obtaining
+          configuration early in the process of bootstrapping over the
+          network.</t>
+
+          <t>The PXE BIOS acquires an address in order to load the
+          operating system image and continue booting.  Address and
+          possibly other configuration parameters are used during the
+          boot process and are discarded thereafter.  Any lack of
+          available DHCPv6 service at this time will prevent such
+          devices from booting.</t>
+
           <t>Instead of deploying failover, it is better to use the
           much simpler preference mechanism, defined in <xref
           target="RFC3315"/>. For example, consider two or more
@@ -265,7 +268,7 @@
           occurs.  Each server is operating, but has lost connection
           to its partner.  Two clients request an address, one from
           each server. Each server consults its database and discovers
-          that the sole address is available, so it is assigned to the
+          that only one address is available, so it is assigned to the
           client. Unfortunately, each server assigned the same address
           to a different client. Making the scenario more realistic
           (millions of addresses rather than one) just decreased
