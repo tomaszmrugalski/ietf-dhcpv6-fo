@@ -135,9 +135,8 @@
         been returned to a client through a policy - for example, the
         information returned to all clients on the same link - does
         not require a binding.</t>
-        <t>DDNS - an abbreviation for "Dynamic DNS", which refers to
-        the capability to update a DNS server's name database using the
-        on-the-wire protocol defined in <xref
+        <t>DNS Update - the capability to update a DNS server's name database 
+        using the on-the-wire protocol defined in <xref
         target="RFC2136"/>. Clients and servers can negotiate the scope of
         such updates as defined in <xref target="RFC4704"/>.</t>
         <t>Failover - an ability of one partner to continue offering
@@ -414,7 +413,9 @@
       assumes a pair of cooperating servers was chosen.</t>
 
       <section anchor="failures" title="Failure modes">
-        <t>This section documents failure modes.</t>
+        <t>This section documents failure modes. This requirements document
+        does not make any claims whether those two failures are distinguishable
+        by a server.</t>
         <section anchor="partner-down" title="Server Failure">
           <t>Servers may become unresponsive due to a software crash,
           hardware failure, power outage or any number of other
@@ -717,8 +718,9 @@
       reviews and substantial contributions.  Authors would also like
       to thank Qin Wu, Jean-Francois Tremblay, Frank Sweetser, Jiang
       Sheng, Yu Fu, Greg Rabil, Vithalprasad Gaitonde, Krzysztof
-      Nowicki, Steinar Haug, Elwyn Davies, Ted Lemon, Benoit Claise and
-      Stephen Farrell for their comments and feedback.</t>
+      Nowicki, Steinar Haug, Elwyn Davies, Ted Lemon, Benoit Claise,
+      Stephen Farrell, Michal Hoeft, and Krzysztof Gierlowski for
+      their comments and feedback.</t>
 
       <t>This work has been partially supported by Department of
       Computer Communications (a division of Gdansk University of
