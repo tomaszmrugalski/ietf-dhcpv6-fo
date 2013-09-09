@@ -320,9 +320,10 @@
     In case of a disagreement between the simplified and complete description,
     please follow <xref target="states"/>.</t>
 
-    <t>Each server MUST be in one of the well defines states. In each
-    state a server may be either responsive (responds to clients'
-    queries) or unresponsive (clients' queries are ignored).</t>
+    <t>Each server MUST be in one of the well defines states.
+    Depending on its current state a server may be either responsive
+    (responds to clients' queries) or unresponsive (clients' queries
+    are ignored).</t>
 
     <t>A server starts its operation in the short-lived STARTUP state. A
     server determines its partner reachability and state and sets its
@@ -615,9 +616,10 @@
     is limited, as may be the case with prefix delegation. See <xref
     target="alloc-classic"/> for details.</t>
 
-    <t>Independent Allocation - This allocation algorithm assumes
-    that available resources are split between primary and secondary
-    servers as well.  In this case, however, resources are assigned
+    <t>Independent Allocation - 
+    This allocation algorithm also assumes that available resources 
+    are split between primary and secondary servers.
+    In this case, however, resources are assigned
     to a specific server for all time, regardless if they are
     available or currently used. This algorithm is much simpler
     than proportional allocation, because resource imbalance doesn't

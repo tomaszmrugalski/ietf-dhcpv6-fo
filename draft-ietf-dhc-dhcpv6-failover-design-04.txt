@@ -431,9 +431,9 @@ Internet-Draft           DHCPv6 Failover Design           September 2013
    disagreement between the simplified and complete description, please
    follow Section 9.
 
-   Each server MUST be in one of the well defines states.  In each state
-   a server may be either responsive (responds to clients' queries) or
-   unresponsive (clients' queries are ignored).
+   Each server MUST be in one of the well defines states.  Depending on
+   its current state a server may be either responsive (responds to
+   clients' queries) or unresponsive (clients' queries are ignored).
 
    A server starts its operation in the short-lived STARTUP state.  A
    server determines its partner reachability and state and sets its own
@@ -754,17 +754,17 @@ Internet-Draft           DHCPv6 Failover Design           September 2013
        amount of available resources is limited, as may be the case with
        prefix delegation.  See Section 6.1 for details.
 
-   2.  Independent Allocation - This allocation algorithm assumes that
-       available resources are split between primary and secondary
-       servers as well.  In this case, however, resources are assigned
-       to a specific server for all time, regardless if they are
-       available or currently used.  This algorithm is much simpler than
-       proportional allocation, because resource imbalance doesn't have
-       to be checked and there is no rebalancing for independent
-       allocation.  This algorithm is particularly well suited for
-       scenarios where the there is an abundance of available resources
-       which is typically the case for DHCPv6 address allocation.  See
-       Section 6.2 for details.
+   2.  Independent Allocation - This allocation algorithm also assumes
+       that available resources are split between primary and secondary
+       servers.  In this case, however, resources are assigned to a
+       specific server for all time, regardless if they are available or
+       currently used.  This algorithm is much simpler than proportional
+       allocation, because resource imbalance doesn't have to be checked
+       and there is no rebalancing for independent allocation.  This
+       algorithm is particularly well suited for scenarios where the
+       there is an abundance of available resources which is typically
+       the case for DHCPv6 address allocation.  See Section 6.2 for
+       details.
 
 6.1.  Proportional Allocation
 
