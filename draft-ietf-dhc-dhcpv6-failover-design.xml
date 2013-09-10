@@ -3109,10 +3109,10 @@ CONFLICT-DONE                                  |
   <section title="Acknowledgements">
     <t>This document extensively uses concepts, definitions and other
     parts of <xref target="dhcpv4-failover"/> document.  Authors would
-    like to thank Shawn Routher, Greg Rabil, and Bernie Volz for their
-    significant involvement and contributions. Authors would like to
-    thank Marcin Siodelski for his thorough review and VithalPrasad
-    Gaitonde for his insightful comments.</t>
+    like to thank Shawn Routher, Greg Rabil, Bernie Volz and Marcin Siodelski
+    for their significant involvement and contributions. Authors would like to
+    thank VithalPrasad Gaitonde, Krzysztof Gierlowski, Krzysztof Nowicki and
+    Michal Hoeft for their insightful comments.</t>
 
     <t>This work has been partially supported by Department of
     Computer Communications (a division of Gdansk University of
@@ -3132,10 +3132,8 @@ CONFLICT-DONE                                  |
       <?rfc include='reference.RFC.4703'?>
       <?rfc include='reference.RFC.4704'?>
       <?rfc include='reference.RFC.5007'?>
-      <?rfc include='reference.RFC.6939'?>
     </references>
     <references title="Informative References">
-      <?rfc include='reference.RFC.4649'?>
       <?rfc include='reference.RFC.5460'?>
       <?rfc include='reference.I-D.ietf-dhc-dhcpv6-failover-requirements'?>
       <?rfc include='reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
