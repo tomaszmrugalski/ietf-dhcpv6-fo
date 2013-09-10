@@ -95,7 +95,7 @@ Table of Contents
      8.9.  Acknowledging Reception . . . . . . . . . . . . . . . . .  32
    9.  Endpoint States . . . . . . . . . . . . . . . . . . . . . . .  32
      9.1.  State Machine Operation . . . . . . . . . . . . . . . . .  32
-     9.2.  State Machine Initialization  . . . . . . . . . . . . . .  34
+     9.2.  State Machine Initialization  . . . . . . . . . . . . . .  35
      9.3.  STARTUP State . . . . . . . . . . . . . . . . . . . . . .  35
        9.3.1.  Operation in STARTUP State  . . . . . . . . . . . . .  36
        9.3.2.  Transition Out of STARTUP State . . . . . . . . . . .  36
@@ -1836,12 +1836,12 @@ Internet-Draft           DHCPv6 Failover Design           September 2013
    is ongoing with the other server.
 
 
-       +---------------+  V  +--------------+
-       |    RECOVER -|+|  |  |   STARTUP  - |
-       |(unresponsive) |  +->+(unresponsive)|
-       +------+--------+     +--------------+
-       +-Comm. OK             +-----------------+
-       |     Other State:     |  PARTNER DOWN - +<---------------------+
+
+
+
+
+
+
 
 
 
@@ -1850,6 +1850,12 @@ Mrugalski & Kinnear      Expires March 14, 2014                [Page 33]
 Internet-Draft           DHCPv6 Failover Design           September 2013
 
 
+       +---------------+  V  +--------------+
+       |    RECOVER -|+|  |  |   STARTUP  - |
+       |(unresponsive) |  +->+(unresponsive)|
+       +------+--------+     +--------------+
+       +-Comm. OK             +-----------------+
+       |     Other State:     |  PARTNER DOWN - +<---------------------+
        |    RESOLUTION-INTER. | (responsive)    |                      ^
       All     POTENTIAL-      +----+------------+                      |
      Others   CONFLICT------------ | --------+                         |
@@ -1892,12 +1898,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2013
 
                  Figure 4: Failover Endpoint State Machine
 
-9.2.  State Machine Initialization
-
-   The state machine is characterized by storage (in stable storage) of
-   at least the following information:
-
-   o  Current failover state.
 
 
 
@@ -1905,6 +1905,13 @@ Mrugalski & Kinnear      Expires March 14, 2014                [Page 34]
 
 Internet-Draft           DHCPv6 Failover Design           September 2013
 
+
+9.2.  State Machine Initialization
+
+   The state machine is characterized by storage (in stable storage) of
+   at least the following information:
+
+   o  Current failover state.
 
    o  Previous failover state.
 
@@ -1943,13 +1950,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2013
    determine (using that information if it is available) what state it
    should enter.
 
-   The STARTUP state is not shown with any specific state transitions in
-   the state machine diagram (Figure 4) because the processing during
-   the STARTUP state can cause the server to transition to any of the
-   other states, so that specific state transition arcs would only
-   obscure other information.
-
-
 
 
 
@@ -1961,6 +1961,12 @@ Mrugalski & Kinnear      Expires March 14, 2014                [Page 35]
 
 Internet-Draft           DHCPv6 Failover Design           September 2013
 
+
+   The STARTUP state is not shown with any specific state transitions in
+   the state machine diagram (Figure 4) because the processing during
+   the STARTUP state can cause the server to transition to any of the
+   other states, so that specific state transition arcs would only
+   obscure other information.
 
 9.3.1.  Operation in STARTUP State
 
@@ -2004,12 +2010,6 @@ Internet-Draft           DHCPv6 Failover Design           September 2013
    transitions will occur when communications goes from "OK" to failed,
    or from failed to "OK", and some implementations will implement a
    portion of their state machine processing based on these changes.
-
-
-
-
-
-
 
 
 

@@ -1704,6 +1704,10 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
       <t>In the state transition diagram below, the "+" or "-" in the upper
       right corner of each state is a notation about whether communication is
       ongoing with the other server.
+
+      <!-- that's an ugly hack: add couple extra lines here, so the diagram
+      ends on a new page -->
+      <vspace blankLines="8"/>
       </t>
 
     <figure anchor="endpoint-state-machine" title="Failover Endpoint State Machine">
