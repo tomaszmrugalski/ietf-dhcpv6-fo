@@ -184,8 +184,8 @@
       incoming queries in case of primary server
       failure). Active-active mode (i.e. both servers actively
       handling clients' requests) is currently not supported for the
-      sake of simplicity. Such a mode is likely to be defined as an exension at a
-      later time and will probably be based on <xref
+      sake of simplicity. Such a mode is likely to be defined as an
+      extension at a later time and will probably be based on <xref
       target="I-D.ietf-dhc-dhcpv6-load-balancing" />.</t>
 
       <t>The failover protocol is designed to provide lease stability
@@ -301,7 +301,7 @@
   for DHCPv4 failover) is used.  The MCLT is the maximum amount of
   time that one server can extend a lease for a client's binding
   beyond the time known by its failover partner. See <xref
-  target="mclt"/> for a detailed desciption how the MCLT affects assigned
+  target="mclt"/> for a detailed description how the MCLT affects assigned
   lifetimes.</t>
 
   <t>Servers verify each others availability by periodically
@@ -338,10 +338,10 @@
 
     <t>If a server discovers that its partner is no longer reachable,
     it goes to COMMUNICATIONS-INTERRUPTED state. A server must be
-    extra cautious as it can't distingush if its partner is down
+    extra cautious as it can't distinguish if its partner is down
     or just communication between servers is interrupted. Since
     communication between partners is not possible, a server must
-    act on the assumtion that its partner is up.  A failover server
+    act on the assumption that its partner is up.  A failover server
     must follow a defined procedure, in particular, it MUST NOT
     extend any lease more than the MCLT beyond its partner's knowledge
     of the lease expiration time.  This imposes an additional burden
@@ -426,7 +426,7 @@
       its partner. The partner responds with POOLRESP.</t>
 
       <t>POOLRESP - The Pool Response message is used by one server
-      (typically primary) to indicate that it has reponded to its
+      (typically primary) to indicate that it has responded to its
       partner's request for resources allocation.  </t>
 
       <t>UPDREQ - The update request message is used by one server to request
@@ -476,8 +476,8 @@
       <!-- tomek: again, why is there no STATEACK message? -->
 
       <t>CONTACT - The contact message is used by either server to ensure that
-      the other server continues to see the connection as opera- tional.  It
-      MUST be transmitted periodically over every esta- blished connection if
+      the other server continues to see the connection as operational.  It
+      MUST be transmitted periodically over every established connection if
       other message traffic is not flowing, and it MAY be sent at any time.</t>
       <!-- tomek: what about link failing in only one direction, e.g. uplink
       broken? Perhaps there should be some way to acknowledge CONTACT? -->
@@ -706,7 +706,7 @@
     POOLREQ/POOLRESP message exchange allows the secondary server
     to explicitly request that the primary server examine the
     entirety of its database to ensure that the secondary has the
-    approprite resources available.</t>
+    appropriate resources available.</t>
 
     <t>Servers frequently have several kinds of resources available
     on a particular network segment.  The failover protocol assumes
@@ -796,7 +796,7 @@
     to its downed partner and later released by a client unless it
     is in PARTNER-DOWN state.  When it is in PARTNER-DOWN state, a
     server SHOULD use its own pool first and then it MAY start
-    making new assignements from its downed partner's pool. As the
+    making new assignments from its downed partner's pool. As the
     assumption is that independent allocation should be used only
     when available resources are vast and not expected to be fully
     used at any given time, it is very unlikely that the server
@@ -834,7 +834,7 @@
     prefixes. Therefore typically proportional allocation will be used for
     prefix delegations. Independent allocation still may be used, but the
     implication must be well understood. For example in a network that delegates
-    /64 prefixes out out /48 prefix (so there can be up to 65536 prefixes
+    /64 prefixes out of a /48 prefix (so there can be up to 65536 prefixes
     delegated) and a 1000 requesting routers, it is safe to use independent
     allocation.</t>
 
@@ -939,8 +939,8 @@
 
   <t>The lease state machine has been presented in <xref
   target="lease-state-machine"/>. Most states are stationary, i.e. the lease
-  stays in a given state until exernal event triggers transition to another
-  state. The only transitive state is FREE*. Once it is reached, the the state
+  stays in a given state until external event triggers transition to another
+  state. The only transitive state is FREE*. Once it is reached, the state
   machine immediately transitions to either FREE or FREE_BACKUP state.</t>
 
   <figure anchor="lease-state-machine" title="Lease State Machine" align="center">
@@ -1052,7 +1052,7 @@
     state and also in PARTNER-DOWN state before it can take over
     the entire address pool (after the expiry of MCLT).</t>
     
-    <t>The secondary server connot simply take over the entire
+    <t>The secondary server cannot simply take over the entire
     resource pool immediately, since it could also be that
     both servers are able to communicate with DHCP clients,
     but unable to communicate with each other.</t>
@@ -1095,7 +1095,7 @@
       each message MUST contain information about the time 
       of the transmission in the time context of the transmitter.
       The transmitting server MUST set this as close to the
-      actual transmission as possible.  Transmision here is when
+      actual transmission as possible.  Transmission here is when
       data is added to the send queue of the socket (or the equivalent),
       as the application may not know about the time of the actual
       transmission of the "wire".   The receiving partner MUST store its
@@ -1277,7 +1277,7 @@
    transmitted at any time. An implementation MAY use additional mechanisms
    to detect partner unreachability.</t>
 
-   <t>Implementors are advised to keep in mind that the timer based
+   <t>Implementers are advised to keep in mind that the timer based
    CONTACT message mechanism is not perfect and may not detect some
    failures. In particular, if the partner is using one interface to
    reach clients ("downlink") and another to reach its partner ("uplink"),
@@ -1332,13 +1332,13 @@
 
     <t>In any other state, a server cannot reallocate a resource from one
     client to another without first notifying its partner (through a
-    BNDUPD message) and receiving acknowledgement (through a BNDACK mes-
-    sage) that its partner is aware that that first client is not using
+    BNDUPD message) and receiving acknowledgement (through a BNDACK message) 
+    that its partner is aware that that first client is not using
     the resource.</t>
 
     <t>This could be modeled in the following way.  Though this specific
-    implementation is in no way required, it may serve to better illus-
-    trate the concept.</t>
+    implementation is in no way required, it may serve to better illustrate 
+    the concept.</t>
 
     <t>An "available" resource on a server may be allocated to any client.
     A resource which was leased to a client and which expired or was
@@ -1409,7 +1409,7 @@
       <t>valid life time sent to client*;</t>
       <t>IAID - Identity Association used by the client, while obtaining
       a given lease. (Note1: one client may use many IAIDs
-      simulatenously. Note2: IAID for IA, TA and PD are orthogonal
+      simultaneously. Note2: IAID for IA, TA and PD are orthogonal
       number spaces.)*;</t>
       <t>Next Expected Client Transmission (renewal time) - time interval since Client Last
       Transmission Time, when a response from a client is expected*; <!--
@@ -1462,7 +1462,7 @@
     choose to ignore it as well. Some information may be useful, so it is a
     good idea to keep or update it. One reason is FQDN information. A server
     SHOULD be prepared to clean up DNS information once the lease expires or is
-    released. See Section <xref target="DDNS"/> for detailed discussion about
+    released. See <xref target="DDNS"/> for a detailed discussion about
     Dynamic DNS. Another reason the partner may be interested in keeping additional
     data is a better support for leasequery <xref target="RFC5007"/> or bulk
     leasequery <xref target="RFC5460"/>, which features queries based on
@@ -1523,7 +1523,7 @@
       from a differing configuration on one server than on the other
       server.  It may be transient (last until both servers can
       process a new configuration) or it may be chronic.  It cannot
-      be resolved by commuincations over the failover connection,
+      be resolved by communications over the failover connection,
       but must be resolved (if it is not transient) by administrator
       action to resolve the conflicts.</t>
 
@@ -1560,12 +1560,12 @@
       no client-last-transaction-time option in the BNDUPD message.</t>
 
       <t>The list in <xref target="tbl-conflict-resolution"/> presents the conflict
-      resolution outcome. To "accept" BNDUPD means to update the server's
+      resolution outcome. To "accept" a BNDUPD means to update the server's
       bindings database with the information contained in the BNDUDP and once
       the update is complete, send a BNDACK message corresponding to the BNDUPD
-      message. To "reject" a BNDUPD means to lease the server's binding database
-      unchangeg and to respond to the BNDUPD with BNDACK
-      with a rejest-reason option included.</t>
+      message. To "reject" a BNDUPD means to leave the server's binding database
+      unchanged and to respond to the BNDUPD with BNDACK with a reject-reason 
+      option included.</t>
 
       <t>When interpreting the information in the following table (<xref
       target="tbl-conflict-resolution"/>), for those rules that are listed with
@@ -1638,7 +1638,7 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
       <t>Upon acceptance of a binding lease, the server MUST notify its partner
       that it updated its database. A server MUST NOT send the BNDACK before its
       database is updated. A BNDACK MUST contain at lease the minimum set of information
-      required to unabiguously identify the BNDUPD that triggered the BNDACK.</t>
+      required to unambiguously identify the BNDUPD that triggered the BNDACK.</t>
 
     </section>
 
@@ -1685,7 +1685,7 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
 
       <t>Whenever any of the above state variables
       changes state, the state machine is invoked, which may then trigger a
-      change in the current failove state.  Thus, whenever the communications
+      change in the current failover state.  Thus, whenever the communications
       status changes, the state machine processing is invoked.  This may or
       may not result in a change in the current failover state.</t>
 
@@ -1935,7 +1935,7 @@ RECOVER-WAIT--------->+------------------+
 
       <section anchor="operation-in-partner-down-state" title="Operation in PARTNER-DOWN State">
 
-        <t>The server MUST be responsive in PARTNER-DOWN state, regardess
+        <t>The server MUST be responsive in PARTNER-DOWN state, regardless
 	if it is primary or secondary.</t>
 
         <t>It will allow renewal of all outstanding leases on resources.
@@ -1984,7 +1984,7 @@ RECOVER-WAIT--------->+------------------+
       <section anchor="transition-out-of-partner-down-state" title="Transition Out of PARTNER-DOWN State">
 
         <t>When a server in PARTNER-DOWN state succeeds in establishing
-        a con- nection to its partner, its actions are conditional
+        a connection to its partner, its actions are conditional
         on the state and flags received in the STATE message from
         the other server as part of the process of establishing the
         connection.</t>
@@ -2275,10 +2275,10 @@ RECOVER-WAIT--------->+------------------+
         <t>If a server in NORMAL state fails to receive acks to messages sent to
         its partner for an implementation dependent period of time, it MAY
         move into COMMUNICATIONS-INTERRUPTED state.  This situation might
-        occur if the partner server was capable of maintaining the TCP con-
-        nection between the server and also capable of sending a CONTACT mes-
-        sage periodically, but was (for some reason) incapable of pro-
-        cessing BNDUPD messages.</t>
+        occur if the partner server was capable of maintaining the TCP connection 
+	between the server and also capable of sending a CONTACT message 
+	periodically, but was (for some reason) incapable of processing 
+	BNDUPD messages.</t>
 
         <t>If the communications is determined to not be "ok" (as
         defined in <xref target="reachability"/>), then transition
@@ -2287,8 +2287,8 @@ RECOVER-WAIT--------->+------------------+
         <t>If a server in NORMAL state receives any messages from its partner
         where the partner has changed state from that expected by the server
         in NORMAL state, then the server should transition into
-        COMMUNICATIONS-INTERRUPTED state and take the appropriate state tran-
-        sition from there.  For example, it would be expected for the partner
+        COMMUNICATIONS-INTERRUPTED state and take the appropriate state transition 
+	from there.  For example, it would be expected for the partner
         to transition from POTENTIAL-CONFLICT into NORMAL state, but not for
         the partner to transition from NORMAL into POTENTIAL-CONFLICT state.</t>
 
@@ -2535,7 +2535,7 @@ CONFLICT-DONE                                  |
       are in POTENTIAL-CONFLICT state, the server that remains
       in service will not be able to process DHCP client requests and
       there will be no DHCP service available.  The RESOLUTION-INTERRUPTED
-      state is the state that a server moves to if its parter
+      state is the state that a server moves to if its partner
       disappears while it is in POTENTIAL-CONFLICT state.</t>
 
       <t>When a server enters RESOLUTION-INTERRUPTED state it SHOULD raise an
@@ -2651,7 +2651,7 @@ CONFLICT-DONE                                  |
 
     <section title="Active-active mode">
       <t>A very simple way to achieve active-active mode is to remove
-      the restriction that seconary server MUST NOT respond to SOLICIT
+      the restriction that secondary server MUST NOT respond to SOLICIT
       and REQUEST messages. Instead it could respond, but MUST have
       lower preference than primary server. Clients discovering
       available servers will receive ADVERTISE messages from both
@@ -2819,7 +2819,7 @@ CONFLICT-DONE                                  |
 	of any DDNS update related to the lease.</t>
 
 	<t>The partner server receiving BNDUPD messages containing
-	the DDNS information SHOULD compare the status informatin
+	the DDNS information SHOULD compare the status information
 	and the FQDN with the current DDNS information it has
 	associated with the lease binding, and update its notion
 	of the DDNS status accordingly.</t>
@@ -3014,11 +3014,11 @@ CONFLICT-DONE                                  |
     state changes of any resource, but it can only be offered to
     the client for which it is reserved.</t>
 
-    <t>From the above, it follows that a reservation soley on the
+    <t>From the above, it follows that a reservation solely on the
     secondary will not necessarily allow the secondary to offer
     that address to client to whom it is reserved.  The reservation
     must also appear on the primary as well for the secondary to
-    be able to offer the resource to the client to which is is
+    be able to offer the resource to the client to which it is
     reserved.</t>
 
     <t>When the reservation on a resource is cancelled, if the resource 
@@ -3091,7 +3091,7 @@ CONFLICT-DONE                                  |
     Network administrators are expected to switch the remaining active server
     to PARTNER-DOWN state only if they is sure that its partner server
     is indeed down. Failing to obey this requirement will result in both
-    servers likely assigning duplicate leases to different clients. Implementors
+    servers likely assigning duplicate leases to different clients. Implementers
     should take that into consideration if they decide to implement
     the auto-partner-down timer-based transition to PARTNER-DOWN state.</t>
 
@@ -3100,7 +3100,7 @@ CONFLICT-DONE                                  |
     allocated to the secondary server and they are not usable in a normal
     (i.e. non failures) operation immediately, though over time they will
     be rebalanced and end up on the server that needs them. While limiting 
-    this pool may be preferable from resource utilisation perspective, 
+    this pool may be preferable from resource utilization perspective, 
     it must be a reasonably large pool, so the secondary may take over once 
     the primary becomes unavailable.</t>
 
