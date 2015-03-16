@@ -63,12 +63,13 @@
       specified in <xref target="RFC7031"/>.  
       Design considerations are documented in 
       <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
-      In theory one could implement the DHCPv6 Failover protocol by
+      One could implement the DHCPv6 Failover protocol by
       referring only to the current document and not the design document,
-      as the current document explains the "how" of the protocol.  However, the
+      as the current document explains the details of the protocol.  
+      However, the
       design document explains "why" the protocol operates as
       it does, making it required reading for someone implementing the
-      failover protocol.
+      failover protocol described in this document.
       </t>
     </abstract>
   </front>
@@ -84,7 +85,7 @@
     <section title="Glossary">
       <t>This is a supplemental glossary that should be combined with
       definitions in Section 3 of
-      <xref target="I-D.ietf-dhc-dhcpv6-failover-requirements"/>.
+      <xref target="RFC7031">RFC 7031</xref>.
 
       <list style="symbols">
 
@@ -172,7 +173,7 @@
     </section>
 
     <section title="Introduction">
-      <t>The failover protocol design provides a means for cooperating
+      <t>The failover protocol provides a means for cooperating
       DHCPv6 servers to work together to provide a DHCPv6 service
       with availability that is increased beyond that which could
       be provided by a single DHCPv6 server operating alone.  It
@@ -188,9 +189,9 @@
       <t>This protocol defines active-passive mode, sometimes also
       called a hot standby model. This means that during normal
       operation one server is active (i.e. actively responds to
-      clients' requests) while the second is passive (i.e. it does
-      receive clients' requests, but does not respond to them and only
-      maintains a copy of lease database and is ready to take over
+      clients' requests) while the second is passive (i.e. it 
+      receives clients' requests, but does not respond to them and only
+      maintains a copy on the binding database and is ready to take over
       incoming queries in case of primary server
       failure). Active-active mode (i.e. both servers actively
       handling clients' requests) is currently not supported for the
@@ -201,17 +202,38 @@
       <t>The failover protocol is designed to provide lease stability
       for leases with lease times beyond a short period.  Due in part to the
       additional overhead required as well as requirements to handle
-      time skew between failover partners (See <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>)
+      time skew between failover partners 
+      (See <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>)
       failover is not suitable for leases shorter than 30 seconds. 
       The DHCPv6 Failover protocol MUST NOT be used for leases shorter 
       than 30 seconds.</t>
 
       <t>This protocol attempts to fulfill all DHCPv6 failover requirements
       defined in <xref target="RFC7031"/> as well as following the design
-      approach documented in <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
+      approach documented in 
+      <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
       </t>
 
     </section> 
+
+<section title="Design Decisions">
+
+   <t>The DHCPv6 failover design <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
+   offered several approaches to be used to deal with some issues, and discusses the
+   pros and cons of each.  This document needs to be specific with respect to some of
+   these approaches. The following design decisions have therefore been taken as part
+   of the process of producing this document:
+   <list style="hanging">
+        <t hangText="Resource Allocation"> <vspace/>
+	   Section 6 of <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
+	   discusses two alloction algorithms: proportional and independent.
+	   Proportional allocation is used for delegated prefixes, and 
+	   independent allocation is used for IP address allocation.</t>
+   </list>
+   </t>
+
+
+</section>
 
 
 <section title="Message and Option Definitions">
@@ -223,10 +245,61 @@
     communication is conducted over a TCP connection established between the
     partners. The protocol reuses the framing format specified in Section 5.1 of
     <xref target="RFC5460">DHCPv6 Bulk Leasequery</xref>, but uses different
-    message types. All information is sent over the connection as typical
+    message types with a different message format, described in 
+    <xref target="msg-format"/>.  
+    All information is sent over the connection as typical
     DHCPv6 messages that convey DHCPv6 options, following the format defined in
     Section 22.1 of <xref target="RFC3315"/>.
     </t>
+
+  </section>
+
+  <section anchor="msg-format" title="Failover Message Format">
+
+   <t>
+   All Failover messages defined below share a common format with a
+   fixed size header and a variable format area for options.  All
+   values in the message header and in any included options are in 
+   network byte order.
+   </t>
+
+   <t>
+   The following diagram illustrates the format of DHCP messages exchanged
+   between failover partners:
+   </t>
+
+   <figure>
+   <artwork>
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    msg-type   |               transaction-id                  |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           sent-time                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+   |                                                               . 
+   .                            options                            .
+   .                           (variable)                          .
+   .                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   msg-type             Identifies the DHCP message type; the
+                        available message types are listed in
+			below.
+
+   transaction-id       The transaction ID for this message exchange.
+
+   sent-time		The time the message was transmitted (set
+                        as close to transmission as practical), 
+			in seconds since midnight (UTC), 
+			January 1, 2000, modulo 2^32.  Used to 
+			determine the time skew of the failover
+			partners.
+
+   options              Options carried in this message.
+   </artwork>
+   </figure>
+
 
   </section>
 
@@ -244,9 +317,9 @@
     </section>
 
     <section anchor="msg-bndack" title="BNDACK">
-      <t> The binding acknowledgement message BNDACK (TBD2) is used for confirmation of the
-      received BNDUPD message. It may contain a positive or negative response
-      (e.g. due to detected lease conflict).  </t>
+      <t> The binding acknowledgement message BNDACK (TBD2) is used for confirmation
+      of the received BNDUPD message. It may contain a positive or negative
+      response (e.g. due to detected lease conflict).  </t>
     </section>
       
     <section anchor="msg-poolreq" title="POOLREQ">
@@ -285,10 +358,11 @@
     </section>
 
     <section anchor="msg-connect" title="CONNECT">
-      <t>The connect message CONNECT (TBD8) is used by the primary server to
-      establish a high level connection with the other server, and to transmit
-      several important configuration data items between the servers. The
-      partner is expected to confirm by responding with CONNECTACK message.</t>
+      <t>The connect message CONNECT (TBD8) is used by the primary
+      server to establish a high level connection with the secondary
+      server, and to transmit several important configuration data
+      items between the servers. The partner is expected to confirm
+      by responding with CONNECTACK message.</t>
     </section>
 
     <section anchor="msg-connectack" title="CONNECTACK">
@@ -306,15 +380,19 @@
     <section anchor="msg-state" title="STATE">
       <t>The state message STATE (TBD11) is used by either server to inform its
       partner about a change of failover state. In some cases it may be used
-      to also inform the partner about current state, e.g. after connection
+      to also inform the partner about the current state, e.g. after connection
       is established in COMMUNICATIONS-INTERRUPTED or PARTNER-DOWN states.</t>
     </section>
 
     <section anchor="msg-contact" title="CONTACT">
-      <t>The contact message CONTACT (TBD12) is used by either server to ensure that
-      the other server continues to see the connection as operational.  It
-      MUST be transmitted periodically over every established connection if
-      other message traffic is not flowing, and it MAY be sent at any time.</t>
+      <t>
+      The contact message CONTACT (TBD12) is used by either server
+      to ensure that the other server continues to see the connection
+      as operational.  It MUST be transmitted periodically over
+      every established connection if other message traffic is not
+      flowing, and it MAY be sent at any time.
+      </t>
+
     </section>
 
   </section>
@@ -326,41 +404,858 @@
     The following new options are defined.
     </t>
 
-
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_SERVER_STATE">
-
-    <t>
-    The OPTION_F_SERVER_STATE option specifies the endpoint state of
-    the server sending the option.
-    </t>
-
-    <t>
-    This is an unsigned byte.
-    </t>
-
-    <t>
-    The code for this option is TBD.
-    </t>
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_binding_status"
+             title="OPTION_F_BINDING_STATUS">
+  
+    <t>The binding-status represents an implementation independent representation
+       of the status (or the state) of a resource (IP address or prefix).
+   </t>
+  
+   <t>
+   This is an unsigned byte.
+   </t>
+  
+   <t>
+   The code for this option is TBD14.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    OPTION_F_BINDING_STATUS    |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | binding-status|
+   +-+-+-+-+-+-+-+-+
+  
+   option-code       OPTION_F_BINDING_STATUS (TBD14).
+   option-len        1.
+   binding-status    The binding status.  See below.
+   </artwork>
+   </figure>
 
     <figure>
     <artwork>
-
-    0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |     OPTION_F_SERVER_STATE     |                1              |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | server-state  |                                                
-   +-+-+-+-+-+-+-+-+
-
-     option-code       OPTION_F_SERVER_STATE (TBD).
-     option-len        1.
-     state             Failover endpoint state.
-
+   Value   binding-status
+   -----   --------------
+   0       reserved
+   1       ACTIVE 
+   2       EXPIRED 
+   3       RELEASED
+   4       FREE*
+   5       FREE
+   6       FREE_BACKUP
+   7       ABANDONED
+   8       RESET
     </artwork>
     </figure>
+
+   <t>The resource binding-status values  are as follows:</t>
+
+  <t>
+  <list style="hanging">
+    <t hangText="ACTIVE"> -- The resource is assigned to a client. Client
+    identification data MUST appear.</t>
+    <t hangText="EXPIRED"> -- indicates that a client's binding on a
+    given resource has expired. When the partner acks the BNDUPD of an
+    expired resource, the server sets its internal state to FREE*. Client
+    identification SHOULD appear.</t>
+    <t hangText="RELEASED"> -- indicates that a client sent in RELEASE
+    message. When the partner acks the BNDUPD of a released resource,
+    the server sets its internal state to FREE*. Client identification
+    SHOULD appear.</t>
+
+    <t hangText="FREE*"> -- Once a resource is expired or released, its
+    state becomes FREE*. Depending on which algorithm and which pool
+    was used to allocate a given resource, FREE* may either mean FREE or
+    FREE_BACKUP. Implementations do not have to implement this FREE*
+    state, but may choose to switch to the destination state directly.
+    For a clarity of representation, this transitional FREE* state is
+    treated as a separate state. </t>
+
+    <t hangText="FREE"> -- Is used when a DHCP server needs to
+    communicate that a resource is unused by any client, but it
+    was not just released, expired or reset by a network administrator.
+    When the partner acks the BNDUPD of a FREE resource, the server
+    marks the resource as available for assignment by the primary server.
+    Note that on a secondary server running in PARTNER-DOWN state, after
+    waiting the MCLT, the resource MAY be allocated to a client by the
+    secondary server. Client identification MAY appear and indicates
+    the last client to have used this resource as a hint.</t>
+
+    <!-- tomek: this was called BACKUP in v4, but it was confusing for
+	 users. FREE_BACKUP is  -->
+    <t hangText="FREE_BACKUP"> -- indicates that this resource can
+    be allocated by the secondary server to a client at any time.
+    It is only meaningful for delegated prefixes, using proportional
+    allocation. Note that on the primary server running in PARTNER-DOWN
+    state, after waiting the MCLT, the prefix MAY be allocated to
+    a client by the primary server. Client identification MAY appear
+    and indicates the last client to have used this resource as a
+    hint.</t>
+
+    <t hangText="ABANDONED"> -- indicates that a resource is considered
+    unusable by the DHCP system. The primary reason for entering
+    such state is reception of DECLINE message for said resource. Client 
+    identification MAY appear.</t>
+
+    <t hangText="RESET"> -- indicates that this resource was made
+    available by operator command. This is a distinct state so that
+    the reason that the resource became FREE can be determined.
+    Client identification MAY appear.</t>
+
+  </list>
+  </t>
+
+
+  
+   </section>
+
+
+
+
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_dns_removal_info"
+             title="OPTION_F_DNS_REMOVAL_INFO">
+  
+   <t>This option contains the information necessary to remove a DNS
+   name that was entered by the failover partner.
+   </t>
+  
+   <t>
+   The code for this option is TBD21.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   OPTION_F_DNS_REMOVAL_INFO   |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          sub-options                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_DNS_REMOVAL_INFO (TBD21).
+   option-len        4.
+   sub-options       Three possible sub-options:
+                     OPTION_F_DNS_HOST_NAME
+                     OPTION_F_DNS_ZONE_NAME
+                     OPTION_F_DNS_FLAGS
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_dns_host_name"
+             title="OPTION_F_DNS_HOST_NAME">
+  
+   <t>
+   Contains the host name that was entered into DNS by the failover partner.
+   </t>
+  
+   <t>
+      This is a DNS name encoded in RFC 1035 format
+      <xref target="RFC1035">RFC 1035</xref>, 
+      as specified in Section 8 of
+      <xref target="RFC3315">RFC 3315</xref>. 
+   </t>
+  
+   <t>
+   This is a suboption of OPTION_F_DNS_REMOVAL_INFO.
+   The code for this option is 1.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     OPTION_F_DNS_HOST_NAME    |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               .
+   .                                                               .
+   .                           host-name                           .
+   .                           (variable)                          .
+   .                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_DNS_HOST_NAME (1).
+   option-len        0 + length of host-name.
+   host-name         RFC 1035 encoded host-name.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_dns_zone_name"
+             title="OPTION_F_DNS_ZONE_NAME">
+  
+   <t>
+   Contains the zone name that was entered into DNS by the failover partner.
+   </t>
+  
+   <t>
+      This is a DNS name encoded in RFC 1035 format
+      <xref target="RFC1035">RFC 1035</xref>, 
+      as specified in Section 8 of
+      <xref target="RFC3315">RFC 3315</xref>. 
+   </t>
+  
+   <t>
+   This is a suboption of OPTION_F_DNS_REMOVAL_INFO.
+   The code for this option is 2.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     OPTION_F_DNS_ZONE_NAME    |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               .
+   .                                                               .
+   .                           zone-name                           .
+   .                           (variable)                          .
+   .                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_DNS_ZONE_NAME (2).
+   option-len        0 + length of zone-name.
+   zone-name         RFC 1035 encoded zone name.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_dns_flags"
+             title="OPTION_F_DNS_FLAGS">
+  
+   <t>
+   Flags which indicate what needs to be done to remove this DNS name.	
+   </t>
+  
+   <t>
+   This consists an unsigned 16 bit value in network byte order.
+   </t>
+  
+   <t>
+   This is a suboption of OPTION_F_DNS_REMOVAL_INFO.
+   The code for this option is 3.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       OPTION_F_DNS_FLAGS      |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             flags             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_DNS_FLAGS (3).
+   option-len        2.
+   flags             TBD.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_failover_expire_time"
+             title="OPTION_F_FAILOVER_EXPIRE_TIME">
+  
+    <t>The greatest lifetime that this server has ever acked to its
+    partner in a BNDACK.
+    This MUST be an absolute time (i.e. seconds since midnight 
+    January 1, 2000 UTC, modulo 2^32). 
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD17.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | OPTION_F_FAILOVER_EXPIRE_TIME |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                     failover-expire-time                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_FAILOVER_EXPIRE_TIME (TBD17).
+   option-len        4.
+   failover-expire-time The failover-expire-time. This MUST be an 
+			absolute time (i.e. seconds since midnight 
+			January 1, 2000 UTC, modulo 2^32). 
+
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_max_unacked_bndupd"
+             title="OPTION_F_MAX_UNACKED_BNDUPD">
+  
+   <t>
+   The maximum number of BNDUPD messages that this server is prepared to
+   accept over the TCP connection without causing the TCP connection to
+   block.
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD18.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  OPTION_F_MAX_UNACKED_BNDUPD  |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       max-unacked-bndupd                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code        OPTION_F_MAX_UNACKED_BNDUPD (TBD18).
+   option-len         4.
+   max-unacked-bndupd Maximum number of unacked BNDUPD message 
+                      allowed.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_mclt"
+             title="OPTION_F_MCLT">
+  
+   <t>The maximum-client-lead-time (MCLT) is the is the upper
+   bound on the difference allowed between the lease time provided to a
+   DHCPv6 client by a server and the lease time known by that server's
+   failover partner.  It is an interval, measured in seconds.
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD19.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         OPTION_F_MCLT         |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                              mclt                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_MCLT (TBD19).
+   option-len        4.
+   mclt              The maximum-client-lease-time, in seconds.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_next_partner_lifetime"
+             title="OPTION_F_NEXT_PARTNER_LIFETIME">
+  
+   <t>
+    The time we want to send to the partner the next time that
+    we send them a BNDUPD.  This will become the time after which
+    the partner can consider the IP address expired and is able
+    to re-use the IP address.
+    This MUST be an absolute time (i.e. seconds since midnight 
+    January 1, 2000 UTC, modulo 2^32). 
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD20.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | OPTION_F_NEXT_PARTER_LIFETIME |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                     next-partner-lifetime                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_NEXT_PARTER_LIFETIME (TBD20).
+   option-len        4.
+   next-partner-lifetime  The next-partner-lifetime. This MUST be an 
+			  absolute time (i.e. seconds since midnight 
+			  January 1, 2000 UTC, modulo 2^32). 
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_next_partner_lifetime_sent"
+             title="OPTION_F_NEXT_PARTNER_LIFETIME_SENT">
+  
+   <t>
+    The time that was received in an OPTION_F_NEXT_PARTNER_LIFETIME
+    <xref target="option_f_next_partner_lifetime"/> option.  This
+    is an exact replacement (echo) of the time received in the
+    OPTION_F_NEXT_PARTNER_LIFETIME option, uncorrected and unadjusted
+    in any way.
+    This MUST be an absolute time (i.e. seconds since midnight 
+    January 1, 2000 UTC, modulo 2^32). 
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD21.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |OPTION_F_NEXT_PARTNER_LIFETIME_|           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                   next-partner-lifetime-sent                  |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_NEXT_PARTNER_LIFETIME_SENT (TBD21).
+   option-len        4.
+   next-partner-lifetime-sent  The next-partner-lifetime-send. 
+			       This MUST be an absolute time
+			       (i.e. seconds since midnight 
+			       January 1, 2000 UTC, modulo 2^32). 
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_partner_down_time"
+             title="OPTION_F_PARTNER_DOWN_TIME">
+  
+   <t>
+    The time that the partner most recently lost commmunications with its
+    failover partner. 
+    This MUST be an absolute time (i.e. seconds since midnight 
+    January 1, 2000 UTC, modulo 2^32). 
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD22.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   OPTION_F_PARTNER_DOWN_TIME  |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       partner-down-time                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_PARTNER_DOWN_TIME (TBD22).
+   option-len        4.
+   partner-down-time Contains the partner-down-time. This MUST be an 
+		     absolute time (i.e. seconds since midnight 
+		     January 1, 2000 UTC, modulo 2^32). 
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_partner_raw_clt_time"
+             title="OPTION_F_PARTNER_RAW_CLT_TIME">
+  
+   <t>
+    The time when the partner most recently interacted with the client
+    associated with this IP address.
+    This MUST be an absolute time (i.e. seconds since midnight 
+    January 1, 2000 UTC, modulo 2^32).   This time is uncorrected
+    for clock skew, timezone differences, and anything else.  It remains
+    in the time context of the partner server.
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD23.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | OPTION_F_PARTNER_RAW_CLT_TIME |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                      partner-raw-clt-time                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_PARTNER_RAW_CLT_TIME (TBD23).
+   option-len        4.
+   partner-raw-clt-time Contains the partner-raw-clt-time. This MUST be an 
+			absolute time (i.e. seconds since midnight 
+			January 1, 2000 UTC, modulo 2^32). 
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_protocol_version"
+             title="OPTION_F_PROTOCOL_VERSION">
+  
+   <t>
+   The protocol version allows the one failover partner to determine
+   the version of the protocol being used by the other partner, to allow
+   for changes and upgrades in the future.
+   </t>
+  
+   <t>
+   This is an unsigned integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD24.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   OPTION_F_PROTOCOL_VERSION   |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+   |                         protocol-version                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_PROTOCOL_VERSION (TBD24).
+   option-len        4.
+   protocol-version  The version of the protocol.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_receive_time"
+             title="OPTION_F_RECEIVE_TIME">
+  
+   <t>
+   The number of seconds (an interval) within which the server must
+   receive a message from its partner, or it will assume that 
+   communications from the partner is not ok.
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD25.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     OPTION_F_RECEIVE_TIME     |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          receive-time                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_RECEIVE_TIME (TBD25).
+   option-len        4.
+   receive-time      The receive-time.  An interval of seconds.
+   </artwork>
+   </figure>
+  
+   </section>
+
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_reconfigure_data"
+             title="OPTION_F_RECONFIGURE_DATA">
+  
+   <t>Contains the information necessary for one failover partner to
+   use the reconfigure-key created on the other failover partner.</t>
+
+   <t>
+   The code for this option is TBD26.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   OPTION_F_RECONFIGURE_DATA   |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        reconfigure-time                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               .
+   .                                                               .
+   .                        reconfigure-key                        .
+   .                           (variable)                          .
+   .                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_RECONFIGURE_DATA (TBD26).
+   option-len        4 + length of reconfigure-key.
+   reconfigure-time  Time at which reconfigure-key was created.
+		     This MUST be an absolute time (i.e. seconds 
+		     since midnight 
+		     January 1, 2000 UTC, modulo 2^32). 
+   reconfigure-key   The reconfigure-key.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_relationship_name"
+             title="OPTION_F_RELATIONSHIP_NAME">
+  
+   <t>
+   A name for this failover relationshiop. 
+   </t>
+  
+   <t>
+   A UTF-8 encoded text string suitable for
+   display to an end user, which MUST NOT be null-terminated.
+   </t>
+  
+   <t>
+   The code for this option is TBD26.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   OPTION_F_RELATIONSHIP_NAME  |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               .
+   .                                                               .
+   .                       relationship-name                       .
+   .                           (variable)                          .
+   .                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_RELATIONSHIP_NAME (TBD26).
+   option-len        0 + length of relationship-name.
+   relationship-name A UTF-8 encoded text string suitable for
+		     display to an end user, which MUST NOT be
+		     null-terminated.
+   </artwork>
+   </figure>
+  
+   </section>
+ 
+
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_server_flags"
+             title="OPTION_F_SERVER_FLAGS">
+  
+   <t>
+   The OPTION_F_SERVER_FLAGS option specifies information
+   associated with the failover endpoint sending the option.
+   </t>
+
+   <t>
+   This is an unsigned byte.
+   </t>
+  
+   <t>
+   The code for this option is TBD28.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     OPTION_F_SERVER_FLAGS     |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  server-flags |
+   +-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_SERVER_FLAGS (TBD28).
+   option-len        1.
+   server-flags      The server flags, see below:
+   </artwork>
+   </figure>
+
+   <figure>
+   <artwork>
+    0 1 2 3 4 5 6 7
+   +-+-+-+-+-+-+-+-+
+   |  MBZ  |B|A|S|C|
+   +-+-+-+-+-+-+-+-+
+
+   The bits (numbered from the least-significant bit in network
+   byte-order) are used as follows:
+ 
+   4 (B): SECONDARY (BACKUP)
+          Indicates that the sending server is a secondary 
+          (or backup) server.
+   5 (A): ACK_STARTUP
+          Set to 1 to indicate that the OPTION_F_SERVER_FLAGS most
+ 	  recently received contained the STARTUP bit set.
+   6 (S): STARTUP,
+          MUST be set to 1 whenever the server is in STARTUP state.
+   7 (C): COMMUNICATED
+          Set to 1 to indicate that the sending server has
+ 	  communicated with its partner. 
+   0-3  : Must be zero
+   </artwork>
+   </figure>
+
+  
+   </section>
+ 
+
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_server_state"
+             title="OPTION_F_SERVER_STATE">
+  
+   <t>
+   The OPTION_F_SERVER_STATE option specifies the endpoint state of
+   the server sending the option.
+   </t>
+
+   <t>
+   This is an unsigned byte.
+   </t>
+  
+   <t>
+   The code for this option is TBD29.
+   </t>
+  
+   <figure>
+   <artwork>
+  
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     OPTION_F_SERVER_STATE     |           option-len          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  server-state |
+   +-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_SERVER_STATE (TBD29).
+   option-len        1.
+   server-state      Failover endpoint state.
+   </artwork>
+   </figure>
 
     <figure>
     <artwork>
@@ -387,206 +1282,135 @@
     <xref target="state-startup"/>.
     </t>
 
-    </section>
+  
+   </section>
+ 
 
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_SERVER_FLAGS">
-
-    <t>
-    The OPTION_F_SERVER_FLAGS option specifies information
-    associated with the failover endpoint sending the option.
-    </t>
-
-    <t>
-    This is an unsigned byte.
-    </t>
-
-    <t>
-    The code for this option is TBD.
-    </t>
-
-    <figure>
-    <artwork>
-
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_start_time_of_state"
+             title="OPTION_F_START_TIME_OF_STATE">
+  
+    <t>The time at which the associated state began to hold its current
+       value.  When this option appears in a STATE message, the state to
+       which it refers is the server endpoint state.  When it appears in
+       an IA_NA or IA_PD message, the state to which it refers is the
+       binding-status value in the IA_NA or IA_PD option.
+       This MUST be an absolute time (i.e. seconds since midnight 
+       January 1, 2000 UTC, modulo 2^32). 
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD30.
+   </t>
+  
+   <figure>
+   <artwork>
+  
     0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |     OPTION_F_SERVER_FLAGS     |                1              |
+   |  OPTION_F_START_TIME_OF_STATE |           option-len          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | server-flags  |                                                
-   +-+-+-+-+-+-+-+-+
+   |                      start-time-of-state                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_START_TIME_OF_STATE (TBD30).
+   option-len        4.
+   start-time-of-state  The start-time-of-state. This MUST be an 
+			absolute time (i.e. seconds since midnight 
+			January 1, 2000 UTC, modulo 2^32). 
+   </artwork>
+   </figure>
+  
+   </section>
+ 
 
-     option-code       OPTION_F_SERVER_FLAGS (TBD).
-     option-len        1.
-     state             Flags associated with endpoint.
-    </artwork>
-    </figure>
-
-    <figure>
-    <artwork>
-    0 1 2 3 4 5 6 7
-   +-+-+-+-+-+-+-+-+
-   |  MBZ  |B|A|S|C|
-   +-+-+-+-+-+-+-+-+
-
-   The bits (numbered from the least-significant bit in network
-   byte-order) are used as follows:
-
-   4 (B): SECONDARY (BACKUP)
-	  Indicates that the sending server is a secondary (or backup)
-	  server.
-   5 (A): ACK_STARTUP
-          Set to 1 to indicate that the OPTION_F_SERVER_FLAGS most
-	  recently received contained the STARTUP bit set.
-   6 (S): STARTUP,
-          MUST be set to 1 whenever the server is in STARTUP state.
-   7 (C): COMMUNICATED
-          Set to 1 to indicate that the sending server has
-	  communicated with its partner. 
-   0-3  : Must be zero
-    </artwork>
-    </figure>
-
-    </section>
-
-
-
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_RECEIVE_TIME">
-
-    <t>
-    The OPTION_F_RECEIVE_FLAGS option specifies how long the
-    failover endpoint sending this option will allow a connection
-    that is considered up to go without a packet reception before
-    considering the connection down.
-    </t>
-
-    <t>
-    This is an unsigned integer in network byte order.
-    </t>
-
-    <t>
-    The code for this option is TBD.
-    </t>
-
-    <figure>
-    <artwork>
-
+ 
+   <!-- ============================================================= -->
+  
+   <section anchor="option_f_state_expiration_time"
+             title="OPTION_F_STATE_EXPIRATION_TIME">
+  
+   <t>
+    The state-expiration-time is the time at which  the current state
+    of this lease will expire. 
+    This MUST be an absolute time (i.e. seconds since midnight 
+    January 1, 2000 UTC, modulo 2^32). 
+   </t>
+  
+   <t>
+   This is an unsigned 32 bit integer in network byte order.
+   </t>
+  
+   <t>
+   The code for this option is TBD31.
+   </t>
+  
+   <figure>
+   <artwork>
+  
     0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |     OPTION_F_RECEIVE_TIME     |                4              |
+   | OPTION_F_STATE_EXPIRATION_TIME|           option-len          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         receive-time                          |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                     state-expiration-time                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
+  
+   option-code       OPTION_F_STATE_EXPIRATION_TIME (TBD31).
+   option-len        4.
+   state-expiration-time  The state-expiration-time.  This MUST be an
+			  absolute time (i.e. seconds since midnight 
+			  January 1, 2000 UTC, modulo 2^32). 
+   </artwork>
+   </figure>
+  
+   </section>
 
-     option-code       OPTION_F_RECEIVE_TIME (TBD).
-     option-len        4.
-     receive-time      How long this endpoint will wait before 
-                       considering a connection down due to lack of
-		       any packet flow.
-    </artwork>
-    </figure>
+   </section>
 
-    </section>
-
-
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_BINDING_STATUS">
-
-    </section>
-
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_START_TIME_OF_STATE">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_STATE_EXPIRATION_TIME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_FAILOVER_EXPIRATION_TIME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_PARTNER_RAW_CLT_TIME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_MCLT">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_BASE_TIME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_RELATIONSHIP_NAME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_PROTOCOL_VERSION">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_MAX_UNACKED_BNDUPD">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_NEXT_PARTNER_LIFETIME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_NEXT_PARTNER_LIFETIME_SENT">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_PARTNER_DOWN_TIME">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_DNS_INFO">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_REQUESTED_FQDN">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_DNS_INFO">
-
-    </section>
-    <!-- ================================================ -->
-
-    <section title="OPTION_F_DNS_REMOVAL_INFO">
-
-    </section>
+  <section anchor="status-list" title="Status Codes">
 
 
+   <t>
+      The following new status codes are defined, to be used in the
+      OPTION_STATUS_CODE option.
+   <list style="hanging">
+        <t hangText="OneClientDifferentLeases (TBD?)"> <vspace/>
+	   The client on one server has resources that conflict with the 
+	   resources that this client has on the other server.</t>
+        <t hangText="AddressInUseByOtherClient (TBD?)"> <vspace/>
+	   The one client on one server has leased resources that are in
+	   conflict with the resources that this client has leased on another
+	   server.</t>
+        <t hangText="ConfigurationConflict (TBD?)"> <vspace/>
+	   The configuration implied by the information in a BNDUPD
+	   (e.g. the IPV6 address or prefix address)
+	   is in direct conflict with the information known to the
+	   receiving server.</t>
+        <t hangText="MissingBindingInformation (TBD?)"> <vspace/>
+	   There is insufficient information in a BNDUPD to effectively
+	   process it.</t>
+        <t hangText="OutdatedBindingInformation (TBD?)"> <vspace/>
+	   Returned when the information in a server's binding
+	   database conflicts with the information found in an incoming
+	   BNDUPD, and the server believes that the information in
+	   its binding database more accurately reflects reality.</t>
+   </list>
+   </t>
 
 
   </section>
 
 
 </section>
+
 
 
 <section title="Connection Management">
@@ -604,17 +1428,35 @@
     MUST listen for connection attempts from the primary server.
     </t>
 
+    <t>When a primary server successfully creates a TCP connection
+    with a secondary server, it SHOULD attempt to negotiate a TLS
+    <xref target="RFC5246"/>connection over the newly created TCP
+    connection, as described in Section 8.2 of
+    <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/>.
+    In the language of that section, the primary failover server
+    operates as the "requestor" and the secondary failover server
+    operates as the "DHCPv6 server".</t>
+
+    <t>If a TLS connection is not negotiated, either server MAY
+    choose to continue to establish a failover relationship or
+    it MAY choose to refuse to proceed without a TLS connection.
+    </t>
+
     <t>When a connection attempt succeeds, the primary server which
     has initiated the connection attempt MUST send a CONNECT message
     down the connection.  </t>
 
-    <t>When a connection attempt is received, the only information
-    that the receiving server has is the IP address of the partner
+    <t>When a connection attempt is received by a secondary server, the only information
+    that the secondary server has is the IP address of the partner
     initiating a connection.  If it has any relationships with the
     connecting server for which it is a secondary server, it should
-    just await the CONNECT message to determine which relationship
-    this connection is to serve.</t>
-
+    just await the CONNECT message or a STARTTLS message (see Section
+    8.2 of
+    <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/>).
+    Once it has received the CONNECT message, it will use the information
+    in that message to determine which relationship this connection
+    is to service.</t>
+    
     <t>If it has no secondary relationships with the connecting
     server, it MUST drop the connection.  The goal is to limit
     the resources expended dealing with attempts to create a spurious
@@ -622,9 +1464,8 @@
 
     <t>To summarize -- a primary server MUST use a connection that it has
     initiated in order to send a CONNECT message.  Every server that
-    is a secondary server in a relationship simply listens for connection
-    attempts from the primary server.
-    </t>
+    is a secondary server in a relationship MUST listen for CONNECT
+    messages from the primary server.</t>
 
     <t>Once a connection is established, the primary server MUST send
     a CONNECT message across the connection.  A secondary server MUST
@@ -633,31 +1474,19 @@
     primary server in an installation dependent amount of time, it MAY
     drop the connection.</t>
 
-    <t>Every CONNECT message includes a TLS-request option, and if the
-    CONNECTACK message does not reject the CONNECT message and the
-    TLS-reply option says TLS MUST be used, then the servers will
-    immediately enter into TLS negotiation.</t>
+    <t>The secondary server responds to the CONNECT message with a
+    CONNECTACK message indicating its response to request for a connection
+    contained in the CONNECT message.</t>
 
-    <t>Once TLS negotiation is complete, the primary server MUST
-    resend the CONNECT message on the newly secured TLS connection and
-    then wait for the CONNECTACK message in response.  The TLS-request
-    and TLS-reply options MUST NOT appear in either this second
-    CONNECT or its associated CONNECTACK message as they had in the
-    first messages.</t>
-
-    <t>The second message sent over a new connection (either a bare
-    TCP connection or a connection utilizing TLS) is a STATE message.
-    Upon the receipt of this message, the receiver can consider
-    communications up.</t>
+    <t>When the CONNECT and CONNECTACK exchange successfully produces a
+    working failover connection, the next message sent over a new connection 
+    is a STATE message.  Upon the receipt of this message, the receiver can consider
+    communications ok.</t>
 
   </section>
 
   <section title="Endpoint Identification">
-    <t>The proper operation of the failover protocol requires more than
-    the transmission of messages between one server and the other.  Each
-    endpoint might seem to be a single DHCPv6 server, but in fact there
-    are situations where additional flexibility in configuration
-    is useful.  A failover endpoint is always associated with a set
+     <t>A failover endpoint is always associated with a set
     of DHCPv6 prefixes that are configured on the DHCPv6 server where
     the endpoint appears.  A DHCPv6 prefix MUST NOT be associated with
     more than one failover endpoint.</t>
@@ -668,11 +1497,6 @@
     each failover partner.  This failover relationship MUST have a
     unique name.</t>
 
-    <t>There is typically little need for additional relationships between
-    any two servers but there MAY be more than one failover relationship
-    between two servers -- however each MUST have a unique relationship
-    name.</t>
-
     <t>Any failover endpoint can take actions and hold unique states.</t>
 
     <t>This document frequently describes the behavior of the protocol in
@@ -682,12 +1506,13 @@
     that resides in a particular process, and that several failover
     end-points may reside in the same server process.</t>
 
-    <t>It is not the case that there is a unique failover endpoint for
-    each prefix that participates in a failover relationship.  On one
-    server, there is (typically) one failover endpoint per partner,
-    regardless of how many prefixes are managed by that combination of
-    partner and role.  Conversely, on a particular server, any given
-    prefix will be associated with exactly one failover endpoint.</t>
+    <t>It is not the case that there is a unique failover endpoint
+    for each prefix that participates in a failover relationship.
+    On one server, there is (typically) one failover endpoint per
+    partner, regardless of how many prefixes are managed by that
+    combination of partner and role.  On a particular server, any
+    given prefix that participates in failover will be associated
+    with exactly one failover endpoint.</t>
 
     <t>When a connection is received from the partner, the unique failover
     endpoint to which the message is directed is determined solely by
@@ -763,20 +1588,9 @@
 
 
 
-<section title="Binding Updates">
+<section title="Binding Updates and Acks">
 
-  <section anchor="send-bndupd" title="Sending Binding Update">
-
-    <t>This and the following section is written as though every
-    BNDUPD message contains only a single binding update transaction
-    in order to reduce the complexity of the discussion.  Servers
-    MAY generate messages with multiple binding update transactions
-    in them, and their partner servers MAY process these messages.
-    Before multiple binding update transactions are to be sent and
-    processed over a failover connection, their use MUST be negotiated
-    during the CONNECT and CONNECTACK connection establishment
-    processing.</t>
-
+  <section anchor="time-bndupd" title="Times Required for Exchanging Binding Updates">
     <!-- tomek: here's the table from v4-failover-12, section 7.1:
 
                                         binding-status            BACKUP
@@ -794,7 +1608,7 @@
    start-time-of-state           SHOULD     SHOULD     SHOULD     SHOULD
    client-last-trans.-time       MUST       SHOULD     MUST       MAY
    DDNS(1)                       SHOULD     SHOULD     SHOULD     SHOULD
-   client-request-options        SHOULD     SHOULD NOT SHOULD     SHOULD NOT
+   client-request-/soptions        SHOULD     SHOULD NOT SHOULD     SHOULD NOT
    client-reply-options          SHOULD     SHOULD NOT SHOULD NOT SHOULD NOT
 
    (1) MUST if server is performing dynamic DNS for this IP address, else
@@ -804,234 +1618,275 @@
    (4) IP-flags option MUST appear if any flags are non-zero, else it
        MAY appear. -->
 
-    <t>Each server updates its failover partner about recent changes in lease
-    states.  Each update MUST include at least the following information:
-    <list style="numbers">
-      <t>resource type - non-temporary address or a prefix. Resource type can
-      be indicated by the container that conveys the actual resource (e.g. an IA_NA
-      option indicates non-temporary IPv6 address);</t>
-      <t>resource information - the actual address or prefix. That is conveyed
-      using the appropriate option, e.g. an IAADDR for an address or an IAPREFIX for
-      a prefix;</t>
-      <t>valid life time sent to client*;</t>
-      <t>IAID - Identity Association used by the client, while obtaining
-      a given lease. (Note1: one client may use many IAIDs
-      simultaneously. Note2: IAID for IA, TA and PD are orthogonal
-      number spaces.)*;</t>
-      <t>Next Expected Client Transmission (renewal time) - time interval since Client Last
-      Transmission Time, when a response from a client is expected*; <!--
-      this is a T1 timer. Since we decided to use IA_NA/IA_PD anyway, we
-      will just set it properly --></t>
-      <t>potential valid life time - a lifetime that the server is willing to
-      set if there were no MCLT/failover restrictions imposed*;</t>
-      <t>preferred life time sent to client - the actual value sent back to
-      the client*;</t>
-      <t>CLTT - Client Last Transaction Time, a timestamp of the last received
-      transmission from a client*;</t>
-      <t>Client DUID*.</t>
-      <t>Resource state.</t>
-      <t>start time of state (especially for non-client updates).</t>
+
+    <t>Each server must keep track of the following specific times beyond those
+    required by the base DHCPv6 protocol <xref target="RFC3315" />.  
+    <list style="hanging">
+        <t hangText="failover-expire-time"> <vspace/>
+	   The greatest lifteime that this server has ever acked to its failover
+	   partner in a BNDACK.</t>
+        <t hangText="failover-partner-lifetime"> <vspace/>
+	   The greatest lifetime that the failover partner has ever acked to
+	   this server in a BNDACK.</t>
+        <t hangText="next-partner-lifetime"> <vspace/>
+	   The time that we want to send the partner, which will be the time 
+	   after which the partner can consider the IPv6 address expired.</t>
+        <t hangText="client-last-transaction-time"> <vspace/>
+	   The time when the this server most recently intereacted with the
+	   client associated with this IP address.</t>
+        <t hangText="partner-raw-clt-time"> <vspace/>
+	   The time when the partner most recently interacted with the client
+	   associated with this IP address.  This time remains exactly as it
+	   was received by this server, and it not adjusted to be in the time
+	   context of this server.</t>
+        <t hangText="start-time-of-state"> <vspace/>
+	   The time when the binding status of this lease was changed 
+	   to its current value.</t>
+        <t hangText="state-expiration-time"> <vspace/>
+	   The time when the current state of this lease will expire.</t>
     </list>
     </t>
-    <t>Items marked with asterisk MUST appear only if the lease is/was associated
+
+  </section>
+
+  <section anchor="send-bndupd" title="Sending Binding Updates">
+
+    <t>Each server updates its failover partner about recent changes
+       in lease states using the BNDUPD message.  Every BNDUPD
+       message contains information about one or more client bindings.
+       All information about a particular client binding is contained
+       in a single OPTION_CLIENT_DATA option (see <xref target="RFC5007"/>
+       Section 4.1.2.2).</t>
+
+    <t>The OPTION_CLIENT_DATA option MUST contain
+       at least the data shown below in its client-options section:
+    <list style="symbols">
+       <t>OPTION_CLIENTID containing the DUID of the client most 
+	  recently associated with this IP address*;</t>
+       <t>OPTION_LQ_BASE_TIME containing the absolute time that the information
+	  was placed into this OPTION_CLIENT_DATA option.
+	  (see <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/> Section 6.3.1);</t>
+       <t>OPTION_F_RECONFIGURE_DATA
+	  containing the time and reconfigure key, if any*;</t>
+       <t>OPTION_LQ_RELAY_DATA containing information described 
+	  in Section 4.1.2.4 of <xref target="RFC5007" />*;</t>
+       <t>OPTION_IA_NA for an IPv6 Address or OPTION_IA_PD for an IPv6 Prefix. More
+	  than one of either of these options MAY appear if there are more 
+	  than one associated with this client;
+	 <list style="symbols">
+	    <t>IAID - Identity Association used by the client, while obtaining 
+	    a given lease. (Note1: one client may use many IAIDs
+	    simultaneously. Note2: IAID for IA, TA and PD are orthogonal
+	    number spaces.)*;</t>
+	    <t>T1 time sent to client*;</t>
+	    <t>T2 time sent to client*;</t>
+	    <t>Inside of the IA_NA-options or IA_PD-option sections:
+	    <list style="symbols">
+	       <t>
+	       OPTION_IAADDR for an IPv6 address or an OPTION_IAPREFIX for a IPv6 prefix;
+	       <list style="symbols">
+		  <t>IPv6 Address or IPv6 Prefix (with length);</t>
+		  <t>preferred lifetime sent to client*;</t>
+		  <t>valid lifetime sent to client*;</t>
+		  <t>Inside of the IAaddr-options or IAprefix-options:
+		  <list style="symbols">
+		     <t>OPTION_F_BINDING_STATUS containing the binding-status;</t>
+		     <t>OPTION_F_START_TIME_OF_STATE containing the 
+			start-time-of-state;</t>
+		     <t>OPTION_F_STATE_EXPIRATION_TIME containing the 
+			state-expiration-time**;</t>
+		     <t>OPTION_CLT_TIME (relative) containing the 
+			client-last-transaction-time.  See <xref target="RFC5007" /> 
+			for this option*;</t> 
+		     <t>OPTION_F_NEXT_PARTNER_LIFETIME (absolute) containing 
+			next-partner-lifetime*;</t>
+		     <t>OPTION_F_PARTNER_RAW_CLT_TIME (absolute) 
+			containing the partner-raw-clt-time*;</t>
+		     <t>OPTION_F_FAILOVER_EXPIRE_TIME (absolute) 
+			containing the failover-expire-time*;</t>
+		     <t>DHCP_O_CLIENT_FQDN 
+			containing the the FQDN information associated with
+			this resource and client*;</t>
+		  </list></t>
+	       </list></t>
+	    </list></t>
+         </list></t>
+    </list>
+    Note that additonal data MAY be included beyond that listed above.  The
+    IAddr_options or IAprefix-options area are the places where additional information
+    should be included.
+    </t>
+
+    <t>Items marked with a single asterisk (*) MUST appear only if the resource is associated
     with a client. Otherwise it MUST NOT appear.</t>
-    <!-- TODO: point out that in some states client DUID MUST NOT appear -->
-    <!-- tomek: we don't really care about preferred lifetime. Since it is
-         defined in IAADDR/IAPREFIX options that we will be reusing, we will
-         need to send something. We may just send actual preferred lifetime, but
-         it won't be useful for anything. -->
-    <!-- tomek: we will use IA_NA + IAADDR, IA_PD + IAPREFIX options here
-	 with some new additional options:
-	 - valid lifetime requested by client
-	 - potential valid life time
-	 - cltt -->
 
-    <t>The BNDUPD message MAY contain additional information related to the
-    updated lease. The additional information MAY include, but is not limited to:
-    <list style="numbers">
-      <!-- tomek: v4-failover-12 states that FQDN either MUST or MUST NOT
-           appear, depending on whether server did or did not DDNS. Perhaps
-           putting it in the optional section is not the right place? -->
-      <!-- tomek: I'm not sure it tying FQDN to the actual DDNS update is a good
-      idea. There's a corner case when FQDN is used only to assign names to
-      hosts, without updating DNSes. It is a use case allowed by the standard,
-      not sure if it has any practical applications or if it is really used.
-      I suggest a different wording: "depending on whether the server did or
-      did not send FQDN option to clients" -->
-      <t>assigned FQDN name, defined in <xref target="RFC4704"/>;</t>
-      <t>Options Requested by the client, i.e. content of the ORO;</t>
-      <t>Relay Data option from DHCPv6 Leasequery, see <xref target="RFC5007"/> Section 4.1.2.4</t>
-      <t>Any other options the updating partner deems useful.</t>
-    </list>
-    </t>
+    <t>Items marked with a double asterisk (**) MUST appear only if the value in the
+    OPTION_F_BINDING_STATUS is associated with a timeout, otherwise it MUST NOT appear.</t>
 
-    <t>The receiving partner MAY store any additional information received, but it MAY
-    choose to ignore it as well. Some information may be useful, so it is a
-    good idea to keep or update it. One reason is FQDN information. A server
+   <t>The OPTION_CLT_TIME MUST,
+   if it appears, be the time that the server last interacted
+   with the DHCP client.  It MUST NOT be, for instance, the time
+   that the lease on an IP address expired.  If there has been
+   no interaction with the DHCP client in question (or there is
+   no DHCP client presently associated with this resource), then
+   there will be no OPTION_CLT_TIME option in the OPTION_CLIENT_DATA option</t>
+
+    <t> A server
     SHOULD be prepared to clean up DNS information once the lease expires or is
     released. See <xref target="DDNS"/> for a detailed discussion about
     Dynamic DNS. Another reason the partner may be interested in keeping additional
-    data is a better support for leasequery <xref target="RFC5007"/> or bulk
-    leasequery <xref target="RFC5460"/>, which features queries based on
+    data is a better support for leasequery <xref target="RFC5007"/>, bulk
+    leasequery <xref target="RFC5460"/> or active leasequery
+    <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/>,
+    some of which features queries based on
     Relay-ID, by link address and by Remote-ID.</t>
-  </section> <!-- sending data -->
+  </section> <!-- sending binnding updates -->
 
-  <section title="Receiving Binding Update">
+  <section title="Receiving Binding Updates">
 
-    <!-- see v4-failover-12, section 7.1.2 -->
-    <t>When a server receives a BNDUPD message, it needs to decide how to
-    process the binding update transaction it contains and whether that
-    transaction represents a conflict of any sort. The conflict resolution
-    process MUST be used on the receipt of every BNDUPD message, not just those
-    that are received while in POTENTIAL-CONFLICT state, in order to increase
-    the robustness of the protocol.</t>
-    
-    <t>There are three sorts of conflicts:
-    <list style="numbers">
-      <t>Two clients, one resource - This is the duplicate resource allocation
-      conflict. There two different clients each allocated the same resource. See
-      <xref target="conflict-resolution"/>.</t>
-      <t>Two resources, one client conflict - This conflict exists when a client
-      on one server is associated with a one resource, and on the other server
-      with a different resource in the same or related prefix. This does not
-      refer to the case where a single client has resources in multiple
-      different prefixes or administrative domains (i.e. a mobile client that
-      changed its location), but rather the case where on
-      the same prefix the client has a lease on one IP address in one server
-      and on a different IP address on the other server.
-      
-      <!-- how to start new paragraph within the same bullet? -->
-      <vspace blankLines="1"/>
+  <section anchor="correcting-time-skew" title="Correcting Time Skew">
 
-      This conflict may or may not be a problem for a given DHCP server
-      implementation and policy. If implementations and policies allow, both
-      resources can be assigned to a given client. In the event that a DHCP
-      server requires that a DHCP client have only one outstanding lease of a
-      given type, the conflict MUST be resolved by accepting the lease which has
-      the latest CLTT.
+    <t>Unless otherwise specified, all of the times discussed below are corrected
+       to be in the time context of the receiving server, as follows:
+       <list style="numbers">
+	  <t>The sent-time from the Failover message is compared with the
+	     current time of the receiving server.  The difference is noted,
+	     and used to affect the time correction.  It MAY be used directly
+	     as the time correction, but it SHOULD instead be used to 
+	     have a cumulative effect on the time correction.  This is
+	     called the time-correction.</t>
+	  <t>Any OPTION_LQ_BASE_TIME options in the BNDUPD message MUST
+	     be corrected with the time-correction.
+	     This is called the corrected-base-time.</t>
+	  <t>Any relative time values received in the BNDUPD MUST be
+	     added to or subtracted from the corrected-base-time.</t>
+	  <t>Any absolute time values received in the BNDUPD MUST be
+	     corrected with the time-correction</t>
+       </list></t>
+       <t>When all of this is done to an incoming time, that time can be
+	  before, after, or essentially the same as another time.  Any time
+	  which ends up being +/- 5 seconds of another time SHOULD be considered
+	  the same.</t>
 
-      <vspace blankLines="1"/>
-      It should be further clarified that DHCPv6 protocol makes
-      assignments based on a (client DUID, resource type, IAID)
-      triplet. The possibility of using different IAIDs was omitted in
-      this paragraph for clarity. If one client is assigned multiple
-      resources of the same type, but with different IAIDs, there is
-      no conflict. Also, IAID values for different resource types are
-      orthogonal, i.e. an IA_NA with IAID=1 is different than an IA_PD with
-      IAID=1 and there is no conflict.
-      </t>
+ </section>
 
-      <t>binding-status conflict - This is normal conflict, where one server is
-      updating the other with newer information. See <xref
-      target="conflict-resolution"/> for details of how to resolve these
-      conflicts.</t>
 
-      <t> configuration conflict -- This kind of conflict stems
-      from a differing configuration on one server than on the other
-      server.  It may be transient (last until both servers can
-      process a new configuration) or it may be chronic.  It cannot
-      be resolved by communications over the failover connection,
-      but must be resolved (if it is not transient) by administrator
-      action to resolve the conflicts.</t>
+  <section anchor="processing-binding-updates" title="Processing Binding Updates">
 
-    </list>
-    </t>
-  </section>
+     <t>When a BNDUPD is received each OPTION_CLIENT_DATA option
+     is processed separately, and each must be independently
+     accepted or rejected.</t>
 
-    <section anchor="conflict-resolution" title="Conflict Resolution">
-      <!-- tomek: that paragraph is no longer needed. Following paragraphs
-	   based on v4 failover decribe the issue much better -->
-      <t>The server receiving a lease update from its partner must evaluate the
-      received lease information to see if it is consistent with already known
-      state and decide which information - the previously known or that just received -
-      is "better". The server should take into consideration the following
-      aspects: if the lease is already assigned to a specific client, who had
-      contact with client recently, start time of the lease, etc.</t>
+      <t>When analyzing an OPTION_CLIENT_DATA option from a partner server, if
+      there is insufficient information in the OPTION_CLIENT_DATA to process
+      it, then reject the OPTION_CLIENT_DATA with "MissingBindingInformation".</t>
 
-      <t>When analyzing a BNDUPD message from a partner server, if there is
-      insufficient information in the BNDUPD to process it, then reject the
-      BNDUPD with reject-reason "Missing binding information".</t>
+      <t>The server receiving a BNDUPD update from its partner must
+      evaluate the received information in each OPTION_CLIENT_DATA
+      option to see if it is consistent with already known state
+      and decide which information - the previously known or that
+      just received - is "better".  If the information in the BNDUPD
+      is "better", the receiving server will accept the information
+      in the BNDUPD.  If the information in the server's binding
+      database is "better", the server will reject the information
+      in the BNDUPD.</t>
 
-      <t>If the resource in the BNDUPD is not a resource associated with
-      the failover endpoint which received the BNDUPD message, then reject
-      it with reject-reason "Illegal IP address or prefix (not part of any
-      address or prefix pool)".</t>
-      <!-- issue 12: do we want separate reject-reason for prefixes? -->
+   <t>A server receving a BNDUPD message MUST respond to the sender of that
+      message with a BNDACK message which contains the same xid as the
+      BNDUPD message.  This BNDACK message MUST contain one
+      or more
+      OPTION_CLIENT_DATA options, each of which corresponds to 
+      one of the OPTION_CLIENT_DATA options in the BNDUPD message.</t>
 
-      <t>Every BNDUPD message SHOULD contain a client-last-transaction-time
-      option, which MUST, if it appears, be the time that the server last
-      interacted with the DHCP client.  It MUST NOT be, for instance, the
-      time that the lease on an IP address expired.  If there has been no
-      interaction with the DHCP client in question (or there is no DHCP
-      client presently associated with this resource), then there will be
-      no client-last-transaction-time option in the BNDUPD message.</t>
+     <t>Each OPTION_CLIENT_DATA in the BNDACK which is accepted SHOULD
+     NOT contain an OPTION_STATUS_CODE unless a status message
+     needs to be sent to the failover partner, in which case it
+     SHOULD include an OPTION_STATUS_CODE option with a status
+     code indicating success and whatever message is needed.
+     </t>
 
-      <t>The list in <xref target="tbl-conflict-resolution"/> presents the conflict
-      resolution outcome. To "accept" a BNDUPD means to update the server's
-      bindings database with the information contained in the BNDUDP and once
-      the update is complete, send a BNDACK message corresponding to the BNDUPD
-      message. To "reject" a BNDUPD means to leave the server's binding database
-      unchanged and to respond to the BNDUPD with BNDACK with a reject-reason 
-      option included.</t>
+     <t>To indicate rejection of the information
+     in an OPTION_CLIENT_DATA, an OPTION_STATUS_CODE SHOULD be
+     included with a status code indicating an error, in the
+     OPTION_CLIENT_DATA option in the BNDACK message.</t>
 
-      <t>When interpreting the information in the following table (<xref
-      target="tbl-conflict-resolution"/>), for those rules that are listed with
-      "time" -- if a BNDUPD doesn't have a client-last-transaction-time value,
-      then it MUST NOT be considered later than the client-last-transaction-time
-      in the receiving server's binding.  If the BNDUPD contains a client-last-
-      transaction-time value and the receiving server's binding does not, then
-      the client-last-transaction-time value in the BNDUPD MUST be considered
-      later than the server's.</t>
+ </section>
+
+  <section anchor="accept-or-reject" title="Accept or Reject?">
+
+     <t>The first task in processing the information in an
+     OPTION_CLIENT_DATA option is extract the client information
+     and resource information out of the OPTION_CLIENT_DATA option,
+     and to access the resource (IP address or prefix) information
+     in the server's binding database.</t>
+
+      <t>If the resource specified in the OPTION_CLIENT_DATA is not
+      a resource associated with the failover endpoint which received
+      the OPTION_CLIENT_DATA option, then reject it with reject-reason
+      "ConfigurationConflict".</t>
+
+      <t>In general, acceptance or rejection is based around the
+      comparison of two different time values, one from the
+      OPTION_CLIENT_DATA and one from receiving server's binding
+      database associated with the resource found in the
+      OPTION_CLIENT_DATA.  The time for the OPTION_CLIENT_DATA is
+      the OPTION_CLT_TIME if one appears, and the
+      OPTION_F_START_TIME_OF_STATE if one does not.  The time for
+      the resource in the server's binding database is the
+      client-last-transaction-time, if one appears, and the
+      start-time-of-state if one does not.</t>
+
+      <t>The basic approach is to compare these times, and if the
+      one from the OPTION_CLIENT_DATA is clearly later, then accept
+      the information in the OPTION_CLIENT_DATA.  If the one from
+      the server's binding database is clearly later, then reject
+      the information in the OPTION_CLIENT_DATA.  The challenge
+      comes when they are essentially the same (i.e., +/- 5 seconds).
+      The table below (<xref target="tbl-conflict-resolution"/>)
+      contains the rules for dealing with these situations.
+   </t>
 
   <figure anchor="tbl-conflict-resolution" title="Conflict Resolution">
     <artwork><![CDATA[
-                          binding-status in received BNDUPD.
+                       binding-status in received OPTION_CLIENT_DATA
 binding-status
 in receiving                                      FREE        RESET
 server           ACTIVE   EXPIRED   RELEASED   FREE_BACKUP  ABANDONED
 
-ACTIVE           accept(5) time(2)   time(1)    time(2)      accept
+ACTIVE           accept(4) time(2)   time(1)    time(2)      accept
 EXPIRED          time(1)   accept    accept     accept       accept
 RELEASED         time(1)   time(1)   accept     accept       accept
 FREE/FREE_BACKUP accept    accept    accept     accept       accept
 RESET            time(3)   accept    accept     accept       accept
-ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
+ABANDONED        reject    reject    reject     reject       accept
 ]]></artwork></figure>
 
-    <t>time(1): If the client-last-transaction-time in the BNDUPD is later than
-    the client-last-transaction-time in the receiving server's binding, accept
+    <t>time(1): If the time value in the OPTION_CLIENT_DATA is later than
+    the time value in the server's binding database, accept
     it, else reject it.</t>
 
     <t>time(2): If the current time is later than the receiving server's
-    lease-expiration-time, accept it, else reject it.</t>
+    state-expiration-time, accept it, else reject it.</t>
 
-    <t>time(3): If the client-last-transaction-time in the BNDUPD is later than
+    <t>time(3): If the OPTION_CLT_TIME value in the OPTION_CLIENT_DATA is later than
     the start-time-of-state in the receiving server's binding, accept it, else
     reject it.</t>
 
-    <t>(1,2,3): If rejecting, use reject reason "Outdated binding
-    information".</t>
+    <t>(1,2,3): If rejecting, use reject reason "OutdatedBindingInformation".</t>
 
-    <t>(4): Use reject reason "Less critical binding information".</t>
-
-    <t>(5): If the clients in a BNDUPD message and in a receiving server's
+    <t>(4): If the client in an OPTION_CLIENT_DATA option and in a receiving server's
     binding differ, then if the receiving server is a secondary accept it, else
-    reject it with a reject reason of "Fatal conflict exists: address in use
-    by other client".</t>
+    reject it with a reject reason of "AddressInUseByOtherClient".</t>
 
-    <!-- issue 5: Done. The issue was: This is just a loose collection of
-         notes. This section will probably need to be rewritten as a a flowchart
-         of some kind. -->
-
-      <t>The lease update may be accepted or rejected.  Rejection SHOULD NOT
-      change the flag in a lease that says that it should be transmitted to the
-      failover partner.  If this flag is set, then it should be transmitted, but
-      if it is not already set, the rejection of a lease state update SHOULD NOT
-      trigger an automatic update of the failover partner sending the rejected
-      update.  The potential for update storms is too great, and in the unusual
-      case where the servers simply can't agree, that disagreement is better
-      than an update storm.
-      </t>
+      <t>The lease update may be accepted or rejected.  Rejection
+      SHOULD NOT change the flag in a lease that says that it should
+      be transmitted to the failover partner.  If this flag is set,
+      then it should be transmitted, but if it is not already set,
+      the rejection of a lease state update SHOULD NOT trigger an
+      automatic update of the failover partner sending the rejected
+      update.  The potential for update storms is too great, and
+      in the unusual case where the servers simply can't agree,
+      that disagreement is better than an update storm.  </t>
 
     <!-- <t>Discussion: There will definitely be different types of update
       rejections. For example, this will allow a server to treat differently a
@@ -1040,11 +1895,137 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
       known.</t>-->
     </section>
 
+    <section anchor="accepting-updates" title="Accepting Updates">
+
+
+
+       <t>When the information in an OPTION_CLIENT_DATA option has been accepted, some
+	  of that information is stored in the receiving server's binding database, 
+	  and corresponding OPTION_CLIENT_DATA is entered into a BNDACK.  The
+	  information to enter into the OPTION_CLIENT_DATA in the BNDACK is described
+	  in <xref target="send-bndack"/>.</t>
+
+       <t>The information contained in the accepted OPTION_CLIENT_DATA option
+       is stored in the receiving server's binding database as follows:
+       <list style="numbers">
+	  <t>The OPTION_CLIENTID is used to find the client.</t>
+	  <t>The other data contained in the top level of the OPTION_CLIENT_DATA
+	     option is stored with the client as appropriate.</t>
+	  <t>For each of the IA_NA or IA_PD options in the OPTION_CLIENT_DATA option
+	     and for each of the OPTION_IADDR or OPTION_IAPREFIX options in the 
+	     IA_* options:
+	     <list style="numbers">
+		<t>OPTION_F_BINDING_STATUS is stored as the binding-status</t>
+		<t>OPTION_F_NEXT_PARTNER_LIFETIME is stored in the 
+		   failover-expire-time</t>
+		<t>OPTION_F_STATE_EXPIRATION_TIME is stored in the
+		   state-expiration-time</t>
+		<t>OPTION_F_CLT_TIME (which MUST NOT be converted with the
+		   corrected-base-time, but must be converted with the raw
+		   value from the OPTION_LQ_BASE_TIME) is stored
+		   in the partner-raw-clt-time</t>
+		<t>OPTION_F_PARTNER_RAW_CLT_TIME (which MUST NOT be corrected with
+		   the time-correction)
+		   replaces the client-last-transaction-time if it is later
+		   than the current client-last-transaction-time.</t>
+		<t>OPTION_F_FAILOVER_EXPIRE_TIME replaced the failover-partner-lifetime
+		   if it is later than the current failover-partner-lifetime.</t>
+	  </list></t>
+       </list></t>
+
+
+
+
+    </section>
+
+  </section>
+
+  <section anchor="send-bndack" title="Sending Binding Acks">
+
+     <t>A server MUST respond to every BNDUPD message with a BNDACK
+	message.  The BNDACK message MUST contain an OPTION_CLIENT_DATA
+	option corresponding to every OPTION_CLIENT_DATA option in the
+	BNDUPD message.  The BNDACK message MUST have the same xid
+	as the BNDUPD message to which it is a response.
+        Each OPTION_CLIENT_DATA option MUST contain
+	at least the data shown below in its client-options section:
+    <list style="symbols">
+       <t>OPTION_CLIENTID containing the DUID of the client most 
+	  recently associated with this IP address*;</t>
+       <t>OPTION_IA_NA for an IPv6 Address or OPTION_IA_PD for an IPv6 Prefix. More
+	  than one of either of these options MAY appear if there are more 
+	  than one associated with this client;
+	 <list style="symbols">
+	    <t>Inside of the IA_NA-options or IA_PD-option sections:
+	    <list style="symbols">
+	       <t>
+	       OPTION_IAADDR for an IPv6 address or an OPTION_IAPREFIX for a IPv6 prefix;
+	       <list style="symbols">
+		  <t>IPv6 Address or IPv6 Prefix (with length);</t>
+		  <t>Inside of the IAaddr-options or IAprefix-options:
+		  <list style="symbols">
+		     <t>OPTION_STATUS_CODE containing an error code, or
+			containing a success code if a message is required.
+			If the information in the corresponding OPTION_CLIENT_DATA 
+			in the BNDACK was accepted, and no status message was
+			required (which is the usual case), no OPTION_STATUS_CODE 
+			option appears.</t>
+		     <t>OPTION_F_BINDING_STATUS containing the binding-status received
+			in the BNDUPD;</t>
+		     <t>OPTION_F_STATE_EXPIRATION_TIME containing the 
+			state-expiration-time received in the BNDUPD;</t>
+		     <t>OPTION_F_NEXT_PARTNER_LIFETIME (absolute) containing 
+			next-partner-lifetime recevied in the BNDUPD;</t>
+		  </list></t>
+	       </list></t>
+	    </list></t>
+         </list></t>
+    </list>
+    </t>
+
+  </section>
+
+  <section anchor="receive-bndack" title="Receiving Binding Acks">
+
+
+     <t>When a BNDACK is received each OPTION_CLIENT_DATA option
+	is processed separately, and each can either represent an
+	ACK or a NAK.  If a particular OPTION_CLIENT_DATA option
+	does not contain an OPTION_STATUS_CODE option, or if there
+	is an OPTION_STATUS_CODE option which contains a success
+	code, then the OPTION_CLIENT_DATA option represents
+	an acknowledgement (ACK) that the BNDUPD was a success.</t>
+
+     <t>Alternatively, the appearance of an OPTION_STATUS_CODE representing
+	an error in an OPTION_CLIENT_DATA option indicates a NAK of the
+	BNDUPD represented by the OPTION_CLIENT_DATA.</t>
+
+     <t>The information contained in the BNDACK in an OPTION_CLIENT_DATA that
+	represents an ACK is stored with the appropriate client and lease, as follows:
+       <list style="numbers">
+	  <t>The OPTION_CLIENTID is used to find the client.</t>
+	  <t>For each of the IA_NA or IA_PD options in the OPTION_CLIENT_DATA option
+	     and for each of the OPTION_IADDR or OPTION_IAPREFIX options:
+	     <list style="numbers">
+		<t>OPTION_STATUS_CODE if any is examined to see if it indicates
+		   a BNDNAK.  If it indicates a BNDNAK for this client, do not
+		   perform the rest of these steps.</t>
+		<t>OPTION_F_NEXT_PARTNER_LIFETIME_SENT is stored in the 
+		   failover-partner-lifetime</t>
+	  </list></t>
+       </list></t>
+
+       <t>The time next-partner-lifetime is set to 0.</t>
+
+
+  </section>
+
+
     <section anchor="acknowledging-reception" title="Acknowledging Reception">
 
       <t>Upon acceptance of a binding lease, the server MUST notify its partner
-      that it updated its database. A server MUST NOT send the BNDACK before its
-      database is updated. A BNDACK MUST contain at lease the minimum set of information
+      that it updated its binding database. A server MUST NOT send the BNDACK before its
+      binding database is updated. A BNDACK MUST contain at lease the minimum set of information
       required to unambiguously identify the BNDUPD that triggered the BNDACK.</t>
 
     </section>
@@ -1076,11 +2057,9 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
     state, the period is the MCLT from the entry into PARTNER-DOWN
     state.  For resources which are not available when the server
     enters PARTNER-DOWN state, the period is the MCLT after the
-    later of the following times: the potential valid lifetime, the
-    most recently transmitted potential valid lifetime, the most
-    recently received acknowledged potential valid lifetime, and
-    the most recently transmitted acknowledged potential valid
-    lifetime.  If this time would be earlier than the current time
+    later of the following times: the failover-partner-lifetime, the
+    next-partner-lifetime (if any), and the failover-expire-time.
+    If this time would be earlier than the current time
     plus the MCLT, then the time the server entered PARTNER-DOWN
     state plus the maximum-client-lead-time is used.</t>
 
@@ -1109,9 +2088,7 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
     that its partner is aware that that first client is not using
     the resource.</t>
 
-    <t>This could be modeled in the following way.  Though this specific
-    implementation is in no way required, it may serve to better illustrate 
-    the concept.</t>
+    <t>This may be modeled in the following way.</t>
 
     <t>An "available" resource on a server may be allocated to any client.
     A resource which was leased to a client and which expired or was
@@ -1190,6 +2167,10 @@ ABANDONED        reject(4) reject(4) reject(4)  reject(4)    accept
       state machine.  If there is a difference between the words describing a
       particular state and the diagram below, the words should be considered
       authoritative.</t>
+
+      <t>In the diagram below, the word (responsive) or (unresponsive) appers
+      in the states, and refers to whether the server in this state is allowed
+      to respond to client DHCP requests.</t>
 
       <t>In the state transition diagram below, the "+" or "-" in the upper
       right corner of each state is a notation about whether communication is
@@ -1378,13 +2359,17 @@ RECOVER-WAIT--------->+------------------+
 
         <t>Step 4:</t>
 
-        <t>Attempt to create a TCP connection to the failover partner.</t>
+	<t>If the server is a primary server: attempt to create a 
+	   TCP connection to the failover partner.  If the server is
+	   a secondary server, listen on the failover port and wait
+	   for the primary server to connect.  See 
+	   <xref target="create-connections"/>.</t>  
 
         <t>Step 5:</t>
 
         <t>Wait for "communications OK".</t>
 
-        <t>When and if communications become "okay", clear the STARTUP
+        <t>When and if communications become "OK", clear the STARTUP
         flag, and set the current state to the PREVIOUS-STATE.</t>
 
         <t>If the partner is in PARTNER-DOWN state, and if the time
@@ -1402,7 +2387,8 @@ RECOVER-WAIT--------->+------------------+
 
         <t>Step 6:</t>
 
-        <t>If the startup time expires the server SHOULD transition
+	<t>If the startup time expires prior to communications 
+	   becoming "OK", the server SHOULD transition
         to the PREVIOUS-STATE.</t>
 
       </section> <!-- transition-out-of-startup-state -->
@@ -1430,7 +2416,7 @@ RECOVER-WAIT--------->+------------------+
 
         <t>It will allow renewal of all outstanding leases on resources.
         For those resources for which the server is
-        using proportional allocation, it will allocate resources
+        using proportional allocation (i.e. prefixes), it will allocate resources
         from its own pool, and after a fixed period of time (the
         MCLT interval) has elapsed from entry into PARTNER-DOWN
         state, it may allocate IP addresses from the set of all
@@ -1461,6 +2447,7 @@ RECOVER-WAIT--------->+------------------+
 
         <t>In the unlikely case when there are two servers operating
         in a PARTNER-DOWN state, there is a chance of duplicate leases
+	for the same prefix to be
         assigned. This leads to a POTENTIAL-CONFLICT (unresponsive)
         state when they re-establish contact. The duplicate lease
         issue can be postponed to a large extent by the server granting
@@ -1747,7 +2734,7 @@ RECOVER-WAIT--------->+------------------+
 
       <t>In NORMAL state, each server receives binding updates from
       its partner server in BNDUPD messages. It records these in its
-      client binding database in stable storage and then sends a
+      binding database in stable storage and then sends a
       corresponding BNDACK message to its partner server.</t>
 
       </section> <!-- operation-in-normal-state -->
@@ -1883,7 +2870,7 @@ RECOVER-WAIT--------->+------------------+
 
         <!-- this title is too long. That should be a caption field -->
         <figure anchor="state-change-example" title="Transition from NORMAL to
-         COMMUNICATIONS-INTERRUPTED and back (example with 2 addresses
+         COMMUNICATIONS-INTERRUPTED and back (example with 2 prefixes
          allocated to secondary)">
           <artwork><![CDATA[
    Primary                                Secondary
@@ -2425,13 +3412,12 @@ CONFLICT-DONE                                  |
 
   </section>
 
-  <section anchor="reserve" title="Reservations and failover">
-    <!-- issue 10 
-    TODO: Describe how lease reservation works with failover. See
-    Section 5.13 in <xref target="dhcpv4-failover"/>.
+  <!-- RESERVATIONS  
+       This isn't really going to work as written, but it is a whole
+       lot more complicated than this.  Do we want to even deal with
+       this in the draft or just let people work it out?
 
-    Done 10/16/12 Kim
-    -->
+  <section anchor="reserve" title="Reservations and failover">
 
     <t>Some DHCP servers support a capability to offer specific preconfigured 
     resources to DHCP clients.  These are real DHCP
@@ -2483,46 +3469,9 @@ CONFLICT-DONE                                  |
     server with the binding-status FREE and an indication that the
     resource is no longer reserved.</t>
 
-    <!-- 
-    TODO: Should we try to pin down the form of "indication that
-    the resource is (or is not) reserved"?
+  </section>
     -->
 
-  </section>
-
-  <!-- tomek: this is definitely material for protocol draft, not the design
-  draft -->
-  <!--
-  <section anchor="protocol-skeleton" title="Protocol entities">
-    <t>Discussion: It is unclear if following sections belong to
-    design or protocol draft. It is currently kept here as a
-    scratchbook with list of things that will have to be defined
-    eventually. Whether or not it will stay in this document or will be moved to
-    the protocol spec document is TBD.</t>
-
-    <section anchor="options" title="Failover Protocol">
-      <t>This section enumerates list of options that will be defined in
-      failover protocol specification. Rough description of purpose and
-      content for each option is specified. Exact on wire format will be
-      defined in protocol specification.</t>
-      <t><list style="numbers">
-        <t>OPTION_FO_TIMESTAMP - convey information about timestamp. It
-        is used by time skew measurement algorithm (see <xref
-        target="time-skew"/>).</t>
-      </list></t>
-    </section>
-
-    <section anchor="defines" title="Protocol constants">
-      <t>This section enumerates various constants that have to be defined
-      in actual protocol specification.</t>
-      <t><list style="numbers">
-        <t>TIME_SKEW_PKTS_AVG - number of packets that are used to calculate
-        average time skew between partners. See (see <xref
-        target="time-skew"/>).</t>
-      </list></t>
-    </section>
-
-  </section> -->
 
   <section title="Security Considerations">
     <t>DHCPv6 failover is an extension of a standard DHCPv6 protocol, so all
@@ -2571,7 +3520,7 @@ CONFLICT-DONE                                  |
    </t>
 
     <t>
-    <list style="symbols">
+       <list style="symbols">
       <t>BNDUPD (TBD1)</t>
 
       <t>BNDACK (TBD2)</t> 
@@ -2598,6 +3547,46 @@ CONFLICT-DONE                                  |
     </list>
     </t>
 
+   <t>
+   IANA is requested to assign values for the following new DHCPv6
+   Option codes in the registry maintained in 
+   http://www.iana.org/assignments/dhcpv6-parameters:
+
+   <list>
+      <t>OPTION_F_BINDING_STATUS (TBD?)</t>
+      <t>OPTION_F_DNS_INFO (TBD?)</t>
+      <t>OPTION_F_DNS_REMOVAL_INFO (TBD?)</t>
+      <t>OPTION_F_FAILOVER_EXPIRE_TIME (TBD?)</t>
+      <t>OPTION_F_MAX_UNACKED_BNDUPD (TBD?)</t>
+      <t>OPTION_F_MCLT (TBD?)</t>
+      <t>OPTION_F_NEXT_PARTER_LIFETIME (TBD?)</t>
+      <t>OPTION_F_NEXT_PARTNER_LIFETIME (TBD?)</t>
+      <t>OPTION_F_PARTNER_DOWN_TIME (TBD?)</t>
+      <t>OPTION_F_PARTNER_RAW_CLT_TIME (TBD?)</t>
+      <t>OPTION_F_PROTOCOL_VERSION (TBD?)</t>
+      <t>OPTION_F_RECEIVE_TIME (TBD?)</t>
+      <t>OPTION_F_RECONFIGURE_DATA (TBD?)</t>
+      <t>OPTION_F_RELATIONSHIP_NAME (TBD?)</t>
+      <t>OPTION_F_REQUESTED_FQDN (TBD?)</t>
+      <t>OPTION_F_SERVER_FLAGS (TBD?)</t>
+      <t>OPTION_F_SERVER_STATE (TBD?)</t>
+      <t>OPTION_F_START_TIME_OF_STATE (TBD?)</t>
+      <t>OPTION_F_STATE_EXPIRATION_TIME (TBD?)</t>
+   </list>
+
+   </t>
+
+   <t>
+   IANA is requested to assign values for the following new DHCPv6
+   Status codes in the registry maintained in 
+http://www.iana.org/assignments/dhcpv6-parameters:
+   <list> 
+      <t> OneClientDifferentLeases (TBD?)</t>
+      <t>TwoClientClientsSameLease (TBD?)</t>
+      <t>ConfigurationConflict (TBD?)</t>
+   </list>
+   </t>
+
 
   </section>
 
@@ -2621,6 +3610,7 @@ CONFLICT-DONE                                  |
 
   <back>
     <references title="Normative References">
+      <?rfc include='reference.RFC.1035'?>
       <?rfc include='reference.RFC.2119'?>
       <?rfc include='reference.RFC.2136'?>
       <?rfc include='reference.RFC.3315'?>
@@ -2628,13 +3618,14 @@ CONFLICT-DONE                                  |
       <?rfc include='reference.RFC.4703'?>
       <?rfc include='reference.RFC.4704'?>
       <?rfc include='reference.RFC.5007'?>
+      <?rfc include='reference.RFC.5246'?>
       <?rfc include='reference.RFC.5460'?>
       <?rfc include='reference.RFC.7031'?>
     </references>
     <references title="Informative References">
-      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-failover-requirements'?>
       <?rfc include='reference.I-D.ietf-dhc-dhcpv6-failover-design.xml'?>
       <?rfc include='reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
+      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-active-leasequery'?>
       <reference anchor="dhcpv4-failover">
         <front>
           <title>DHCP Failover Protocol</title> <author fullname="Ralph

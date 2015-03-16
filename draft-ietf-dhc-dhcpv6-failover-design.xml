@@ -503,9 +503,11 @@
 
 
 <section title="Connection Management Overview">
+
     <t>Every primary server implementing the failover protocol
     MUST attempt to connect to all of its partners periodically,
     where the period is implementation dependent and SHOULD be
+    configurable. 
     </t>
 
     <t>Every secondary server implementing the failover protocol
@@ -514,7 +516,9 @@
 
     <t>When a connection attempt succeeds, the primary server which
     has initiated the connection attempt MUST send a CONNECT message
-    down the connection.  </t>
+    down the connection.  A secondary server SHOULD respond with
+    a CONNECTACK message indicating its acceptance or rejection of
+    the attempt to connect</t>
 
 
   <section title="Endpoint Identification">
