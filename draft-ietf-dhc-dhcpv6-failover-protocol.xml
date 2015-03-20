@@ -419,7 +419,7 @@
    </t>
   
    <t>
-   The code for this option is TBD14.
+   The code for this option is TBD13.
    </t>
   
    <figure>
@@ -433,7 +433,7 @@
    | binding-status|
    +-+-+-+-+-+-+-+-+
   
-   option-code       OPTION_F_BINDING_STATUS (TBD14).
+   option-code       OPTION_F_BINDING_STATUS (TBD13).
    option-len        1.
    binding-status    The binding status.  See below.
    </artwork>
@@ -529,7 +529,7 @@
    </t>
   
    <t>
-   The code for this option is TBD21.
+   The code for this option is TBD14.
    </t>
   
    <figure>
@@ -543,7 +543,7 @@
    |                          sub-options                          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_DNS_REMOVAL_INFO (TBD21).
+   option-code       OPTION_F_DNS_REMOVAL_INFO (TBD14).
    option-len        4.
    sub-options       Three possible sub-options:
                      OPTION_F_DNS_HOST_NAME
@@ -574,7 +574,7 @@
   
    <t>
    This is a suboption of OPTION_F_DNS_REMOVAL_INFO.
-   The code for this option is 1.
+   The suboption code for this suboption is 1.
    </t>
   
    <figure>
@@ -621,7 +621,7 @@
   
    <t>
    This is a suboption of OPTION_F_DNS_REMOVAL_INFO.
-   The code for this option is 2.
+   The suboption code for this suboption is 2.
    </t>
   
    <figure>
@@ -663,7 +663,7 @@
   
    <t>
    This is a suboption of OPTION_F_DNS_REMOVAL_INFO.
-   The code for this option is 3.
+   The suboption code for this suboption is 3.
    </t>
   
    <figure>
@@ -679,7 +679,31 @@
   
    option-code       OPTION_F_DNS_FLAGS (3).
    option-len        2.
-   flags             TBD.
+   flags             flag bits, see below:
+   </artwork>
+   </figure>
+
+   <figure>
+   <artwork>
+    0 1 2 3 4 5 6 7
+   +-+-+-+-+-+-+-+-+
+   |  MBZ  |U|S|R|F|
+   +-+-+-+-+-+-+-+-+
+
+   The bits (numbered from the least-significant bit in network
+   byte-order) are used as follows:
+ 
+   4 (U): USING_REQUESTED_FQDN
+	  Set to 1 to indicate that name used came from the 
+	  FQDN that was received from the client.
+   5 (S): SYNTHESIZED_NAME
+	  Set to 1 to indicate that the name was synthesized
+	  based on some algorithm.
+   6 (R): REV_UPTODATE
+          Set to 1 to indicate that the reverse zone is up to date.
+   7 (F): FWD_UPTODATE
+          Set to 1 to indicate that the forward zone is up to date.
+   0-3  : Must be zero
    </artwork>
    </figure>
   
@@ -702,7 +726,7 @@
    </t>
   
    <t>
-   The code for this option is TBD17.
+   The code for this option is TBD15.
    </t>
   
    <figure>
@@ -716,7 +740,7 @@
    |                     failover-expire-time                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_FAILOVER_EXPIRE_TIME (TBD17).
+   option-code       OPTION_F_FAILOVER_EXPIRE_TIME (TBD15).
    option-len        4.
    failover-expire-time The failover-expire-time. This MUST be an 
 			absolute time (i.e. seconds since midnight 
@@ -745,7 +769,7 @@
    </t>
   
    <t>
-   The code for this option is TBD18.
+   The code for this option is TBD16.
    </t>
   
    <figure>
@@ -759,7 +783,7 @@
    |                       max-unacked-bndupd                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code        OPTION_F_MAX_UNACKED_BNDUPD (TBD18).
+   option-code        OPTION_F_MAX_UNACKED_BNDUPD (TBD16).
    option-len         4.
    max-unacked-bndupd Maximum number of unacked BNDUPD message 
                       allowed.
@@ -786,7 +810,7 @@
    </t>
   
    <t>
-   The code for this option is TBD19.
+   The code for this option is TBD17.
    </t>
   
    <figure>
@@ -800,7 +824,7 @@
    |                              mclt                             |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_MCLT (TBD19).
+   option-code       OPTION_F_MCLT (TBD17).
    option-len        4.
    mclt              The maximum-client-lease-time, in seconds.
    </artwork>
@@ -829,7 +853,7 @@
    </t>
   
    <t>
-   The code for this option is TBD20.
+   The code for this option is TBD18.
    </t>
   
    <figure>
@@ -843,7 +867,7 @@
    |                     next-partner-lifetime                     |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_NEXT_PARTER_LIFETIME (TBD20).
+   option-code       OPTION_F_NEXT_PARTER_LIFETIME (TBD18).
    option-len        4.
    next-partner-lifetime  The next-partner-lifetime. This MUST be an 
 			  absolute time (i.e. seconds since midnight 
@@ -875,7 +899,7 @@
    </t>
   
    <t>
-   The code for this option is TBD21.
+   The code for this option is TBD19.
    </t>
   
    <figure>
@@ -889,7 +913,7 @@
    |                   next-partner-lifetime-sent                  |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_NEXT_PARTNER_LIFETIME_SENT (TBD21).
+   option-code       OPTION_F_NEXT_PARTNER_LIFETIME_SENT (TBD19).
    option-len        4.
    next-partner-lifetime-sent  The next-partner-lifetime-send. 
 			       This MUST be an absolute time
@@ -919,7 +943,7 @@
    </t>
   
    <t>
-   The code for this option is TBD22.
+   The code for this option is TBD20.
    </t>
   
    <figure>
@@ -933,7 +957,7 @@
    |                       partner-down-time                       |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_PARTNER_DOWN_TIME (TBD22).
+   option-code       OPTION_F_PARTNER_DOWN_TIME (TBD20).
    option-len        4.
    partner-down-time Contains the partner-down-time. This MUST be an 
 		     absolute time (i.e. seconds since midnight 
@@ -964,7 +988,7 @@
    </t>
   
    <t>
-   The code for this option is TBD23.
+   The code for this option is TBD21.
    </t>
   
    <figure>
@@ -978,7 +1002,7 @@
    |                      partner-raw-clt-time                     |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_PARTNER_RAW_CLT_TIME (TBD23).
+   option-code       OPTION_F_PARTNER_RAW_CLT_TIME (TBD21).
    option-len        4.
    partner-raw-clt-time Contains the partner-raw-clt-time. This MUST be an 
 			absolute time (i.e. seconds since midnight 
@@ -1006,7 +1030,7 @@
    </t>
   
    <t>
-   The code for this option is TBD24.
+   The code for this option is TBD22.
    </t>
   
    <figure>
@@ -1020,7 +1044,7 @@
    |                         protocol-version                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_PROTOCOL_VERSION (TBD24).
+   option-code       OPTION_F_PROTOCOL_VERSION (TBD22).
    option-len        4.
    protocol-version  The version of the protocol.
    </artwork>
@@ -1046,7 +1070,7 @@
    </t>
   
    <t>
-   The code for this option is TBD25.
+   The code for this option is TBD23.
    </t>
   
    <figure>
@@ -1060,7 +1084,7 @@
    |                          receive-time                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_RECEIVE_TIME (TBD25).
+   option-code       OPTION_F_RECEIVE_TIME (TBD23).
    option-len        4.
    receive-time      The receive-time.  An interval of seconds.
    </artwork>
@@ -1077,7 +1101,7 @@
    use the reconfigure-key created on the other failover partner.</t>
 
    <t>
-   The code for this option is TBD26.
+   The code for this option is TBD24.
    </t>
   
    <figure>
@@ -1097,7 +1121,7 @@
    .                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_RECONFIGURE_DATA (TBD26).
+   option-code       OPTION_F_RECONFIGURE_DATA (TBD24).
    option-len        4 + length of reconfigure-key.
    reconfigure-time  Time at which reconfigure-key was created.
 		     This MUST be an absolute time (i.e. seconds 
@@ -1125,7 +1149,7 @@
    </t>
   
    <t>
-   The code for this option is TBD26.
+   The code for this option is TBD25.
    </t>
   
    <figure>
@@ -1143,7 +1167,7 @@
    .                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_RELATIONSHIP_NAME (TBD26).
+   option-code       OPTION_F_RELATIONSHIP_NAME (TBD25).
    option-len        0 + length of relationship-name.
    relationship-name A UTF-8 encoded text string suitable for
 		     display to an end user, which MUST NOT be
@@ -1172,7 +1196,7 @@
    </t>
   
    <t>
-   The code for this option is TBD28.
+   The code for this option is TBD26.
    </t>
   
    <figure>
@@ -1186,7 +1210,7 @@
    |  server-flags |
    +-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_SERVER_FLAGS (TBD28).
+   option-code       OPTION_F_SERVER_FLAGS (TBD26).
    option-len        1.
    server-flags      The server flags, see below:
    </artwork>
@@ -1237,7 +1261,7 @@
    </t>
   
    <t>
-   The code for this option is TBD29.
+   The code for this option is TBD27.
    </t>
   
    <figure>
@@ -1251,7 +1275,7 @@
    |  server-state |
    +-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_SERVER_STATE (TBD29).
+   option-code       OPTION_F_SERVER_STATE (TBD27).
    option-len        1.
    server-state      Failover endpoint state.
    </artwork>
@@ -1306,7 +1330,7 @@
    </t>
   
    <t>
-   The code for this option is TBD30.
+   The code for this option is TBD28.
    </t>
   
    <figure>
@@ -1320,7 +1344,7 @@
    |                      start-time-of-state                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_START_TIME_OF_STATE (TBD30).
+   option-code       OPTION_F_START_TIME_OF_STATE (TBD28).
    option-len        4.
    start-time-of-state  The start-time-of-state. This MUST be an 
 			absolute time (i.e. seconds since midnight 
@@ -1349,7 +1373,7 @@
    </t>
   
    <t>
-   The code for this option is TBD31.
+   The code for this option is TBD29.
    </t>
   
    <figure>
@@ -1363,7 +1387,7 @@
    |                     state-expiration-time                     |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_STATE_EXPIRATION_TIME (TBD31).
+   option-code       OPTION_F_STATE_EXPIRATION_TIME (TBD29).
    option-len        4.
    state-expiration-time  The state-expiration-time.  This MUST be an
 			  absolute time (i.e. seconds since midnight 
@@ -1382,22 +1406,22 @@
       The following new status codes are defined, to be used in the
       OPTION_STATUS_CODE option.
    <list style="hanging">
-        <t hangText="OneClientDifferentLeases (TBD?)"> <vspace/>
+        <t hangText="OneClientDifferentLeases (TBD30)"> <vspace/>
 	   The client on one server has resources that conflict with the 
 	   resources that this client has on the other server.</t>
-        <t hangText="AddressInUseByOtherClient (TBD?)"> <vspace/>
+        <t hangText="AddressInUseByOtherClient (TBD31)"> <vspace/>
 	   The one client on one server has leased resources that are in
 	   conflict with the resources that this client has leased on another
 	   server.</t>
-        <t hangText="ConfigurationConflict (TBD?)"> <vspace/>
+        <t hangText="ConfigurationConflict (TBD32)"> <vspace/>
 	   The configuration implied by the information in a BNDUPD
 	   (e.g. the IPV6 address or prefix address)
 	   is in direct conflict with the information known to the
 	   receiving server.</t>
-        <t hangText="MissingBindingInformation (TBD?)"> <vspace/>
+        <t hangText="MissingBindingInformation (TBD33)"> <vspace/>
 	   There is insufficient information in a BNDUPD to effectively
 	   process it.</t>
-        <t hangText="OutdatedBindingInformation (TBD?)"> <vspace/>
+        <t hangText="OutdatedBindingInformation (TBD34)"> <vspace/>
 	   Returned when the information in a server's binding
 	   database conflicts with the information found in an incoming
 	   BNDUPD, and the server believes that the information in
@@ -2688,13 +2712,13 @@ RECOVER-WAIT--------->+------------------+
       all currently unacknowledged binding updates as BNDUPD messages.</t>
 
       <t>When the above process is complete, if the server entering NORMAL
-      state is a secondary server, then it will request resources (addresses
-      and/or prefixes) for allocation using the POOLREQ message.</t>
+      state is a secondary server, then it will request resources (prefixes) 
+      for allocation using the POOLREQ message.</t>
 
       <section anchor="operation-in-normal-state"
                title="Operation in NORMAL State">
 
-      <t>Primary server is responsive in NORMAL state. Secondary is
+      <t>The primary server is responsive in NORMAL state. The secondary is
       unresponsive in NORMAL state.</t>
 
         <t>When in NORMAL state a primary server will operate in the following manner:
@@ -3547,31 +3571,30 @@ CONFLICT-DONE                                  |
     </list>
     </t>
 
+
    <t>
    IANA is requested to assign values for the following new DHCPv6
    Option codes in the registry maintained in 
    http://www.iana.org/assignments/dhcpv6-parameters:
 
    <list>
-      <t>OPTION_F_BINDING_STATUS (TBD?)</t>
-      <t>OPTION_F_DNS_INFO (TBD?)</t>
-      <t>OPTION_F_DNS_REMOVAL_INFO (TBD?)</t>
-      <t>OPTION_F_FAILOVER_EXPIRE_TIME (TBD?)</t>
-      <t>OPTION_F_MAX_UNACKED_BNDUPD (TBD?)</t>
-      <t>OPTION_F_MCLT (TBD?)</t>
-      <t>OPTION_F_NEXT_PARTER_LIFETIME (TBD?)</t>
-      <t>OPTION_F_NEXT_PARTNER_LIFETIME (TBD?)</t>
-      <t>OPTION_F_PARTNER_DOWN_TIME (TBD?)</t>
-      <t>OPTION_F_PARTNER_RAW_CLT_TIME (TBD?)</t>
-      <t>OPTION_F_PROTOCOL_VERSION (TBD?)</t>
-      <t>OPTION_F_RECEIVE_TIME (TBD?)</t>
-      <t>OPTION_F_RECONFIGURE_DATA (TBD?)</t>
-      <t>OPTION_F_RELATIONSHIP_NAME (TBD?)</t>
-      <t>OPTION_F_REQUESTED_FQDN (TBD?)</t>
-      <t>OPTION_F_SERVER_FLAGS (TBD?)</t>
-      <t>OPTION_F_SERVER_STATE (TBD?)</t>
-      <t>OPTION_F_START_TIME_OF_STATE (TBD?)</t>
-      <t>OPTION_F_STATE_EXPIRATION_TIME (TBD?)</t>
+      <t>OPTION_F_BINDING_STATUS (TBD13)</t>
+      <t>OPTION_F_DNS_REMOVAL_INFO (TBD14)</t>
+      <t>OPTION_F_FAILOVER_EXPIRE_TIME (TBD15)</t>
+      <t>OPTION_F_MAX_UNACKED_BNDUPD (TBD16)</t>
+      <t>OPTION_F_MCLT (TBD17)</t>
+      <t>OPTION_F_NEXT_PARTNER_LIFETIME (TBD18)</t>
+      <t>OPTION_F_NEXT_PARTNER_LIFETIME_SENT (TBD19)</t>
+      <t>OPTION_F_PARTNER_DOWN_TIME (TBD20)</t>
+      <t>OPTION_F_PARTNER_RAW_CLT_TIME (TBD21)</t>
+      <t>OPTION_F_PROTOCOL_VERSION (TBD22)</t>
+      <t>OPTION_F_RECEIVE_TIME (TBD23)</t>
+      <t>OPTION_F_RECONFIGURE_DATA (TBD24)</t>
+      <t>OPTION_F_RELATIONSHIP_NAME (TBD25)</t>
+      <t>OPTION_F_SERVER_FLAGS (TBD26)</t>
+      <t>OPTION_F_SERVER_STATE (TBD27)</t>
+      <t>OPTION_F_START_TIME_OF_STATE (TBD28)</t>
+      <t>OPTION_F_STATE_EXPIRATION_TIME (TBD29)</t>
    </list>
 
    </t>
@@ -3581,9 +3604,11 @@ CONFLICT-DONE                                  |
    Status codes in the registry maintained in 
 http://www.iana.org/assignments/dhcpv6-parameters:
    <list> 
-      <t> OneClientDifferentLeases (TBD?)</t>
-      <t>TwoClientClientsSameLease (TBD?)</t>
-      <t>ConfigurationConflict (TBD?)</t>
+      <t>OneClientDifferentLeases (TBD30)</t>
+      <t>AddressInUseByOtherClient (TBD31)</t>
+      <t>ConfigurationConflict (TBD32)</t>
+      <t>MissingBindingInformation (TBD33)</t>
+      <t>OutdatedBindingInformation (TBD34)</t>
    </list>
    </t>
 
