@@ -33,7 +33,7 @@
       <organization abbrev="Cisco">Cisco Systems, Inc.</organization>
       <address>
         <postal>
-          <street>1414 Massachusetts Ave.</street>
+          <street>1414 Massachusetts Avenue</street>
           <city>Boxborough</city>
           <region>Massachusetts</region>
           <code>01719</code>
@@ -52,24 +52,14 @@
     <keyword>Failover</keyword>
 
     <abstract>
-      <t>DHCPv6 defined in <xref target="RFC3315"/> does not offer
+      <t>DHCPv6 defined in "Dynamic Host Configuration Protocol
+      for IPv6 (DHCPv6)" does not offer
       server redundancy. This document defines a specific protocol
       implementation to provide for DHCPv6 failover, a mechanism for 
       running two servers on the same network with capability 
       for either server to take over clients' leases in case of server failure or network partition.  
-      This is the third in a series of documents documenting 
-      DHCPv6 Failover.
-      DHCPv6 failover requirements are
-      specified in <xref target="RFC7031"/>.  
-      Design considerations are documented in 
-      <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
-      One could implement the DHCPv6 Failover protocol by
-      referring only to the current document and not the design document,
-      as the current document explains the details of the protocol.  
-      However, the
-      design document explains "why" the protocol operates as
-      it does, making it required reading for someone implementing the
-      failover protocol described in this document.
+      It meets the requirements for DHCPv6 failover detailed in
+      "DHCPv6 Failover Requirements".
       </t>
     </abstract>
   </front>
@@ -89,84 +79,138 @@
 
       <list style="symbols">
 
-        <t>auto-partner-down - a capability where a failover server
-        will move from COMMUNICATIONS-INTERRUPTED state to 
-        PARTNER-DOWN state automatically, without operator intervention.</t>
+        <t>Absolute Time
+        <vspace blankLines="1" />
+        The time in seconds since midnight January 1, 2000 UTC,
+        modulo 2^32).
+        </t>
 
-        <t>DDNS - Dynamic DNS.  Typically used as an acronym referring to
-        dynamic update of the DNS.</t> 
+        <t>auto-partner-down
+        <vspace blankLines="1" />
+        A capability where a failover server will move from
+        COMMUNICATIONS-INTERRUPTED state to PARTNER-DOWN state
+        automatically, without operator intervention.
+        </t>
 
-        <t>Failover endpoint - The failover protocol allows for
-        there to be a unique failover 'endpoint' for each failover
-        relationship in which a failover server participates.  The
-        failover relationship is defined by a relationship name,
-        and includes the failover partner IP address, the role this
-        server takes with respect to that partner (primary or
-        secondary), and the prefixes associated with that relationship.
-        Note that a single prefix can only be associated with a
-        single failover relationship.  This failover endpoint can
-        take actions and hold unique states.  Typically, there is
-        one failover endpoint per partner (server), although there
-        may be more.  'Server' and 'failover endpoint' are synonymous
-        only if the server participates in only one failover
-        relationship. However, for the sake of simplicity 'Server'
-        is used throughout the document to refer to a failover
-        endpoint unless to do so would be confusing.</t>
+        <t>DDNS
+        <vspace blankLines="1" />
+        Dynamic DNS. Typically used as an acronym referring to
+        dynamic update of the DNS.
+        </t>
 
-        <t>Failover communication - all messages exchanged between
-        partners.</t>
+        <t>Delegable Prefix
+        <vspace blankLines="1" />
+        A prefix from which other prefixes may be delegated, as 
+        described in <xref target="RFC3633"/>.
+        </t>
 
-        <t>Independent Allocation - an allocation algorithm
+        <t>Failover endpoint
+        <vspace blankLines="1" />
+	The failover protocol allows for there to be a unique
+	failover 'endpoint' for each failover relationship in which
+	a failover server participates.  The failover relationship
+	is defined by a relationship name, and includes the failover
+	partner IP address, the role this server takes with respect
+	to that partner (primary or secondary), and the prefixes
+	associated with that relationship.  The failover endpoint
+	can take actions and hold unique states.  Typically, there
+	is one failover endpoint per partner (server), although
+	there may be more.
+        </t>
+
+        <t>Failover communication
+        <vspace blankLines="1" />
+        All messages exchanged between
+        partners.
+        </t>
+
+        <t>Independent Allocation
+        <vspace blankLines="1" />
+        An allocation algorithm
         that splits the available pool of resources between the primary
         and secondary servers that is particularly well suited for
         vast pools (i.e. when available resources are not expected
-        to deplete). 
-        See <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>
-        for details.
+        to deplete).  It is used for IPv6 address allocations.
+        See <xref target="alloc-independent"/>.
         </t>
 
-        <t>Lease - an association of a DHCPv6 client with an IPv6 
-        address or delegated prefix.</t>
+        <t>Lease
+        <vspace blankLines="1" />
+        An association of a DHCPv6 client with an IPv6
+        address or delegated prefix.
+        </t>
 
-        <t>Partner - name of the other DHCPv6 server that participates
+        <t>MCLT
+        <vspace blankLines="1" />
+        Maximum Client Lead Time.
+        The fundamental relationship on which much of the correctness
+        of this protocol depends is that the lease expiration time
+        known to a DHCPv6 client MUST NOT be greater by more than the MCLT
+        beyond the partner lifetime time acknowledged by that servers's
+        failover partner.  See <xref target="mclt"/>.
+        </t>
+
+        <t>Partner
+        <vspace blankLines="1" />
+        Name of the other DHCPv6 server that participates
         in failover relationship. When the role (primary or secondary)
         is not important, the other server is referred to as a "failover
-        partner" or simply partner.</t>
-
-        <t>Primary Server - First out of two DHCPv6 servers that participate
-        in a failover relationship. In active-passive mode this is the
-        server that handles most of the client traffic. Its failover partner
-        is referred to as secondary server. </t>
-
-        <t>Proportional Allocation - an allocation algorithm
-        that splits the available resources between
-        the primary and secondary servers and maintains proportions between
-        available resources on both. It is particularly well suited for more
-        limited resources.  
-        See <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>
-        for details.
+        partner" or somtimes simply "partner".
         </t>
 
-        <t>Resource - Any type of resource that is managed by
+        <t>Primary Server
+        <vspace blankLines="1" />
+        First out of two DHCPv6 servers that participate
+        in a failover relationship. When both servers are operating this 
+        server handles most of the client traffic. Its failover partner
+        is referred to as secondary server. 
+        </t>
+
+        <t>Proportional Allocation
+        <vspace blankLines="1" />
+	An allocation algorithm that splits the available resources
+	between the primary and secondary servers and maintains a
+	more or less fixed proportion of the available resources
+	between both servers. It is particularly well suited for
+	more limited resources.  It is used for allocations of
+	delegated prefixes.  See <xref target="alloc-prop"/>.  
+	</t>
+
+        <t>Resource
+        <vspace blankLines="1" />
+        Any type of resource that is managed by
         DHCPv6. Currently there are three types of such resources
         defined: a non-temporary IPv6 address, a temporary IPv6 address,         
-        and an IPv6 prefix. Other resource types may
-        be defined in the future.</t>
+        and an IPv6 delegated prefix.   Only the non-temporary IPv6 addresses and IPv6
+        delegated prefixes are involved in DHCPv6 failover.
+        </t>
 
-        <t>Responsive - A server that is responsive, will respond to
-        DHCPv6 client requests.</t>
+        <t>Responsive
+        <vspace blankLines="1" />
+        A server that is responsive will respond to DHCPv6 client requests.
+        </t>
 
-        <t>Secondary Server - Second of two DHCPv6 servers that participate
-        in a failover relationship. Its failover partner is referred to as
-        the primary server. In active-passive mode this server (the secondary)
-        typically does not handle client traffic and acts as a backup.</t>
+        <t>Secondary Server
+        <vspace blankLines="1" />
+        Second of two DHCPv6 servers that participate in a failover
+        relationship. Its failover partner is referred to as the
+        primary server. When both servers are operating this server (the
+        secondary) typically does not handle client traffic and
+        acts as a backup to the primary server.
+        </t>
 
-        <t>Server - A DHCPv6 server that implements DHCPv6 failover.
+        <t>Server
+        <vspace blankLines="1" />
+         A DHCPv6 server that implements DHCPv6 failover.
         'Server' and 'failover endpoint' are synonymous only if the
-        server participates in only one failover relationship. </t>
+        server participates in only one failover relationship. 
+        </t>
 
-        <t>Unresponsive - A server that is unresponsive will not
-        respond to DHCPv6 client requests.</t>
+        <t>Unresponsive
+        <vspace blankLines="1" />
+        A server that is unresponsive will not
+        respond to DHCPv6 client requests.
+        </t>
 
       </list>
       </t>
@@ -186,70 +230,467 @@
       reassignment of a lease to a different IPv6 address (or prefix) 
       in the event of failure by one or the other of the two servers.</t>
 
-      <t>This protocol defines active-passive mode, sometimes also
+      <t>This protocol defines an active-passive mode, sometimes also
       called a hot standby model. This means that during normal
       operation one server is active (i.e. actively responds to
       clients' requests) while the second is passive (i.e. it 
       receives clients' requests, but does not respond to them and only
       maintains a copy on the binding database and is ready to take over
       incoming queries in case of primary server
-      failure). Active-active mode (i.e. both servers actively
-      handling clients' requests) is currently not supported for the
-      sake of simplicity. Such a mode is likely to be defined as an
-      extension at a later time and will probably be based on <xref
-      target="I-D.ietf-dhc-dhcpv6-load-balancing" />.</t>
+      failure). 
+      </t>
 
       <t>The failover protocol is designed to provide lease stability
       for leases with lease times beyond a short period.  Due in part to the
       additional overhead required as well as requirements to handle
       time skew between failover partners 
-      (See <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>)
+      (See <xref target="time-skew"/>)
       failover is not suitable for leases shorter than 30 seconds. 
       The DHCPv6 Failover protocol MUST NOT be used for leases shorter 
       than 30 seconds.</t>
 
-      <t>This protocol attempts to fulfill all DHCPv6 failover requirements
-      defined in <xref target="RFC7031"/> as well as following the design
-      approach documented in 
-      <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
+      <t>This protocol fulfills all DHCPv6 failover requirements
+      defined in <xref target="RFC7031"/>. 
       </t>
 
     </section> 
 
-<section title="Design Decisions">
-
-   <t>The DHCPv6 failover design <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
-   offered several approaches to be used to deal with some issues, and discusses the
-   pros and cons of each.  This document needs to be specific with respect to some of
-   these approaches. The following design decisions have therefore been taken as part
-   of the process of producing this document:
-   <list style="hanging">
-        <t hangText="Resource Allocation"> <vspace/>
-           Section 6 of <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>.
-           discusses two alloction algorithms: proportional and independent.
-           Proportional allocation is used for delegated prefixes, and 
-           independent allocation is used for IP address allocation.</t>
-   </list>
-   </t>
+<section title="Failover Concepts and Mechanisms">
 
 
-</section>
+    <section anchor="configuration" title="Required Server Configuration">
+
+      <t>Servers frequently have several kinds of resources available
+      on a particular network segment.  The failover protocol assumes
+      that both primary and secondary servers are configured identically
+      with regard to the prefixes and links involved in DHCPv6.
+      For delegated prefixes (involved in proportional allocation)
+      the primary server is responsible for allocating to the secondary
+      server the correct proportion of the available delegated prefixes.
+      IPv6 addresses (involved in independent allocation) are allocated
+      to the primary and secondary servers algorithmically, and do not
+      require an explicit message transfer to be distributed.
+      </t>
+
+    </section>
+
+    <section title="IPv6 Address and Delegable Prefix Allocation">
+
+      <t>Currently there are two allocation algorithms defined for
+      resources (IPv6 addresses or delegable prefixes). 
+      </t>
+
+      <section anchor="alloc-independent" title="Independent Allocation">
+
+        <t>In this allocation scheme, used for allocating individual
+        DHCPv6 IPv6 addresses, available IPv6 addresses are permanently
+        (until server configuration changes) split between servers.
+        Available IPv6 addresses are split between the primary and
+        secondary servers as part of initial connection establishment.
+        Once IPv6 addresses are allocated to each server, there is
+        no need to reassign them.  The IPv6 address allocation is
+        algorithmic in nature, and does not require a message
+        exchange for each IPv6 address allocated.  This algorithm
+        is simpler than proportional allocation since it does not
+        require a rebalancing mechanism. It assumes that the pool
+        assigned to each server will never deplete. 
+	</t>
+
+        <t>Once each server is assigned a pool of IPv6 addresses
+        during initial connection establishment, it may allocate
+        its assigned IPv6 addresses to clients. Once a client
+        releases a resource or its lease on an IPv6 address expires,
+        the returned IPv6 address returns to the pool for the server
+        that leased it.  A lease on an IPv6 address can be renewed
+	by any responsive server.  When an IPv6 address goes FREE*
+	it is owned by whichever server it is allocated to by
+	the independent allocation algorithm.</t>
+
+        <t>IPv6 addresses (which use the independent allocation
+        approach) are ignored when a server processes a POOLREQ
+        message.</t>
+
+        <t>During COMMUNICATION-INTERRUPTED events, a partner MAY
+        continue extending existing leases when requested by clients.
+        A healthy partner MUST NOT lease IPv6 addresses that were assigned
+        to its downed partner and later released by a client unless it
+        is in PARTNER-DOWN state.  When it is in PARTNER-DOWN state, a
+        server SHOULD use its own pool first and then it can start
+        making new assignments from its downed partner's pool. 
+        </t>
+
+        <section anchor="independent-algorithm" title="Independent Allocation Algorithm">
+
+	<t>
+	For every prefix from which IPv6 addresses can be allocated,
+	the primary server MUST allocate only IPv6 addresses
+	when the low-order bit (i.e., bit 15) is equal to 1, and
+	the secondary server MUST allocate only the IPv6 addresses
+	when the low-order bit (i.e., bit 15) is equal to 0.
+	</t>
+
+	</section>
+
+        </section>
+
+      <section anchor="alloc-prop" title="Proportional Allocation">
+
+        <t>In this allocation scheme, each server has its own pool
+        of prefixes available for delegation. Remaining available
+        delegeable prefixes are split between the primary and
+        secondary servers in a configured proportion.  Note that a
+        delegable prefix is not "owned" by a particular server
+        throughout its entire lifetime.  Only a delegable prefix
+        which is available is "owned" by a particular server --
+        once it has been leased to a client, it is not owned by
+        either failover partner.  When it finally becomes available
+        again, it will be owned initially by the primary server,
+        and it may or may not be allocated to the secondary server
+        by the primary server.</t>
+
+        <t>The flow of a delegable prefix is as follows: initially
+        a delegable prefix is owned by the primary server.  It
+        may be allocated to the secondary server if it is available,
+        and then it is owned by the secondary server.  Either server
+        can allocate available delegable prefixes which they own
+        to clients, in which case they cease to own them.  When the
+        client releases the delegated prefix or the lease on it
+        expires, it will again become available and will be owned
+        by the primary.</t>
+
+        <t>Pools governed by proportional allocation are used for
+        allocation when the server is in all states, except
+        PARTNER-DOWN.  In PARTNER-DOWN state the operational partner
+        can allocate from either pool (both its own, and its partner's
+        after some time constraints have elapsed). The allocation
+        and maintenance of these address pools is important, since 
+	the goal is to maintain a more or less
+        constant ratio of available addresses between the two
+        servers.</t>
+
+        <t>The initial allocation when the servers first integrate
+        is triggered by the POOLREQ message from the secondary to
+        the primary.  This is followed (at some point) by the
+        POOLRESP message where the primary tells the secondary that
+        it received and processed the POOLREQ message.  The primary
+        sends the allocated delegable prefixes to the secondary
+        via BNDUPD messages.  The POOLRESP message may be sent
+        before, during, or at the completion of the BNDUPD message
+        exchanges that were triggered by the POOLREQ message.  The
+        POOLREQ/POOLRESP message exchange is a trigger to the primary
+        to perform a scan of its database and to ensure that the
+        secondary has enough delegable prefixes (based on some
+        configured ratio).</t>
+
+        <t>The delegable prefixes are sent to the secondary using
+        the BNDUPD message with a state of FREE_BACKUP, which
+        indicates the delegable prefix is now available for
+        allocation by the secondary.  Once the message is sent, the
+        primary MUST NOT use these prefixes for allocation to DHCPv6
+        clients.</t>
+
+        <t>The POOLREQ/POOLRESP message exchange initiated by the
+        secondary is valid at any time both partners remain in
+        contact, and the primary server SHOULD, whenever it receives
+        the POOLREQ message, scan its database of prefixes and
+        determine if the secondary needs more delegable prefixes
+        from any of the delegable prefixes which it currently
+        owns. </t>
+
+        <t>In order to support a reasonably dynamic balance of the
+        resources between the failover partners, the primary server
+        needs to do additional work to ensure that the secondary
+        server has as many delegable prefixes as it needs (but
+        that it doesn't have more than it needs).</t>
+
+        <t>The primary server SHOULD examine the balance of delegable
+        prefixes between the primary and secondary for a particular
+        prefix whenever the number of available prefixes for either
+        the primary or secondary changes by more than a configured
+        limit.  The primary server SHOULD adjust the delegable
+        prefix balance as required to ensure the configured delegable
+        prefix balance, excepting that the primary server SHOULD
+        employ some threshold mechanism to such a balance adjustment
+        in order to minimize the overhead of maintaining this
+        balance.</t>
+
+        <t>An example of a threshold approach is: do not attempt
+        to re-balance the prefixes on the primary and secondary
+        until the out of balance value exceeds a configured value.</t>
+
+        <t>The primary server can, at any time, send an available
+        delegable prefix to the secondary using a BNDUPD with the
+        state FREE_BACKUP.  The primary server can attempt to take
+        an available delegable prefix away from the secondary by
+        sending a BNDUPD with the state FREE.  If the secondary
+        accepts the BNDUPD, then the resource is now available to
+        the primary and not available to the secondary.  Of course,
+        the secondary MUST reject that BNDUPD if it has already
+        used that resource for a DHCPv6 client.</t>
+
+        <section anchor="reallocation" title="Re-allocating Leases">
+
+          <t>When in PARTNER-DOWN state there is a waiting period
+          after which a delegated prefix can be re-allocated to
+          another client.  For delegable prefixes which are
+          available when the server enters PARTNER-DOWN state, the
+          period is the MCLT from the entry into PARTNER-DOWN state.
+          For delegated prefixes which are not available when the
+          server enters PARTNER-DOWN state, the period is the MCLT
+          after the later of the following times: the
+          acked-partner-lifetime, the partner-lifetime (if
+          any), and the expiration-time.  If this time would
+          be earlier than the current time plus the MCLT, then the
+          time the server entered PARTNER-DOWN state plus the
+          maximum-client-lead-time is used.</t>
+
+          <!-- I don't think we want to discuss these paragraphs from the
+           v4 draft.  Experience shows that nobody wants to live with MCLT
+           restrictions in PARTNER-DOWN state.
+
+          Two options exist for lease times given out while in PARTNER-DOWN
+          state, with different ramifications flowing from each.
+
+          If the server wishes the Failover protocol to protect it from loss of
+          stable storage in PARTNER-DOWN state, then it should ensure that the
+          MCLT based lease time restrictions in section 5.1 are maintained,
+          even in PARTNER-DOWN state.
+
+          If the server wishes to forego the protection of the Failover proto-
+          col in the event of loss of stable storage, then it need recognize no
+          restrictions on actual client lease times while in PARTNER-DOWN
+          state.
+
+          -->
+
+          <t>In any other state, a server cannot reallocate a
+          delegated prefix from one client to another without first
+          notifying its partner (through a BNDUPD message) and
+          receiving acknowledgement (through a BNDACK message) that
+          its partner is aware that the first client is not using
+          the resource.</t>
+
+          <t>This may be modeled in the following way.</t>
+
+          <t>An "available" delegable prefix on a server may be
+          allocated to any client.  A prefix which was delegated
+          (leased) to a client and which expired or was released
+          by that client would take on a new state, EXPIRED or
+          RELEASED respectively.  The partner server would then be
+          notified that this delegated prefix was EXPIRED or RELEASED
+          through a BNDUPD.  When the sending server received the
+          BNDACK for that delegated prefix showing it was FREE, it
+          would move the resource from EXPIRED or RELEASED to FREE,
+          and it would be available for allocation by the primary
+          server to any clients.</t>
+
+          <t>A server MAY reallocate a delegated prefix in the
+          EXPIRED or RELEASED state to the same client with no
+          restrictions provided it has not sent a BNDUPD message
+          to its partner.  This situation would exist if the lease
+          expired or was released after the transition into
+          PARTNER-DOWN state, for instance.</t>
+
+        </section>
+
+      </section>
+
+    </section> <!-- address allocation -->
+
+    <section anchor="lazy-updates" title="Lazy Updates">
+
+      <t>The DHCPv6 Failover Requirements document includes the
+      requirement that failover must not introduce significant
+      performance impact on server response times (See Sections 7
+      and 5.2.2 of <xref target="RFC7031"/> ).  In order to realize
+      this requirement a server implementing the failover protocol
+      must be able respond to a DHCPv6 client without waiting to
+      update its failover partner whenever the binding database
+      changes.  The lazy update mechanism allows a server to allocate
+      a new lease or extend an existing lease, respond to the DHCPv6
+      client, and then update its failover partner as time permits.
+      </t>
+
+      <t>Although the lazy update mechanism does not introduce
+      additional delays in server response times, it introduces
+      other difficulties.  The key problem with lazy update is that
+      when a server fails after updating a DHCPv6 client with a
+      particular lease time and before updating its failover partner,
+      the failover partner will eventually believe that the client's
+      lease has expired -- even though the DHCPv6 client still
+      retains a valid lease on that address or prefix.  It is also
+      possible that the failover partner will have no record at all
+      of the lease of the resource to the DHCPv6 client.  Both of these
+      issues are dealt with by use of the MCLT when allocating or
+      extending leases (see <xref target="mclt"/>).
+     </t>
+
+    </section>
+
+    <section anchor="mclt" title="Maximum Client Lead Time (MCLT)">
+      <t>In order to handle problems introduced by lazy updates (see
+      <xref target="lazy-updates"/>), a period of time known as the
+      "Maximum Client Lead Time" (MCLT) is defined and must be known
+      to both the primary and secondary servers.  Proper use of this
+      time interval places an upper bound on the difference allowed
+      between the lease time provided to a DHCPv6 client by a server and
+      the lease time known by that server's failover partner.
+      </t>
+
+      <t>The MCLT is typically much less than the lease time that
+      a server has been configured to offer a client, and so some
+      strategy must exist to allow a server to offer the configured
+      lease time to a client.  During a lazy update the updating
+      server updates its failover partner with a partner lifetime 
+      which is longer than the lease time previously given to the
+      DHCPv6 client and which is longer than the lease time that the server
+      has been configured to give a client.  This allows the server
+      to give the configured lease time to the client the next time
+      the client renews its lease, since the time that it will give
+      to the client will not be longer than the MCLT beyond the
+      partner lifetime acknowledged by its partner.</t>
+
+      <t>The fundamental relationship on which this protocol depends is: 
+      the lease expiration time known
+      to a DHCPv6 client MUST NOT be greater by more than the MCLT
+      beyond the partner lifetime acknowledged by that server's
+      failover partner.</t>
+
+      <t>The remainder of this section makes the above fundamental
+      relationship more explicit.</t>
+
+      <t>This protocol requires a DHCPv6 server to deal with several
+      different lease intervals and places specific restrictions on
+      their relationships. The purpose of these restrictions is to
+      allow the other server in the pair to be able to make certain
+      assumptions in the absence of an ability to communicate between
+      servers.</t>
+
+      <t>
+      In the following explanation, all of the lifetimes are "valid"
+      lifetimes, in the context of <xref target="RFC3315"/>.
+      </t>
+
+      <t>The different times are:
+      <list style="hanging">
+        <t hangText="desired lifetime:">
+          <vspace/>
+          The desired lifetime is the lease interval that a
+          DHCPv6 server would like to give to a DHCPv6 client in
+          the absence of any restrictions imposed by the failover
+          protocol.  Its determination is outside of the scope of
+          this protocol. Typically this is the result of external
+          configuration of a DHCPv6 server.
+        </t>
+
+        <t hangText="actual lifetime:">
+          <vspace/>
+          The actual lifetime is the lease interval that a
+          DHCPv6 server gives out to a DHCPv6 client.  It may be
+          shorter than the desired lifetime (as explained
+          below).
+        </t>
+
+        <t hangText="partner lifetime:">
+          <vspace/>
+          The partner lifetime is the lease
+          expiration interval the local server tells to its partner
+          in a BNDUPD message.
+        </t>
+
+        <t hangText="acknowledged partner lifetime:">
+          <vspace/>
+          The acknowledged partner lifetime is the partner 
+          lifetime the partner server has most recently
+          acknowledged in a BNDACK message.
+        </t>
+
+      </list>
+      </t>
+
+   <section title="MCLT example">
+     <t>The following example demonstrates the MCLT concept in practice. The
+     values used are arbitrarily chosen and are not a recommendation for
+     actual values. The MCLT in this case is 1 hour.  The desired 
+     lifetime is 3 days, and its renewal time is half the lifetime.</t>
+
+     <t>When a server makes an offer for a new lease on an IPv6 address to a
+     DHCPv6 client, it determines the desired lifetime (in this
+     case, 3 days).  It then examines the acknowledged partner 
+     lifetime (which in this case is zero) and determines the remainder
+     of the time left to run, which is also zero.  It adds the
+     MCLT to this value.  Since the actual lifetime cannot be allowed to exceed
+     the remainder of the current acknowledged partner lifetime
+     plus the MCLT, the offer made to the client is for the remainder
+     of the current acknowledged partner lifetime (i.e. zero)
+     plus the MCLT.  Thus, the actual lifetime is 1 hour (the MCLT).</t>
+
+     <t>Once the server has sent the REPLY to the DHCPv6 client, it
+     will update its failover partner with the lease information using
+     a BNDUPD message.
+     However, the desired partner lifetime will be composed of one
+     half of the current actual lifetime added to the desired
+     lifetime. Thus, the failover partner is updated with a
+     BNDUPD with a partner lifetime of 1/2 hour + 3 days.</t>
+
+     <t>When the primary server receives a BNDACK to its update of
+     the secondary server's (partner's) partner lifetime,
+     it records that as the acknowledged partner lifetime.
+     A server MUST NOT send a BNDACK in response to a BNDUPD message
+     until it is sure that the information in the BNDUPD message
+     has been updated in its lease database.  See <xref
+     target="acknowledging-reception"/>.  Thus, the primary server
+     in this case can be sure that the secondary server has recorded
+     the parnter lease interval in its stable storage when the
+     primary server receives a BNDACK message from the secondary
+     server.</t>
+
+     <t>When the DHCPv6 client attempts to renew at T1 (approximately one
+     half an hour from the start of the lease), the primary server
+     again determines the desired lifetime, which is still 3
+     days.  It then compares this with the original acknowledged
+     partner lifetime (1/2 hour + 3 days) and adjusts for the
+     time passed since the secondary was last updated (1/2 hour).  Thus
+     the time remaining of the acknowledged partner interval is
+     3 days.  Adding the MCLT to this yields 3 days plus 1 hour, which
+     is more than the desired lifetime of 3 days.  So the client
+     may have its lease renewed for the desired lifetime -- 3 days.</t>
+
+     <t>When the primary DHCPv6 server updates the secondary DHCPv6 server
+     after the DHCPv6 client's renewal REPLY is complete, it will calculate
+     the desired partner lifetime as the T1 fraction of the
+     actual client lifetime (1/2 of 3 days this time = 1.5 days).
+     To this it will add the desired client lifetime of 3 days,
+     yielding a total desired partner lifetime of 4.5
+     days.  In this way, the primary attempts to have the secondary
+     always "lead" the client in its understanding of the client's
+     lifetime so as to be able to always offer the client the
+     desired client lifetime.</t>
+
+     <t>Once the initial actual client lifetime of the MCLT is past,
+     the protocol operates effectively like the DHCPv6 protocol does
+     today in its behavior concerning lifetimes. However, the
+     guarantee that the actual client lifetime will never exceed
+     the remaining acknowledged partner server partner lifetime by more
+     than the MCLT allows full recovery from a variety of DHCPv6 server failures.</t>
+   </section>
+   </section>
+
+ </section>
 
 
 <section title="Message and Option Definitions">
 
   <section anchor="msg-framing" title="Message Framing for TCP">
 
-    <t>
-    Failover
-    communication is conducted over a TCP connection established between the
-    partners. The protocol reuses the framing format specified in Section 5.1 of
-    <xref target="RFC5460">DHCPv6 Bulk Leasequery</xref>, but uses different
-    message types with a different message format, described in 
-    <xref target="msg-format"/>.  
-    All information is sent over the connection as typical
-    DHCPv6 messages that convey DHCPv6 options, following the format defined in
-    Section 22.1 of <xref target="RFC3315"/>.
+    <t> Failover communication is conducted over a TCP connection
+    established between the partners. The protocol uses the framing
+    format specified in Section 5.1 of <xref target="RFC5460">DHCPv6
+    Bulk Leasequery</xref>, but uses different message types with
+    a different message format, described in <xref target="msg-format"/>.
+    All information is sent over the connection as typical DHCPv6
+    messages that convey DHCPv6 options, following the format defined
+    in Section 22.1 of <xref target="RFC3315"/>. 
     </t>
 
   </section>
@@ -264,8 +705,9 @@
    </t>
 
    <t>
-   The following diagram illustrates the format of DHCP messages exchanged
-   between failover partners:
+   The following diagram illustrates the format of DHCPv6 messages exchanged
+   between failover partners (which is compatible with the format described
+   in Section 6 of <xref target="RFC3315"/>):
    </t>
 
    <figure>
@@ -283,7 +725,7 @@
    .                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   msg-type             Identifies the DHCP message type; the
+   msg-type             Identifies the DHCPv6 message type; the
                         available message types are listed in
                         below.
 
@@ -311,43 +753,52 @@
     </t>
 
     <section anchor="msg-bndupd" title="BNDUPD">
-      <t> The binding update message BNDUPD (TBD1) is used to send the binding lease
-      changes to the partner. One message may contain one or more lease
-      updates. The partner is expected to respond with a BNDACK message.  </t>
+      <t> The binding update message BNDUPD (TBD1) is used to send
+      the binding lease changes to the partner. One message may
+      contain one or more lease updates. The partner is expected
+      to respond with a BNDACK message.  </t>
     </section>
 
     <section anchor="msg-bndack" title="BNDACK">
-      <t> The binding acknowledgement message BNDACK (TBD2) is used for confirmation
-      of the received BNDUPD message. It may contain a positive or negative
-      response (e.g. due to detected lease conflict).  </t>
+      <t> The binding acknowledgement message BNDACK (TBD2) is used
+      for confirmation of the received BNDUPD message. It may contain
+      a positive or negative response (e.g. due to detected lease
+      conflict).  </t>
     </section>
       
     <section anchor="msg-poolreq" title="POOLREQ">
-      <t>The Pool Request message POOLREQ (TBD3) is used by one server (typically
-      secondary) to request allocation of resources (addresses or prefixes) from
-      its partner. The partner responds with POOLRESP.</t>
+      <t>The Pool Request message POOLREQ (TBD3) is used by the
+      secondary server to request allocation of resources (addresses
+      or prefixes) from the primary server. The primary responds
+      with POOLRESP.</t>
     </section>
 
     <section anchor="msg-poolresp" title="POOLRESP">
-      <t>The Pool Response POOLRESP (TBD4) message is used by one server
-      (typically primary) to indicate that it has responded to its
-      partner's request for resources allocation.  </t>
+      <t>The Pool Response POOLRESP (TBD4) message is used by the
+      primary server to indicate that it has responded to the
+      secondary's request for resource allocation.  </t>
     </section>
 
     <section anchor="msg-updreq" title="UPDREQ">
-      <t>The update request message UPDREQ (TBD5) is used by one server to request
-      that its partner send all binding database changes that have not been
-      sent and confirmed already. Requested partner is expected to respond
-      with zero or more BNDUPD messages, followed by UPDDONE that signals
-      end of updates.</t>
+      <t>The update request message UPDREQ (TBD5) is used by one
+      server to request that its partner send all binding database
+      changes that have not yet been confirmed. The partner is
+      expected to respond with zero or more BNDUPD messages, followed
+      by an UPDDONE message that signals that all of the BNDUPD
+      messages have been sent and a corresponding BNDACK message
+      has been received for each of them.</t>
     </section>
 
     <section anchor="msg-updreqall" title="UPDREQALL">
-      <t>The update request all UPDREQALL (TBD6) is used by one server to request
-      that all binding database information be sent in order to recover from a
-      total loss of its binding database by the requesting server. Requested
-      server responds with zero or more BNDUPD messages, followed by UPDDONE
-      that signal end of updates.</t>
+      <t>The update request all UPDREQALL (TBD6) is used by one
+      server to request that all binding database information present
+      in the other server be sent to the requesting server, in order
+      to recover from a total loss of its binding database by the
+      requesting server. A server receiving this request responds
+      with zero or more BNDUPD messages, followed by an UPDDONE that
+      signals that all of the BNDUPD messages have been sent and
+      a corresponding BNDACK message has been received for each 
+      of them.</t>
     </section>
 
     <section anchor="msg-upddone" title="UPDDONE">
@@ -359,7 +810,7 @@
 
     <section anchor="msg-connect" title="CONNECT">
       <t>The connect message CONNECT (TBD8) is used by the primary
-      server to establish a high level connection with the secondary
+      server to establish a failover connection with the secondary
       server, and to transmit several important configuration data
       items between the servers. The partner is expected to confirm
       by responding with CONNECTACK message.</t>
@@ -374,7 +825,10 @@
     <section anchor="msg-disconnect" title="DISCONNECT">
       <t>The disconnect message DISCONNECT (TBD10) is used by either server when
       closing a connection and shutting down. No response is required for this
-      message.</t>
+      message. The DISCONNECT message SHOULD contain an OPTION_STATUS_CODE option
+      with an appropriate status. Often this will be ServerShuttingDown.  
+      See <xref target="status-list"/>.  A server SHOULD include a descriptive
+      message as to the reasons causing the disconnect message.</t>
     </section>
       
     <section anchor="msg-state" title="STATE">
@@ -387,10 +841,10 @@
     <section anchor="msg-contact" title="CONTACT">
       <t>
       The contact message CONTACT (TBD12) is used by either server
-      to ensure that the other server continues to see the connection
+      to ensure that its partner continues to see the connection
       as operational.  It MUST be transmitted periodically over
       every established connection if other message traffic is not
-      flowing, and it MAY be sent at any time.
+      flowing, and it MAY be sent at any time. See <xref target="connection-parameters"/>.
       </t>
 
     </section>
@@ -411,7 +865,7 @@
              title="OPTION_F_BINDING_STATUS">
   
     <t>The binding-status represents an implementation independent representation
-       of the status (or the state) of a resource (IP address or prefix).
+       of the status (or the state) of a resource (IPv6 address or prefix).
    </t>
   
    <t>
@@ -455,69 +909,9 @@
     </artwork>
     </figure>
 
-   <t>The resource binding-status values  are as follows:</t>
+   <t>The binding-status values are discussed in <xref target="info-model"/></t>
 
-  <t>
-  <list style="hanging">
-    <t hangText="ACTIVE"> -- The resource is assigned to a client. Client
-    identification data MUST appear.</t>
-    <t hangText="EXPIRED"> -- indicates that a client's binding on a
-    given resource has expired. When the partner acks the BNDUPD of an
-    expired resource, the server sets its internal state to FREE*. Client
-    identification SHOULD appear.</t>
-    <t hangText="RELEASED"> -- indicates that a client sent in RELEASE
-    message. When the partner acks the BNDUPD of a released resource,
-    the server sets its internal state to FREE*. Client identification
-    SHOULD appear.</t>
-
-    <t hangText="FREE*"> -- Once a resource is expired or released, its
-    state becomes FREE*. Depending on which algorithm and which pool
-    was used to allocate a given resource, FREE* may either mean FREE or
-    FREE_BACKUP. Implementations do not have to implement this FREE*
-    state, but may choose to switch to the destination state directly.
-    For a clarity of representation, this transitional FREE* state is
-    treated as a separate state. </t>
-
-    <t hangText="FREE"> -- Is used when a DHCP server needs to
-    communicate that a resource is unused by any client, but it
-    was not just released, expired or reset by a network administrator.
-    When the partner acks the BNDUPD of a FREE resource, the server
-    marks the resource as available for assignment by the primary server.
-    Note that on a secondary server running in PARTNER-DOWN state, after
-    waiting the MCLT, the resource MAY be allocated to a client by the
-    secondary server. Client identification MAY appear and indicates
-    the last client to have used this resource as a hint.</t>
-
-    <!-- tomek: this was called BACKUP in v4, but it was confusing for
-         users. FREE_BACKUP is  -->
-    <t hangText="FREE_BACKUP"> -- indicates that this resource can
-    be allocated by the secondary server to a client at any time.
-    It is only meaningful for delegated prefixes, using proportional
-    allocation. Note that on the primary server running in PARTNER-DOWN
-    state, after waiting the MCLT, the prefix MAY be allocated to
-    a client by the primary server. Client identification MAY appear
-    and indicates the last client to have used this resource as a
-    hint.</t>
-
-    <t hangText="ABANDONED"> -- indicates that a resource is considered
-    unusable by the DHCP system. The primary reason for entering
-    such state is reception of DECLINE message for said resource. Client 
-    identification MAY appear.</t>
-
-    <t hangText="RESET"> -- indicates that this resource was made
-    available by operator command. This is a distinct state so that
-    the reason that the resource became FREE can be determined.
-    Client identification MAY appear.</t>
-
-  </list>
-  </t>
-
-
-  
    </section>
-
-
-
 
    <!-- ============================================================= -->
   
@@ -566,10 +960,9 @@
    </t>
   
    <t>
-      This is a DNS name encoded in RFC 1035 format
-      <xref target="RFC1035">RFC 1035</xref>, 
+      This is a DNS name encoded in <xref target="RFC1035"/> format
       as specified in Section 8 of
-      <xref target="RFC3315">RFC 3315</xref>. 
+      <xref target="RFC3315"/>. 
    </t>
   
    <t>
@@ -600,9 +993,6 @@
   
    </section>
  
-
- 
- 
    <!-- ============================================================= -->
   
    <section anchor="option_f_dns_zone_name"
@@ -613,10 +1003,9 @@
    </t>
   
    <t>
-      This is a DNS name encoded in RFC 1035 format
-      <xref target="RFC1035">RFC 1035</xref>, 
+      This is a DNS name encoded in <xref target="RFC1035"/> format
       as specified in Section 8 of
-      <xref target="RFC3315">RFC 3315</xref>. 
+      <xref target="RFC3315"/>.
    </t>
   
    <t>
@@ -703,7 +1092,8 @@
           Set to 1 to indicate that the reverse zone is up to date.
    7 (F): FWD_UPTODATE
           Set to 1 to indicate that the forward zone is up to date.
-   0-3  : Must be zero
+   0-3  : MBZ
+          Must be zero
    </artwork>
    </figure>
   
@@ -712,8 +1102,8 @@
 
    <!-- ============================================================= -->
   
-   <section anchor="option_f_failover_expire_time"
-             title="OPTION_F_FAILOVER_EXPIRE_TIME">
+   <section anchor="option_f_expiration_time"
+             title="OPTION_F_EXPIRATION_TIME">
   
     <t>The greatest lifetime that this server has ever acked to its
     partner in a BNDACK.
@@ -735,16 +1125,16 @@
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | OPTION_F_FAILOVER_EXPIRE_TIME |           option-len          |
+   |   OPTION_F_EXPIRATION_TIME    |           option-len          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                     failover-expire-time                      |
+   |                        expiration-time                        |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_FAILOVER_EXPIRE_TIME (TBD15).
+   option-code       OPTION_F_EXPIRATION_TIME (TBD15).
    option-len        4.
-   failover-expire-time The failover-expire-time. This MUST be an 
-                        absolute time (i.e. seconds since midnight 
-                        January 1, 2000 UTC, modulo 2^32). 
+   expiration-time The expiration time. This MUST be an 
+                   absolute time (i.e. seconds since midnight 
+                   January 1, 2000 UTC, modulo 2^32). 
 
    </artwork>
    </figure>
@@ -803,6 +1193,7 @@
    bound on the difference allowed between the lease time provided to a
    DHCPv6 client by a server and the lease time known by that server's
    failover partner.  It is an interval, measured in seconds.
+   See <xref target="mclt"/>.
    </t>
   
    <t>
@@ -836,16 +1227,14 @@
  
    <!-- ============================================================= -->
   
-   <section anchor="option_f_next_partner_lifetime"
-             title="OPTION_F_NEXT_PARTNER_LIFETIME">
+   <section anchor="option_f_partner_lifetime"
+             title="OPTION_F_PARTNER_LIFETIME">
   
    <t>
-    The time we want to send to the partner the next time that
-    we send them a BNDUPD.  This will become the time after which
-    the partner can consider the IP address expired and is able
-    to re-use the IP address.
-    This MUST be an absolute time (i.e. seconds since midnight 
-    January 1, 2000 UTC, modulo 2^32). 
+    The time after which the partner can consider an IPv6 address
+    expired and is able to re-use the IPv6 address.  This MUST be an
+    absolute time (i.e. seconds since midnight January 1, 2000 UTC,
+    modulo 2^32).
    </t>
   
    <t>
@@ -862,16 +1251,16 @@
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | OPTION_F_NEXT_PARTER_LIFETIME |           option-len          |
+   |   OPTION_F_PARTNER_LIFETIME   |           option-len          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                     next-partner-lifetime                     |
+   |                        partner-lifetime                       |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_NEXT_PARTER_LIFETIME (TBD18).
+   option-code       OPTION_F_PARTER_LIFETIME (TBD18).
    option-len        4.
-   next-partner-lifetime  The next-partner-lifetime. This MUST be an 
-                          absolute time (i.e. seconds since midnight 
-                          January 1, 2000 UTC, modulo 2^32). 
+   partner-lifetime  The partner-lifetime. This MUST be an 
+                     absolute time (i.e. seconds since midnight 
+                     January 1, 2000 UTC, modulo 2^32). 
    </artwork>
    </figure>
   
@@ -881,17 +1270,16 @@
  
    <!-- ============================================================= -->
   
-   <section anchor="option_f_next_partner_lifetime_sent"
-             title="OPTION_F_NEXT_PARTNER_LIFETIME_SENT">
+   <section anchor="option_f_partner_lifetime_sent"
+             title="OPTION_F_PARTNER_LIFETIME_SENT">
   
    <t>
-    The time that was received in an OPTION_F_NEXT_PARTNER_LIFETIME
-    <xref target="option_f_next_partner_lifetime"/> option.  This
-    is an exact replacement (echo) of the time received in the
-    OPTION_F_NEXT_PARTNER_LIFETIME option, uncorrected and unadjusted
-    in any way.
-    This MUST be an absolute time (i.e. seconds since midnight 
-    January 1, 2000 UTC, modulo 2^32). 
+    The time that was received in an OPTION_F_PARTNER_LIFETIME <xref
+    target="option_f_partner_lifetime"/> option.  This is an exact
+    duplicate (echo) of the time received in the OPTION_F_PARTNER_LIFETIME
+    option, uncorrected and unadjusted in any way.  This MUST be
+    an absolute time (i.e. seconds since midnight January 1, 2000
+    UTC, modulo 2^32).
    </t>
   
    <t>
@@ -908,17 +1296,18 @@
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |OPTION_F_NEXT_PARTNER_LIFETIME_|           option-len          |
+   |OPTION_F_PARTNER_LIFETIME_SENT |           option-len          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                   next-partner-lifetime-sent                  |
+   |                      partner-lifetime-sent                    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  
   
-   option-code       OPTION_F_NEXT_PARTNER_LIFETIME_SENT (TBD19).
+   option-code       OPTION_F_PARTNER_LIFETIME_SENT (TBD19).
    option-len        4.
-   next-partner-lifetime-sent  The next-partner-lifetime-send. 
-                               This MUST be an absolute time
-                               (i.e. seconds since midnight 
-                               January 1, 2000 UTC, modulo 2^32). 
+   partner-lifetime-sent  The partner-lifetime received in an
+                          OPTION_F_PARTNER_LIFETIME option.
+                          This MUST be an absolute time
+                          (i.e. seconds since midnight 
+                          January 1, 2000 UTC, modulo 2^32). 
    </artwork>
    </figure>
   
@@ -932,10 +1321,9 @@
              title="OPTION_F_PARTNER_DOWN_TIME">
   
    <t>
-    The time that the partner most recently lost commmunications with its
-    failover partner. 
-    This MUST be an absolute time (i.e. seconds since midnight 
-    January 1, 2000 UTC, modulo 2^32). 
+    The time that the partner most recently lost commmunications
+    with its failover partner.  This MUST be an absolute time (i.e.
+    seconds since midnight January 1, 2000 UTC, modulo 2^32).
    </t>
   
    <t>
@@ -975,12 +1363,11 @@
              title="OPTION_F_PARTNER_RAW_CLT_TIME">
   
    <t>
-    The time when the partner most recently interacted with the client
-    associated with this IP address.
-    This MUST be an absolute time (i.e. seconds since midnight 
-    January 1, 2000 UTC, modulo 2^32).   This time is uncorrected
-    for clock skew, timezone differences, and anything else.  It remains
-    in the time context of the partner server.
+    The time when the partner most recently interacted with the
+    DHCPv6 client associated with this IPv6 address.  This MUST be
+    an absolute time (i.e. seconds since midnight January 1, 2000
+    UTC, modulo 2^32).   This time is uncorrected for clock skew,
+    and remains in the time context of the partner server.
    </t>
   
    <t>
@@ -1178,9 +1565,6 @@
    </section>
  
 
- 
-
- 
    <!-- ============================================================= -->
   
    <section anchor="option_f_server_flags"
@@ -1237,14 +1621,14 @@
    7 (C): COMMUNICATED
           Set to 1 to indicate that the sending server has
           communicated with its partner. 
-   0-3  : Must be zero
+   0-3  : MBZ
+          Must be zero
    </artwork>
    </figure>
 
   
    </section>
  
-
  
    <!-- ============================================================= -->
   
@@ -1292,13 +1676,16 @@
    4       PARTNER-DOWN           Partner down 
    5       POTENTIAL-CONFLICT     Synchronizing
    6       RECOVER                Recovering bindings from partner
-   7       PAUSED                 Shutting down for a short period.
-   8       SHUTDOWN               Shutting down for an long period.
-   9       RECOVER-DONE           Interlock state prior to NORMAL
-   10      RESOLUTION-INTERRUPTED Comm. failed during resolution
-   11      CONFLICT-DONE          Primary resolved its conflicts
+   7       SHUTDOWN               Shutting down for an long period.
+   8       RECOVER-DONE           Interlock state prior to NORMAL
+   9       RESOLUTION-INTERRUPTED Comm. failed during resolution
+   10      CONFLICT-DONE          Primary resolved its conflicts
     </artwork>
     </figure>
+
+    <t>
+    These states are discussed in detail in <xref target="states"/>.
+    </t>
 
     <t>
     (1) The STARTUP state is never sent to the partner server, it is
@@ -1306,10 +1693,8 @@
     <xref target="state-startup"/>.
     </t>
 
-  
    </section>
  
-
  
    <!-- ============================================================= -->
   
@@ -1362,7 +1747,7 @@
              title="OPTION_F_STATE_EXPIRATION_TIME">
   
    <t>
-    The state-expiration-time is the time at which  the current state
+    The state-expiration-time is the time at which the current state
     of this lease will expire. 
     This MUST be an absolute time (i.e. seconds since midnight 
     January 1, 2000 UTC, modulo 2^32). 
@@ -1406,26 +1791,31 @@
       The following new status codes are defined, to be used in the
       OPTION_STATUS_CODE option.
    <list style="hanging">
+   <!--
         <t hangText="OneClientDifferentLeases (TBD30)"> <vspace/>
            The client on one server has resources that conflict with the 
            resources that this client has on the other server.</t>
-        <t hangText="AddressInUseByOtherClient (TBD31)"> <vspace/>
+    -->
+        <t hangText="AddressInUseByOtherClient (TBD30)"> <vspace/>
            The one client on one server has leased resources that are in
            conflict with the resources that this client has leased on another
            server.</t>
-        <t hangText="ConfigurationConflict (TBD32)"> <vspace/>
+        <t hangText="ConfigurationConflict (TBD31)"> <vspace/>
            The configuration implied by the information in a BNDUPD
            (e.g. the IPV6 address or prefix address)
            is in direct conflict with the information known to the
            receiving server.</t>
-        <t hangText="MissingBindingInformation (TBD33)"> <vspace/>
+        <t hangText="MissingBindingInformation (TBD32)"> <vspace/>
            There is insufficient information in a BNDUPD to effectively
            process it.</t>
-        <t hangText="OutdatedBindingInformation (TBD34)"> <vspace/>
+        <t hangText="OutdatedBindingInformation (TBD33)"> <vspace/>
            Returned when the information in a server's binding
            database conflicts with the information found in an incoming
            BNDUPD, and the server believes that the information in
            its binding database more accurately reflects reality.</t>
+        <t hangText="ServerShuttingDown (TBD34)"> <vspace/>
+           Returned when the server is undergoing an operator directed
+	   or otherwise planned shutdown.</t>
    </list>
    </t>
 
@@ -1439,8 +1829,9 @@
 
 <section title="Connection Management">
   <section anchor="create-connections" title="Creating Connections">
-    <t>Every primary server implementing the failover protocol
-    MUST attempt to connect to all of its partners periodically,
+
+    <t>Every primary server implementing the failover protocol MUST
+    attempt to connect to all of its configured partners periodically,
     where the period is implementation dependent and SHOULD be
     configurable.  In the event that a connection has been rejected
     by a CONNECTACK message with a reject-reason option contained
@@ -1452,64 +1843,157 @@
     MUST listen for connection attempts from the primary server.
     </t>
 
-    <t>When a primary server successfully creates a TCP connection
-    with a secondary server, it SHOULD attempt to negotiate a TLS
-    <xref target="RFC5246"/>connection over the newly created TCP
-    connection, as described in Section 8.2 of
-    <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/>.
-    In the language of that section, the primary failover server
-    operates as the "requestor" and the secondary failover server
-    operates as the "DHCPv6 server".</t>
+    <t>When a primary server attempts to connect with a secondary
+    server, it MUST do so as described in Section 8.2 of 
+    <xref target="RFC7653"/>.  
+    In the language of that section, the primary
+    failover server operates as the "requestor" and the secondary
+    failover server operates as the "DHCPv6 server". The message
+    that is sent over the newly established connection is a CONNECT
+    message, instead of an ACTIVELEASEQUERY message.</t>
 
-    <t>If a TLS connection is not negotiated, either server MAY
-    choose to continue to establish a failover relationship or
-    it MAY choose to refuse to proceed without a TLS connection.
-    </t>
-
-    <t>When a connection attempt succeeds, the primary server which
-    has initiated the connection attempt MUST send a CONNECT message
-    down the connection.  </t>
-
-    <t>When a connection attempt is received by a secondary server, the only information
-    that the secondary server has is the IP address of the partner
-    initiating a connection.  If it has any relationships with the
-    connecting server for which it is a secondary server, it should
-    just await the CONNECT message or a STARTTLS message (see Section
-    8.2 of
-    <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/>).
-    Once it has received the CONNECT message, it will use the information
-    in that message to determine which relationship this connection
-    is to service.</t>
+    <t>When a connection attempt is received by a secondary server,
+    the only information that the secondary server has is the IP
+    address of the partner initiating a connection.  If it has any
+    relationships with the connecting server for which it is a
+    secondary server, it should operate as described in Section 9.1
+    of 
+    <xref target="RFC7653"/>, 
+    with the exception that instead
+    of waiting for an Active Leasequery message it will wait for a
+    CONNECT message.  Once it has received the CONNECT message, it
+    will use the information in that message to determine which
+    relationship this connection is to service.</t>
     
     <t>If it has no secondary relationships with the connecting
-    server, it MUST drop the connection.  The goal is to limit
-    the resources expended dealing with attempts to create a spurious
-    failover connection.</t>
+    server, it MUST drop the connection.  
+    </t>
 
-    <t>To summarize -- a primary server MUST use a connection that it has
-    initiated in order to send a CONNECT message.  Every server that
-    is a secondary server in a relationship MUST listen for CONNECT
-    messages from the primary server.</t>
 
-    <t>Once a connection is established, the primary server MUST send
-    a CONNECT message across the connection.  A secondary server MUST
-    wait for the CONNECT message from a primary server.  If the
-    secondary server doesn't receive a CONNECT message from the
-    primary server in an installation dependent amount of time, it MAY
-    drop the connection.</t>
+    <t>To summarize -- a primary server MUST use a connection that
+    it has initiated in order to send a CONNECT message.  Every
+    server that is a secondary server in a relationship MUST listen
+    for CONNECT messages from the primary server.</t>
 
-    <t>The secondary server responds to the CONNECT message with a
-    CONNECTACK message indicating its response to request for a connection
-    contained in the CONNECT message.</t>
-
-    <t>When the CONNECT and CONNECTACK exchange successfully produces a
-    working failover connection, the next message sent over a new connection 
-    is a STATE message.  Upon the receipt of this message, the receiver can consider
+    <t>When the CONNECT and CONNECTACK exchange successfully produces
+    a working failover connection, the next message sent over a new
+    connection is a STATE message. See <xref target="send-state"/>.
+    Upon the receipt of the STATE message, the receiver can consider
     communications ok.</t>
+
+
+    <section anchor="send-connect" title="Sending a CONNECT message">
+
+	<t>
+	  The CONNECT message is sent with information about the
+	  failover configuration on the primary server.  The
+	  message MUST contain at least the following information
+	  in the options area:
+	<list style="symbols">
+	   <t>OPTION_F_PROTOCOL_VERSION containing the protocol version.</t>
+	   <t>OPTION_F_MCLT containing the configured MCLT.</t>
+	   <t>OPTION_F_RECEIVE_TIME containing the the number of seconds 
+	      (an interval) within which the server must receive a
+	      message from its partner, or it will assume that
+	      communications from the partner is not ok.</t>
+	   <t>OPTION_F_UNACKED_BNDUPD containing the maximum number of 
+	      BNDUPD messages that this server is prepared to accept over 
+	      the failover connection without causing the
+	      connection to block.</t>
+	</list>
+
+      </t>
+
+    </section>
+
+    <section anchor="receive-connect" title="Receiving a CONNECT message">
+
+    <t>
+      A server receiving a CONNECT message must process the information in
+      the message and decide whether or not accept the connection.  The
+      processing is performed as follows:
+	<list style="symbols">
+	   <t>OPTION_F_PROTOCOL_VERSION - The secondary server decides if 
+	      the protocol version of the primary server is supported by
+	      the secondary server.  If it
+	      is not, return NotSupported in the OPTION_STATUS_CODE to reject
+	      the CONNECT message.</t>
+	   <t>OPTION_F_MCLT - Compare the MCLT received with the configured
+	      MCLT, and if they are different the server MUST alert 
+	      operational staff of this difference.  Use the MCLT supplied
+	      by the primary server until something explicitly alters the
+	      MCLT defined on the secondary server.</t>
+	   <t>OPTION_F_RECEIVE_TIME - Remember the receive-time as the FO_RECEIVE_TIME
+	      when implementing the Unreachability Detection algorithm described in
+	      <xref target="reachability"/>.</t>
+	   <t>OPTION_F_UNACKED_BNDUPD - Ensure that the maximum amount of
+	      unacked BNDUPD messages queued to the primary server never exceeds
+	      the value in the OPTION_F_UNACKED_BNDUPD option.</t>
+	</list>
+	</t>
+
+	<t>
+	A CONNECT message SHOULD always be followed by a CONNECTACK message, either
+	to accept the connection or to reject the connection by including an OPTION_STATUS_CODE
+	option with an error reject.  In order to reject the connection attempt, simply send
+	a CONNECTACK message with the OPTION_STATUS_CODE with the correct status.  If
+	accepting the connection attempt, then send a CONNECTACK message with the
+	following information:
+	<list style="symbols">
+	   <t>OPTION_F_PROTOCOL_VERSION containing the protocol version being used
+	      by the secondary server.</t>
+	   <t>OPTION_F_MCLT containing the MCLT currently in use on the secondary
+	      server.  This MUST equal the MCLT that was in the OPTION_F_MCLT
+	      option in the CONNECT.</t>
+	   <t>OPTION_F_RECEIVE_TIME containing the the number of seconds 
+	      (an interval) within which the server must receive a
+	      message from its partner, or it will assume that
+	      communications from the partner is not ok.</t>
+	   <t>OPTION_F_UNACKED_BNDUPD containing the maximum number of 
+	      BNDUPD messages that this server is prepared to accept over 
+	      the failover connection without causing the
+	      connection to block.</t>
+	</list>
+	After sending a CONNECTACK message to accept the primary server's
+	CONNECT message, the secondary server MUST send a STATE message 
+	(see <xref target="send-state"/>).
+	</t>
+
+    </section>
+
+    <section anchor="receive-connectack" title="Receiving a CONNECTACK message">
+
+      <t>
+	A server receiving a CONNECTACK message must process the information in
+	the message and decide whether or not continue to employ the connection.  
+	The processing is performed as follows:
+	<list style="symbols">
+	   <t>OPTION_F_PROTOCOL_VERSION - The primary server decides if 
+	      the protocol version in use by the secondary server is supported 
+	      by the primary server.  If it
+	      is not, send a DISCONNECT message and drop the connection.  If it
+	      is supported, continue processing.</t>
+	   <t>OPTION_F_MCLT - Compare the MCLT received with the configured
+	      MCLT, and if they are different send a DISCONNECT message and drop
+	      the connection.</t>
+	   <t>OPTION_F_RECEIVE_TIME - Remember the receive-time as the FO_RECEIVE_TIME
+	      when implementing the Unreachability Detection algorithm described in
+	      <xref target="reachability"/>.</t>
+	   <t>OPTION_F_UNACKED_BNDUPD - Ensure that the maximum amount of
+	      unacked BNDUPD messages queued to the secondary server never exceeds
+	      the value in the OPTION_F_UNACKED_BNDUPD option.</t>
+	</list>
+	After receiving a CONNECTACK message that accepted the primary server's
+	CONNECT message, the primary server MUST send a STATE message 
+	(see <xref target="send-state"/>).
+	</t>
+
+    </section>
 
   </section>
 
   <section title="Endpoint Identification">
+
      <t>A failover endpoint is always associated with a set
     of DHCPv6 prefixes that are configured on the DHCPv6 server where
     the endpoint appears.  A DHCPv6 prefix MUST NOT be associated with
@@ -1540,8 +2024,66 @@
 
     <t>When a connection is received from the partner, the unique failover
     endpoint to which the message is directed is determined solely by
-    the IP address of the partner, the relationship-name, and the role
+    the IPv6 address of the partner, the relationship-name, and the role
     of the receiving server.</t>
+
+  </section>
+
+  <section title="Sending a STATE message" anchor="send-state">
+    <t>
+    A server MUST send a STATE message to its failover partner whenever
+    the state of the failover endpoint changes.  Sending the occasional
+    duplicate STATE message will cause no problems, and not updating
+    the failover partner with information about a failover endpoint
+    state change can, in many cases, cause the entire failover protocol
+    to be inoperative.
+    </t>
+
+    <t>
+      The STATE message is sent with information about the
+      endpoint state of the failover relationship.  The STATE
+      message MUST contain at least the following information
+      in the options area:
+    <list style="symbols">
+       <t>OPTION_F_SERVER_STATE containing the state of the failover endpoint.</t>
+       <t>OPTION_F_SERVER_FLAGS containing the flag values associated with this
+          failover endpoint.</t>
+       <t>OPTION_F_START_TIME_OF_STATE containing the time when this
+          became the state of the failover endpoint.</t>
+       <t>OPTION_F_PARTNER_DOWN_TIME containing time that this failover endpoint
+          went into PARTNER-DOWN state if this server is in PARTNER-DOWN
+	  state.  If this server isn't in PARTNER-DOWN state, do not 
+	  include this option.</t>
+    </list>
+    The server sending a STATE message SHOULD ensure that this information is
+    written to stable storage prior to enqueuing it to its failover partner.
+    </t>
+
+  </section>
+
+  <section anchor="receive-state" title="Receiving a STATE message">
+
+    <t>
+      A server receiving a STATE message must process the information in
+      the message and decide how to react to the information.  The 
+      processing is performed as follows:
+    <list style="symbols">
+       <t>OPTION_F_SERVER_STATE - If this represents a change in state for
+          the failover partner, react according to the direction in
+	  <xref target="state-machine-operation"/>.  If the state
+	  is not PARTNER-DOWN, clear any memory of the partner-down-time.</t>
+       <t>OPTION_F_SERVER_FLAGS - Remember these flags in an appropriate
+          data area so they can be referenced by code implementing
+	  other parts of this document.</t>
+       <t>OPTION_F_START_TIME_OF_STATE - Remember this information
+          in an appropriate data area.</t>
+       <t>OPTION_F_PARTNER_DOWN_TIME - Remember this information in an
+          appropriate data area if the value of the OPTION_F_SERVER_STATE
+	  is PARTNER-DOWN.</t>
+    </list>
+    A server receiving a STATE message SHOULD ensure that this information is
+    written to stable storage.
+    </t>
 
   </section>
 
@@ -1573,6 +2115,10 @@
                                CONTACT packets if no other traffic
                                Created from partner's FO_RECEIVE_TIME
                                divided by FO_CONTACT_PER_RECEIVE_TIME
+
+   FO_SKEW_AVG       10        Number of time-skew values to include
+                               in the moving average time-skew
+                               calculatin
     </artwork>
     </figure>
 
@@ -1612,7 +2158,214 @@
 
 
 
-<section title="Binding Updates and Acks">
+<section title="Binding Updates and Acks" anchor="bndupd">
+
+  <section anchor="time-skew" title="Time Skew">
+
+    <t>Partners exchange information about known lease states. To
+    reliably compare a known lease state with an update received
+    from a partner, servers must be able to reliably compare the
+    times stored in the known lease state with the times received
+    in the update.  Although a simple approach would be to require
+    both partners to use synchronized time, e.g. by using the Network
+    Time Protocol, such a service may not always be available.
+    Therefore a mechanism to measure and track relative time
+    differences between servers is necessary. To do so, each message
+    contains the time of the transmission in the time context of
+    the transmitter in the sent-time field of the message <xref
+    target="msg-format"/>.  The transmitting server MUST set this
+    as close to the actual transmission as possible.  The receiving
+    partner MUST store its own timestamp of reception as close to
+    the actual reception as possible. The received timestamp
+    information is then compared with local timestamp.  </t>
+
+    <t>To account for packet delay variation (jitter), the measured
+    difference is not used directly, but rather the moving average
+    of the last FO_SKEW_AVG packets time difference is
+    calculated. This averaged value is referred to as the time skew.
+    Note that the time skew algorithm allows cooperation between
+    servers with completely desynchronized clocks as well as those
+    whose desynchronization itself is not constant.  </t>
+
+  </section>
+
+  <section title="Information model" anchor="info-model">
+
+  <t>In most DHCPv6 servers a resource (an IPv6 address or a prefix) can
+  take on several different binding-status values, sometimes also
+  called lease states.  While no two DHCPv6 server implementations will have
+  exactly the same possible binding-status values, <xref target="RFC3315"/>
+  enforces some commonality among the general semantics of the
+  binding-status values used by various DHCPv6 server implementations.</t>
+
+  <t> In order to transmit binding database updates between one
+  server and another using the failover protocol, some common
+  binding-status values must be defined.  It is not expected that
+  these values correspond with any actual implementation of the
+  DHCPv6 protocol in a DHCPv6 server, but rather that the binding-status
+  values defined in this document should be convertable back and
+  forth between those defined below and those in use by many DHCPv6
+  server implementations.  
+  </t>
+
+  <t>The lease binding-status values defined for the failover
+  protocol are listed below. Unless otherwise noted below, there
+  MAY be client information associated with each of these binding-status
+  value.</t>
+
+  <t>
+  <list style="hanging">
+
+    <t hangText="ACTIVE"> -- The lease is assigned to a client. Client
+    identification data MUST appear.</t>
+
+    <t hangText="EXPIRED"> -- indicates that a client's binding on a
+    given lease has expired. When the partner acks the BNDUPD of an
+    expired lease, the server sets its internal state to FREE*. Client
+    identification SHOULD appear.</t>
+
+    <t hangText="RELEASED"> -- indicates that a client sent in RELEASE
+    message. When the partner acks the BNDUPD of a released lease,
+    the server sets its internal state to FREE*. Client identification
+    SHOULD appear.</t>
+
+    <t hangText="FREE*"> -- Once a lease is expired or released, its
+    state becomes FREE*. Depending on which algorithm and which pool
+    was used to allocate a given lease, FREE* may either mean FREE or
+    FREE_BACKUP. Implementations do not have to implement this FREE*
+    state, but may choose to switch to the destination state directly.
+    For a clarity of representation, this transitional FREE* state is
+    treated as a separate state. </t>
+
+    <t hangText="FREE"> -- Is used when a DHCPv6 server needs to
+    communicate that a resource is unused by any client, but it
+    was not just released, expired or reset by a network administrator.
+    When the partner acks the BNDUPD of a FREE lease, the server
+    marks the lease as available for assignment by the primary server.
+    Note that on a secondary server running in PARTNER-DOWN state, after
+    waiting the MCLT, the resource MAY be allocated to a client by the
+    secondary server. Client identification MAY appear and indicates
+    the last client to have used this resource as a hint.</t>
+
+    <t hangText="FREE_BACKUP"> -- indicates that this resource can
+    be allocated by the secondary server to a client at any time. Note
+    that the primary server running in PARTNER-DOWN state, after waiting
+    the MCLT, the resource MAY be allocated to a client by the primary
+    server if proportional algorithm was used. Client identification
+    MAY appear and indicates the last client to have used this resource 
+    as a hint.</t>
+
+    <t hangText="ABANDONED"> -- indicates that a lease is considered
+    unusable by the DHCPv6 system. The primary reason for entering
+    such state is reception of DECLINE message for the lease. Client 
+    identification MAY appear.</t>
+
+    <t hangText="RESET"> -- indicates that this resource was made
+    available by operator command. This is a distinct state so that
+    the reason that the resource became FREE can be determined.
+    Client identification MAY appear.</t>
+
+  </list>
+  </t>
+
+  <t>The lease state machine is presented in <xref
+  target="lease-state-machine"/>. Most states are stationary, i.e. the lease
+  stays in a given state until external event triggers transition to another
+  state. The only transitive state is FREE*. Once it is reached, the state
+  machine immediately transitions to either FREE or FREE_BACKUP state.</t>
+
+  <figure anchor="lease-state-machine" title="Lease State Machine" align="center">
+    <artwork><![CDATA[
+                +---------+
+ /------------->|  ACTIVE |<--------------\
+ |              +---------+               |
+ |                |  |  |                 |
+ |       /--(8)--/  (3)  \--(9)-\         |
+ |      |            |           |        |
+ |      V            V           V        |
+ |  +-------+   +--------+   +---------+  |
+ |  |EXPIRED|   |RELEASED|   |ABANDONED|  |
+ |  +-------+   +--------+   +---------+  |
+ |      |            |            |       |
+ |      |            |           (10)     |
+ |      |            |            V       |
+ |      |            |       +---------+  |
+ |      |            |       |  RESET  |  |
+ |      |            |       +---------+  |
+ |      |            |            |       |
+ |       \--(4)--\  (4)  /--(4)--/        |
+ |                |  |  |                 |
+(1)               V  V  V                (2)
+ |              /---------\               |
+ |              |  FREE*  |               |
+ |              \---------/               |
+ |                 |   |                  |
+ |         /-(5)--/     \-(6)-\           |
+ |        |                    |          |
+ |        V                    V          |
+ |    +-------+         +-----------+     |
+ \----|  FREE |<--(7)-->|FREE_BACKUP|-----/
+      +-------+         +-----------+]]>
+</artwork><postamble>FREE* transition</postamble></figure>
+
+    <t>Transitions between states are results of the following events:
+
+    <list style="empty">
+      <t>1. Primary server allocates a lease.</t>
+
+      <t>2. Secondary server allocates a lease.</t>
+
+      <t>3. Client sends RELEASE and the lease is released.</t>
+
+      <t>4. Partner acknowledges state change. This transition MAY also occur if the
+      server is in PARTNER-DOWN state and the MCLT has passed since the entry in
+      RELEASED, EXPIRED, or RESET states.</t>
+
+      <t>5. The lease belongs to a pool that is governed by the proportional
+      allocation, or independent allocation is used and this lease belongs to primary
+      server pool.</t>
+
+      <t>6. The lease belongs to a pool that is governed by the independent
+      allocation and the lease belongs to the secondary server.</t>
+
+      <t>7. Pool rebalance event occurs (POOLREQ/POOLRESP messages are
+      exchanged). Addresses (or prefixes) belonging to the primary
+      server can be assigned to the secondary server pool (transition
+      from FREE to FREE_BACKUP) or vice versa.  </t>
+
+      <t>8. The lease has expired.</t>
+
+      <t>9. DECLINE message is received or a lease is deemed
+       unusable for other reasons.</t>
+
+      <t>10. An administrative action is taken to recover an abandoned lease back to
+      usable state. This transition MAY occur due to an implementation specific
+      handling on ABANDONED resource. One possible example of such use is a
+      Neighbor Discovery or ICMPv6 Echo check if the address is still in use.</t>
+    </list>
+    </t>
+
+      <t>The resource that is no longer in use (due to expiration or release),
+      becomes FREE*. Depending of what allocation algorithm is used, the resource
+      that is no longer is use, returns to the primary (FREE) or secondary pool
+      (FREE_BACKUP). The conditions for specific transitions are depicted in
+      <xref target="free-transition"/>.</t>
+
+  <figure anchor="free-transition" title="FREE* State Transitions" align="center">
+    <artwork><![CDATA[
++----------------+---------+-----------+
+| \Resource owner|         |           |
+|  \----------\  | Primary | Secondary |
+|Algorithm     \ |         |           |
++----------------+---------+-----------+
+| Proportional   | FREE    |FREE_BACKUP| 
+| Independent    | FREE    |    FREE   |
++----------------+---------+-----------+]]>
+</artwork></figure>
+
+
+  </section>
+
 
   <section anchor="time-bndupd" title="Times Required for Exchanging Binding Updates">
     <!-- tomek: here's the table from v4-failover-12, section 7.1:
@@ -1646,30 +2399,32 @@
     <t>Each server must keep track of the following specific times beyond those
     required by the base DHCPv6 protocol <xref target="RFC3315" />.  
     <list style="hanging">
-        <t hangText="failover-expire-time"> <vspace/>
-           The greatest lifteime that this server has ever acked to its failover
-           partner in a BNDACK.</t>
-        <t hangText="failover-partner-lifetime"> <vspace/>
-           The greatest lifetime that the failover partner has ever acked to
-           this server in a BNDACK.</t>
-        <t hangText="next-partner-lifetime"> <vspace/>
-           The time that we want to send the partner, which will be the time 
-           after which the partner can consider the IPv6 address expired.</t>
+        <t hangText="expiration-time"> <vspace/>
+           The greatest lifteime that this server has ever acked
+           to its failover partner in a BNDACK.</t>
+        <t hangText="acked-partner-lifetime"> <vspace/>
+           The greatest lifetime that the failover partner has ever
+           acked to this server in a BNDACK.</t>
+        <t hangText="partner-lifetime"> <vspace/>
+           The time that we will send (or have sent) the partner,
+           which will be the time after which the partner can
+           consider the IPv6 address expired.</t>
         <t hangText="client-last-transaction-time"> <vspace/>
-           The time when the this server most recently intereacted with the
-           client associated with this IP address.</t>
+           The time when the this server most recently intereacted
+           with the client associated with this IPv6 address.</t>
         <t hangText="partner-raw-clt-time"> <vspace/>
-           The time when the partner most recently interacted with the client
-           associated with this IP address.  This time remains exactly as it
-           was received by this server, and it not adjusted to be in the time
-           context of this server.</t>
+           The time when the partner most recently interacted with
+           the client associated with this IPv6 address.  This time
+           remains exactly as it was received by this server, and
+           MUST NOT be adjusted to be in the time context of this
+           server.</t>
         <t hangText="start-time-of-state"> <vspace/>
-           The time when the binding status of this lease was changed 
+           The time when the binding status of this lease was changed
            to its current value.</t>
         <t hangText="state-expiration-time"> <vspace/>
-           The time when the current state of this lease will expire.</t>
-    </list>
-    </t>
+           The time when the current state of this lease will
+           expire.</t>
+    </list> </t>
 
   </section>
 
@@ -1686,10 +2441,11 @@
        at least the data shown below in its client-options section:
     <list style="symbols">
        <t>OPTION_CLIENTID containing the DUID of the client most 
-          recently associated with this IP address*;</t>
+          recently associated with this IPv6 address*;</t>
        <t>OPTION_LQ_BASE_TIME containing the absolute time that the information
           was placed into this OPTION_CLIENT_DATA option.
-          (see <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/> Section 6.3.1);</t>
+          (see <xref target="RFC7653"/> Section 6.3.1);
+          </t>
        <t>OPTION_F_RECONFIGURE_DATA
           containing the time and reconfigure key, if any*;</t>
        <t>OPTION_LQ_RELAY_DATA containing information described 
@@ -1717,17 +2473,17 @@
                      <t>OPTION_F_BINDING_STATUS containing the binding-status;</t>
                      <t>OPTION_F_START_TIME_OF_STATE containing the 
                         start-time-of-state;</t>
-                     <t>OPTION_F_STATE_EXPIRATION_TIME containing the 
+                     <t>OPTION_F_STATE_EXPIRATION_TIME (absolute) containing the 
                         state-expiration-time**;</t>
                      <t>OPTION_CLT_TIME (relative) containing the 
                         client-last-transaction-time.  See <xref target="RFC5007" /> 
                         for this option*;</t> 
-                     <t>OPTION_F_NEXT_PARTNER_LIFETIME (absolute) containing 
-                        next-partner-lifetime*;</t>
+                     <t>OPTION_F_PARTNER_LIFETIME (absolute) containing 
+                        partner-lifetime**;</t>
                      <t>OPTION_F_PARTNER_RAW_CLT_TIME (absolute) 
                         containing the partner-raw-clt-time*;</t>
-                     <t>OPTION_F_FAILOVER_EXPIRE_TIME (absolute) 
-                        containing the failover-expire-time*;</t>
+                     <t>OPTION_F_EXPIRATION_TIME (absolute) 
+                        containing the expiration-time**;</t>
                      <t>DHCP_O_CLIENT_FQDN 
                         containing the the FQDN information associated with
                         this resource and client*;</t>
@@ -1747,13 +2503,13 @@
     <t>Items marked with a double asterisk (**) MUST appear only if the value in the
     OPTION_F_BINDING_STATUS is associated with a timeout, otherwise it MUST NOT appear.</t>
 
-   <t>The OPTION_CLT_TIME MUST,
-   if it appears, be the time that the server last interacted
-   with the DHCP client.  It MUST NOT be, for instance, the time
-   that the lease on an IP address expired.  If there has been
-   no interaction with the DHCP client in question (or there is
-   no DHCP client presently associated with this resource), then
-   there will be no OPTION_CLT_TIME option in the OPTION_CLIENT_DATA option</t>
+   <t>The OPTION_CLT_TIME MUST, if it appears, be the time that the
+   server last interacted with the DHCPv6 client.  It MUST NOT be,
+   for instance, the time that the lease on an IPv6 address expired.
+   If there has been no interaction with the DHCPv6 client in question
+   (or there is no DHCPv6 client presently associated with this
+   resource), then there will be no OPTION_CLT_TIME option in the
+   OPTION_CLIENT_DATA option</t>
 
     <t> A server
     SHOULD be prepared to clean up DNS information once the lease expires or is
@@ -1761,7 +2517,7 @@
     Dynamic DNS. Another reason the partner may be interested in keeping additional
     data is a better support for leasequery <xref target="RFC5007"/>, bulk
     leasequery <xref target="RFC5460"/> or active leasequery
-    <xref target="I-D.ietf-dhc-dhcpv6-active-leasequery"/>,
+    <xref target="RFC7653"/>,
     some of which features queries based on
     Relay-ID, by link address and by Remote-ID.</t>
   </section> <!-- sending binnding updates -->
@@ -1774,14 +2530,14 @@
        to be in the time context of the receiving server, as follows:
        <list style="numbers">
           <t>The sent-time from the Failover message is compared with the
-             current time of the receiving server.  The difference is noted,
-             and used to affect the time correction.  It MAY be used directly
-             as the time correction, but it SHOULD instead be used to 
-             have a cumulative effect on the time correction.  This is
-             called the time-correction.</t>
+             current time of the receiving server as recorded when it received
+             the message.  The difference is noted,
+             and used to affect the time correction by being included
+             in the moving average of the last FO_SKEW_AVG
+             differences.  This is called the time-correction.</t>
           <t>Any OPTION_LQ_BASE_TIME options in the BNDUPD message MUST
              be corrected with the time-correction.
-             This is called the corrected-base-time.</t>
+             The result is called the corrected-base-time.</t>
           <t>Any relative time values received in the BNDUPD MUST be
              added to or subtracted from the corrected-base-time.</t>
           <t>Any absolute time values received in the BNDUPD MUST be
@@ -1790,7 +2546,8 @@
        <t>When all of this is done to an incoming time, that time can be
           before, after, or essentially the same as another time.  Any time
           which ends up being +/- 5 seconds of another time SHOULD be considered
-          the same.</t>
+          to be representing the same time when performing a comparison between
+          two times.</t>
 
  </section>
 
@@ -1801,38 +2558,38 @@
      is processed separately, and each must be independently
      accepted or rejected.</t>
 
-      <t>When analyzing an OPTION_CLIENT_DATA option from a partner server, if
-      there is insufficient information in the OPTION_CLIENT_DATA to process
-      it, then reject the OPTION_CLIENT_DATA with "MissingBindingInformation".</t>
+      <t>When analyzing an OPTION_CLIENT_DATA option from a partner
+      server, if there is insufficient information in the
+      OPTION_CLIENT_DATA to process it, then it is rejected with
+      an OPTION_STATUS_CODE of "MissingBindingInformation".</t>
 
       <t>The server receiving a BNDUPD update from its partner must
       evaluate the received information in each OPTION_CLIENT_DATA
-      option to see if it is consistent with already known state
-      and decide which information - the previously known or that
-      just received - is "better".  If the information in the BNDUPD
-      is "better", the receiving server will accept the information
-      in the BNDUPD.  If the information in the server's binding
-      database is "better", the server will reject the information
-      in the BNDUPD.</t>
+      option to see if it is consistent with the server's already
+      known state, and if it is not, decide which information -
+      that previously known or that just received - is "better".
+      If the information in the BNDUPD is "better", the receiving
+      server will accept the information in the BNDUPD.  If the
+      information in the server's binding database is "better", the
+      server will reject the information in the BNDUPD.</t>
 
-   <t>A server receving a BNDUPD message MUST respond to the sender of that
-      message with a BNDACK message which contains the same xid as the
-      BNDUPD message.  This BNDACK message MUST contain one
-      or more
-      OPTION_CLIENT_DATA options, each of which corresponds to 
-      one of the OPTION_CLIENT_DATA options in the BNDUPD message.</t>
+      <t> A server receving a BNDUPD message MUST respond to the
+      sender of that message with a BNDACK message which contains
+      the same transaction-id as the BNDUPD message.  This BNDACK message MUST
+      contain one or more OPTION_CLIENT_DATA options, each of which
+      corresponds to one of the OPTION_CLIENT_DATA options in the
+      BNDUPD message.</t>
 
-     <t>Each OPTION_CLIENT_DATA in the BNDACK which is accepted SHOULD
-     NOT contain an OPTION_STATUS_CODE unless a status message
+     <t>Each OPTION_CLIENT_DATA in the BNDACK which is accepted
+     SHOULD NOT contain an OPTION_STATUS_CODE unless a status message
      needs to be sent to the failover partner, in which case it
-     SHOULD include an OPTION_STATUS_CODE option with a status
-     code indicating success and whatever message is needed.
-     </t>
+     SHOULD include an OPTION_STATUS_CODE option with a status code
+     indicating success and whatever message is needed.  </t>
 
-     <t>To indicate rejection of the information
-     in an OPTION_CLIENT_DATA, an OPTION_STATUS_CODE SHOULD be
-     included with a status code indicating an error, in the
-     OPTION_CLIENT_DATA option in the BNDACK message.</t>
+     <t>To indicate rejection of the information in an OPTION_CLIENT_DATA,
+     an OPTION_STATUS_CODE SHOULD be included with a status code
+     indicating an error, in the OPTION_CLIENT_DATA option in the
+     BNDACK message.</t>
 
  </section>
 
@@ -1841,7 +2598,7 @@
      <t>The first task in processing the information in an
      OPTION_CLIENT_DATA option is extract the client information
      and resource information out of the OPTION_CLIENT_DATA option,
-     and to access the resource (IP address or prefix) information
+     and to access the resource (IPv6 address or prefix) information
      in the server's binding database.</t>
 
       <t>If the resource specified in the OPTION_CLIENT_DATA is not
@@ -1940,20 +2697,20 @@ ABANDONED        reject    reject    reject     reject       accept
              IA_* options:
              <list style="numbers">
                 <t>OPTION_F_BINDING_STATUS is stored as the binding-status</t>
-                <t>OPTION_F_NEXT_PARTNER_LIFETIME is stored in the 
-                   failover-expire-time</t>
+                <t>OPTION_F_PARTNER_LIFETIME is stored in the 
+                   expiration-time</t>
                 <t>OPTION_F_STATE_EXPIRATION_TIME is stored in the
                    state-expiration-time</t>
                 <t>OPTION_F_CLT_TIME (which MUST NOT be converted with the
-                   corrected-base-time, but must be converted with the raw
+                   corrected-base-time, but MUST be converted with the raw
                    value from the OPTION_LQ_BASE_TIME) is stored
                    in the partner-raw-clt-time</t>
                 <t>OPTION_F_PARTNER_RAW_CLT_TIME (which MUST NOT be corrected with
                    the time-correction)
                    replaces the client-last-transaction-time if it is later
                    than the current client-last-transaction-time.</t>
-                <t>OPTION_F_FAILOVER_EXPIRE_TIME replaced the failover-partner-lifetime
-                   if it is later than the current failover-partner-lifetime.</t>
+                <t>OPTION_F_EXPIRATION_TIME replaces the partner-lifetime
+                   if it is later than the current partner-lifetime.</t>
           </list></t>
        </list></t>
 
@@ -1969,13 +2726,13 @@ ABANDONED        reject    reject    reject     reject       accept
      <t>A server MUST respond to every BNDUPD message with a BNDACK
         message.  The BNDACK message MUST contain an OPTION_CLIENT_DATA
         option corresponding to every OPTION_CLIENT_DATA option in the
-        BNDUPD message.  The BNDACK message MUST have the same xid
+        BNDUPD message.  The BNDACK message MUST have the same transaction-id
         as the BNDUPD message to which it is a response.
         Each OPTION_CLIENT_DATA option MUST contain
         at least the data shown below in its client-options section:
     <list style="symbols">
        <t>OPTION_CLIENTID containing the DUID of the client most 
-          recently associated with this IP address*;</t>
+          recently associated with this IPv6 address*;</t>
        <t>OPTION_IA_NA for an IPv6 Address or OPTION_IA_PD for an IPv6 Prefix. More
           than one of either of these options MAY appear if there are more 
           than one associated with this client;
@@ -1996,10 +2753,11 @@ ABANDONED        reject    reject    reject     reject       accept
                         option appears.</t>
                      <t>OPTION_F_BINDING_STATUS containing the binding-status received
                         in the BNDUPD;</t>
-                     <t>OPTION_F_STATE_EXPIRATION_TIME containing the 
+                     <t>OPTION_F_STATE_EXPIRATION_TIME (absolute) containing the 
                         state-expiration-time received in the BNDUPD;</t>
-                     <t>OPTION_F_NEXT_PARTNER_LIFETIME (absolute) containing 
-                        next-partner-lifetime recevied in the BNDUPD;</t>
+                     <t>OPTION_F_PARTNER_LIFETIME_SENT (absolute) containing 
+                        a duplicate of the OPTION_F_PARTNER_LIFETIME received
+                        in the BNDUPD;</t>
                   </list></t>
                </list></t>
             </list></t>
@@ -2031,26 +2789,70 @@ ABANDONED        reject    reject    reject     reject       accept
           <t>For each of the IA_NA or IA_PD options in the OPTION_CLIENT_DATA option
              and for each of the OPTION_IADDR or OPTION_IAPREFIX options:
              <list style="numbers">
-                <t>OPTION_STATUS_CODE if any is examined to see if it indicates
-                   a BNDNAK.  If it indicates a BNDNAK for this client, do not
-                   perform the rest of these steps.</t>
-                <t>OPTION_F_NEXT_PARTNER_LIFETIME_SENT is stored in the 
-                   failover-partner-lifetime</t>
+                <t>OPTION_F_PARTNER_LIFETIME_SENT is stored in the 
+                   acked-partner-lifetime</t>
+                <t>The time partner-lifetime is set to 0.</t>
           </list></t>
        </list></t>
-
-       <t>The time next-partner-lifetime is set to 0.</t>
-
 
   </section>
 
 
     <section anchor="acknowledging-reception" title="Acknowledging Reception">
 
-      <t>Upon acceptance of a binding lease, the server MUST notify its partner
-      that it updated its binding database. A server MUST NOT send the BNDACK before its
-      binding database is updated. A BNDACK MUST contain at lease the minimum set of information
-      required to unambiguously identify the BNDUPD that triggered the BNDACK.</t>
+      <t>Upon acceptance of a binding update, the server MUST notify its partner
+      that it updated its binding database by sending a BNDACK. A server MUST NOT send the BNDACK before its
+      binding database is updated. </t>
+
+    </section>
+
+
+    <section anchor="bndupd-data" title="BNDUPD/BNDACK Data Flow">
+
+    <t>
+      The following diagram shows the relationship of the times
+      described in <xref target="time-bndupd"/> with the options
+      used to transmit them.  It also relates the times on one
+      failover partner to the other failover partner.
+    </t>
+
+
+  <figure anchor="bndupd-time-diagram" title="BNDUPD and BNDACK Time Handling" align="center">
+    <artwork><![CDATA[
+----------------------- BNDUPD ------------------------------
+
+  Source on            OPTION_F in            Storage on
+ Sending Server  ->   BNDUPD message   ->   Receiving Server
+
+
+                                  [ always update ]
+
+partner-lifetime      PARTNER_LIFETIME      expiration-time      
+client-last-transaction-time  CLT_TIME      (uncorrected)    
+                                            partner-raw-clt-time
+start-time-of-state   START_TIME_OF_STATE   start-time-of-state
+state-expiration-time STATE_EXPIRATION_TIME state-expiration-time
+
+                           [update only if received > current]
+
+expiration-time       EXPIRATION_TIME       partner-lifetime 
+partner-raw-clt-time  PARTNER_RAW_CLT_TIME  
+                                       client-last-transaction-time
+
+----------------------- BNDACK ------------------------------
+
+  Storage on            OPTION_F in           Storage on
+ Receiving Server <-   BNDUPD message   <-   Sending Server
+
+        [ always update ]
+
+acked-partner-lifetime PARTNER_LIFETIME_SENT duplicate of received
+                                               PARTNER_LIFETIME
+                       STATE_EXPIRATION_TIME state-expiration-time
+
+-------------------------------------------------------------
+]]>
+</artwork></figure>
 
     </section>
 
@@ -2058,84 +2860,7 @@ ABANDONED        reject    reject    reject     reject       accept
 
 
 
-
-<section title="Resource Allocation">
-
-    <t>This section discusses allocation details of the allocation
-    of resources to specific clients.
-    </t>
-
-
-  <section anchor="reallocation" title="Re-allocating Leases">
-    <!-- issue 4 
-    TODO: Describe controlled re-allocation of released/expired
-    leases to different clients.
-
-    Done 10/16/12 Kim
-    -->
-    <!-- see section 5.2.2 in v4 failover -->
-
-    <t>When in PARTNER-DOWN state there is a waiting period after
-    which a resource can be re-allocated to another client.  For
-    resources which are available when the server enters PARTNER-DOWN
-    state, the period is the MCLT from the entry into PARTNER-DOWN
-    state.  For resources which are not available when the server
-    enters PARTNER-DOWN state, the period is the MCLT after the
-    later of the following times: the failover-partner-lifetime, the
-    next-partner-lifetime (if any), and the failover-expire-time.
-    If this time would be earlier than the current time
-    plus the MCLT, then the time the server entered PARTNER-DOWN
-    state plus the maximum-client-lead-time is used.</t>
-
-    <!-- I don't think we want to discuss these paragraphs from the
-     v4 draft.  Experience shows that nobody wants to live with MCLT
-     restrictions in PARTNER-DOWN state.
-
-    Two options exist for lease times given out while in PARTNER-DOWN
-    state, with different ramifications flowing from each.
-
-    If the server wishes the Failover protocol to protect it from loss of
-    stable storage in PARTNER-DOWN state, then it should ensure that the
-    MCLT based lease time restrictions in section 5.1 are maintained,
-    even in PARTNER-DOWN state.
-
-    If the server wishes to forego the protection of the Failover proto-
-    col in the event of loss of stable storage, then it need recognize no
-    restrictions on actual client lease times while in PARTNER-DOWN
-    state.
-
-    -->
-
-    <t>In any other state, a server cannot reallocate a resource from one
-    client to another without first notifying its partner (through a
-    BNDUPD message) and receiving acknowledgement (through a BNDACK message) 
-    that its partner is aware that that first client is not using
-    the resource.</t>
-
-    <t>This may be modeled in the following way.</t>
-
-    <t>An "available" resource on a server may be allocated to any client.
-    A resource which was leased to a client and which expired or was
-    released by that client would take on a new state, EXPIRED or
-    RELEASED respectively.  The partner server would then be notified
-    that this resource was EXPIRED or RELEASED through a BNDUPD.  When
-    the sending server received the BNDACK for that resource showing it
-    was FREE, it would move the resource from EXPIRED or RELEASED to
-    FREE, and it would be available for allocation by the primary server
-    to any clients.</t>
-
-    <t>A server MAY reallocate a resource in the EXPIRED or RELEASED
-    state to the same client with no restrictions provided it has not
-    sent a BNDUPD message to its partner.  This situation would exist if
-    the lease expired or was released after the transition into
-    PARTNER-DOWN state, for instance.</t>
-
-  </section>
-
-
-</section> <!-- partner update -->
-
-  <section anchor="states" title="Endpoint States">
+<section anchor="states" title="Endpoint States">
     <section anchor="state-machine-operation" title="State Machine Operation">
 
       <t>Each server (or, more accurately, failover endpoint) can take
@@ -2174,18 +2899,20 @@ ABANDONED        reject    reject    reject     reject       accept
 
         </list></t>
 
-      <t>Whenever any of the above state variables
-      changes state, the state machine is invoked, which may then trigger a
-      change in the current failover state.  Thus, whenever the communications
-      status changes, the state machine processing is invoked.  This may or
-      may not result in a change in the current failover state.</t>
+      <t>Whenever any of the above state variables changes state,
+      the state machine is invoked, which may then trigger a change
+      in the current failover state.  Thus, whenever the communications
+      status changes, the state machine processing is invoked.  This
+      may or may not result in a change in the current failover
+      state.</t>
 
-      <t>Whenever a server transitions to a new failover state, the new state
-      MUST be communicated to its failover partner in a STATE message if the
-      communications status is OK.  In addition, whenever a server makes a
-      transition into a new state, it MUST record the new state, its current
-      understanding of its partner's state, and the time at which it entered the
-      new state in stable storage.</t>
+      <t>Whenever a server transitions to a new failover state, the
+      new state MUST be communicated to its failover partner in a
+      STATE message if the communications status is OK.  In addition,
+      whenever a server makes a transition into a new state, it
+      MUST record the new state, its current understanding of its
+      partner's state, and the time at which it entered the new
+      state in stable storage.</t>
 
       <t>The following state transition diagram gives a condensed view of the
       state machine.  If there is a difference between the words describing a
@@ -2194,7 +2921,7 @@ ABANDONED        reject    reject    reject     reject       accept
 
       <t>In the diagram below, the word (responsive) or (unresponsive) appers
       in the states, and refers to whether the server in this state is allowed
-      to respond to client DHCP requests.</t>
+      to respond to client DHCPv6 requests.</t>
 
       <t>In the state transition diagram below, the "+" or "-" in the upper
       right corner of each state is a notation about whether communication is
@@ -2349,7 +3076,7 @@ RECOVER-WAIT--------->+------------------+
         its partner is not yet available.  In this case, the newly
         commissioned failover server will not operate until its
         partner comes online  -- but it has operational responsibilities
-        as a DHCP server nonetheless.  To properly handle this
+        as a DHCPv6 server nonetheless.  To properly handle this
         situation, a server SHOULD be configurable in such a way
         as to move directly into PARTNER-DOWN state after the startup
         period expires if it has been unable to contact its partner
@@ -2426,59 +3153,60 @@ RECOVER-WAIT--------->+------------------+
     operating and serving the client base. If one server is in
     PARTNER-DOWN state, the other server MUST NOT be operating.</t>
 
-    <t>A server can enter PARTNER-DOWN state either as a result of 
-    operator intervention (when an operator determines that the server's
-    partner is, indeed, down), or as a result of an optional auto-partner-down
-    capability where PARTNER-DOWN state is entered automatically after
-    a server has been in COMMUNICATIONS-INTERRUPTED state for a pre-determined
-    period of time.</t>
+    <t>A server can enter PARTNER-DOWN state either as a result of
+    operator intervention (when an operator determines that the
+    server's partner is, indeed, down), or as a result of an optional
+    auto-partner-down capability where PARTNER-DOWN state is entered
+    automatically after a server has been in COMMUNICATIONS-INTERRUPTED
+    state for a pre-determined period of time.</t>
 
       <section anchor="operation-in-partner-down-state" title="Operation in PARTNER-DOWN State">
 
         <t>The server MUST be responsive in PARTNER-DOWN state, regardless
         if it is primary or secondary.</t>
 
-        <t>It will allow renewal of all outstanding leases on resources.
+        <t>It will allow renewal of all outstanding leases on all resources.</t>
+
+        <t>
         For those resources for which the server is
         using proportional allocation (i.e. prefixes), it will allocate resources
         from its own pool, and after a fixed period of time (the
         MCLT interval) has elapsed from entry into PARTNER-DOWN
-        state, it may allocate IP addresses from the set of all
-        available pools. Server SHOULD fully deplete its own pool,
+        state, it may allocate IPv6 addresses from the set of all
+        available pools. Server MUST fully deplete its own pool,
         before starting allocations from its downed partner's pool.</t>
 
-        <t>Any resource tagged as available for allocation by the
+        <t>IPv6 addresses available for independent allocation by the
         other server (at entry to PARTNER-DOWN state) MUST NOT be
         allocated to a new client until the MCLT
         beyond the entry into PARTNER-DOWN state has elapsed.</t>
 
         <t>A server in PARTNER-DOWN state MUST NOT allocate a resource
-        to a DHCP client different from that to which it was
+        to a DHCPv6 client different from that to which it was
         allocated at the entrance to PARTNER-DOWN state until the
         MCLT beyond the maximum of the following
         times: client expiration time, most recently transmitted
-        potential-expiration-time, most recently received ack of
-        potential-expiration-time from the partner, and most recently
-        acked potential-expiration-time to the partner.  <!-- tomek:
+        partner-lifetime, most recently received ack of the
+        partner-time from the partner, and most recently
+        acked partner-lifetime to the partner.  <!-- tomek:
         commented out as don't have section about BNDUPD message yet.
         See section 7.1.5 for details. --> If this time would be earlier
-        than the current time plus the maximum-client-lead-time, then
+        than the current time plus the MCLT, then
         the time the server entered PARTNER-DOWN state plus the
-        maximum-client-lead-time is used.</t>
+        MCLT is used.</t>
 
         <t>The server is not restricted by the MCLT when offering
         lease times while in PARTNER-DOWN state.</t>
 
         <t>In the unlikely case when there are two servers operating
-        in a PARTNER-DOWN state, there is a chance of duplicate leases
-        for the same prefix to be
-        assigned. This leads to a POTENTIAL-CONFLICT (unresponsive)
-        state when they re-establish contact. The duplicate lease
-        issue can be postponed to a large extent by the server granting
-        new leases first from its own pool. Therefore the server operating
-        in PARTNER-DOWN state MUST use its own pool first for new
-        leases before assigning any leases from its downed partner pool.
-        </t>
+        in a PARTNER-DOWN state, there is a chance of duplicate
+        leases for the same prefix to be assigned. This leads to a
+        POTENTIAL-CONFLICT (unresponsive) state when they re-establish
+        contact. The duplicate lease issue can be postponed to a
+        large extent by the server granting new leases first from
+        its own pool. Therefore the server operating in PARTNER-DOWN
+        state MUST use its own pool first for new leases before
+        assigning any leases from its downed partner pool.  </t>
 
       </section> <!-- operation-in-partner-down-state -->
 
@@ -2493,7 +3221,7 @@ RECOVER-WAIT--------->+------------------+
         <t>If the STARTUP bit is set in the server-flags option of
         a received STATE message, a server in PARTNER-DOWN state
         MUST NOT take any state transitions based on reestablishing
-        communications. Essentially, if a server is in PARTNER-DOWN
+        communications. If a server is in PARTNER-DOWN
         state, it ignores all STATE messages from its partner that
         have the STARTUP bit set in the server-flags option of the
         STATE message.</t>
@@ -2639,20 +3367,14 @@ RECOVER-WAIT--------->+------------------+
         maximum-client-lead-time.  When this timer expires, the
         server will transition into RECOVER-DONE state.</t>
 
-        <t>This is to allow any IP addresses that were allocated
+        <t>This is to allow any IPv6 addresses that were allocated
         by this server prior to loss of its client binding information
         in stable storage to contact the other server or to time
         out.</t>
 
-        <t>If this is the first time this server has run failover
-        -- as determined by the information received from the
-        partner, not necessarily only as determined by this server's
-        stable storage (as that may have been lost), then the waiting
-        time discussed above may be skipped, and the server MAY
-        transition immediately to RECOVER-DONE state.</t>
-
         <t>If the server has never before run failover, then there
-        is no need to wait in this state -- but, again, to determine
+        is no need to wait in this state and the server MAY transition
+        immediately to RECOVER_DONE state. However, to determine
         if this server has run failover it is vital that the
         information provided by the partner be utilized, since the
         stable storage of this server may have been lost.</t>
@@ -2665,7 +3387,7 @@ RECOVER-WAIT--------->+------------------+
         transition to RECOVER-DONE state.  This is rare -- failover
         state transitions are not usually made while communications
         are interrupted, but in this case there is no reason to
-        inhibit the timer.</t>
+        inhibit this transition.</t>
 
       </section> <!-- transition-out-of-recover-wait-state -->
 
@@ -2726,22 +3448,23 @@ RECOVER-WAIT--------->+------------------+
         <t hangText="Lease time calculations"> <vspace/>
 
         As discussed in 
-        <xref target="I-D.ietf-dhc-dhcpv6-failover-design"/>, the
-        lease interval given to a DHCP client can never be more than the
-        MCLT greater than the most recently received 
-        potential-expiration-time from the failover partner or the current time,
+        <xref target="mclt"/>, the
+        lease interval given to a DHCPv6 client can never be more than the
+        MCLT greater than the most recently acknowledged partner lifetime
+        received from the failover partner or the current time,
         whichever is later.
         <vspace blankLines="1"/>
         As long as a server adheres to this constraint, the specifics of
-        the lease interval that it gives to a DHCP client or the value
-        of the potential-expiration-time sent to its failover partner
+        the lease interval that it gives to a DHCPv6 client or the value
+        of the partner lifetime sent to its failover partner
         are implementation dependent.</t>
 
         <t hangText="Lazy update of partner server"> <vspace/>
 
         After sending a REPLY that includes a lease update to a client,
-        the server servicing a DHCP client request attempts to update
-        its partner with the new binding information.</t> 
+        the server servicing a DHCPv6 client request attempts to update
+        its partner with the new binding information. See <xref target="lazy-updates"/>.
+        </t>
 
         <t hangText="Reallocation of resources between clients"> <vspace/>
 
@@ -2757,16 +3480,17 @@ RECOVER-WAIT--------->+------------------+
       </t>
 
       <t>In NORMAL state, each server receives binding updates from
-      its partner server in BNDUPD messages. It records these in its
-      binding database in stable storage and then sends a
-      corresponding BNDACK message to its partner server.</t>
+      its partner server in BNDUPD messages (see <xref target="accepting-updates"/>). 
+      It records these in its binding
+      database in stable storage and then sends a corresponding
+      BNDACK message to its partner server (see <xref target="send-bndack"/>).</t>
 
       </section> <!-- operation-in-normal-state -->
       <section anchor="transition-out-of-normal-state"
                title="Transition Out of NORMAL State">
         <t>If an external command is received by a server in NORMAL
         state informing it that its partner is down, then transition
-        into PARTNER- DOWN state.  Generally, this would be an unusual
+        into PARTNER-DOWN state.  Generally, this would be an unusual
         situation, where some external agency knew the partner server
         was down prior to the failover server discovering it on its
         own.</t>  
@@ -2774,32 +3498,33 @@ RECOVER-WAIT--------->+------------------+
         connection with its parner and suddenly operator states that that
         partner is down. -->
 
-        <t>If a server in NORMAL state fails to receive acks to messages sent to
-        its partner for an implementation dependent period of time, it MAY
-        move into COMMUNICATIONS-INTERRUPTED state.  This situation might
-        occur if the partner server was capable of maintaining the TCP connection 
-        between the server and also capable of sending a CONTACT message 
-        periodically, but was (for some reason) incapable of processing 
-        BNDUPD messages.</t>
+        <t>If a server in NORMAL state fails to receive acks to
+        messages sent to its partner for an implementation dependent
+        period of time, it MAY move into COMMUNICATIONS-INTERRUPTED
+        state.  This situation might occur if the partner server
+        was capable of maintaining the TCP connection between the
+        server and also capable of sending a CONTACT message
+        periodically, but was (for some reason) incapable of
+        processing BNDUPD messages.</t>
 
         <t>If the communications is determined to not be "ok" (as
         defined in <xref target="reachability"/>), then transition
         into COMMUNICATIONS-INTERRUPTED state.</t>
 
-        <t>If a server in NORMAL state receives any messages from its partner
-        where the partner has changed state from that expected by the server
-        in NORMAL state, then the server should transition into
-        COMMUNICATIONS-INTERRUPTED state and take the appropriate state transition 
-        from there.  For example, it would be expected for the partner
-        to transition from POTENTIAL-CONFLICT into NORMAL state, but not for
-        the partner to transition from NORMAL into POTENTIAL-CONFLICT state.</t>
+        <t>If a server in NORMAL state receives any messages from
+        its partner where the partner has changed state from that
+        expected by the server in NORMAL state, then the server
+        should transition into COMMUNICATIONS-INTERRUPTED state and
+        take the appropriate state transition from there.  For
+        example, it would be expected for the partner to transition
+        from POTENTIAL-CONFLICT into NORMAL state, but not for the
+        partner to transition from NORMAL into POTENTIAL-CONFLICT
+        state.</t>
 
-        <t><!-- we don't need PAUSED If a server in NORMAL state
-        receives any messages from its partner where the PARTNER has
-        changed into PAUSED state, the server should transition into
-        COMMUNICATIONS-INTERRUPTED state. -->If a server in NORMAL
-        state receives a DISCONNECT message from its partner, the server should transition
-        into COMMUNICATIONS-INTERRUPTED state.</t>
+        <t> If a server in NORMAL state receives a DISCONNECT message
+        from its partner, the server should transition into
+        COMMUNICATIONS-INTERRUPTED state.</t>
+
       </section> <!-- transition-out-of-normal-state -->
     </section> <!-- normal state -->
 
@@ -2816,10 +3541,9 @@ RECOVER-WAIT--------->+------------------+
 
       <t>When a server enters COMMUNICATIONS-INTERRUPTED state, if it has been
       configured to support an automatic transition out of COMMUNICATIONS-
-      INTERRUPTED state and into PARTNER-DOWN state (i.e., a auto-partner-down
-      has been configured), then a timer MUST be started
+      INTERRUPTED state and into PARTNER-DOWN state (i.e., auto-partner-down
+      has been configured), then a timer is started
       for the length of the configured auto-partner-down period.</t>
-      <!-- tomek: Issue 15: do we want auto-partner-down timer? -->
 
       <t>A server transitioning into the COMMUNICATIONS-INTERRUPTED
       state from the NORMAL state SHOULD raise some alarm condition to
@@ -2829,26 +3553,27 @@ RECOVER-WAIT--------->+------------------+
       <section anchor="operation-in-comm-interrupted-state"
                title="Operation in COMMUNICATIONS-INTERRUPTED State">
 
-        <t>In this state a server MUST respond to all DHCP client
+        <t>In this state a server MUST respond to all DHCPv6 client
         requests.  When allocating new leases, each server allocates
         from its own pool, where the primary MUST allocate only FREE
-        resources, and the secondary MUST
-        allocate only FREE_BACKUP resources.  When
+        delegable prefixes, and the secondary MUST
+        allocate only FREE_BACKUP delegable prefixes, and each server
+        allocates from its own independent IPv6 address ranges.  When
         responding to RENEW messages, each server will allow continued
-        renewal of a DHCP client's current lease on a resource
-        irrespective of whether that lease was given out by the
+        renewal of a DHCPv6 client's current lease on a resource
+        regardless of whether that lease was given out by the
         receiving server or not, although the renewal period MUST NOT
-        exceed the maximum client lead time (MCLT) beyond the latest
-        of: 1) the potential valid lifetime already acknowledged by
-        the other server, or 2) now, or 3) the potential valid lifetime 
+        exceed the MCLT beyond the latest
+        of: 1) the partner lifetime already acknowledged by
+        the other server, or 2) now, or 3) the partner lifetime 
         received from the partner server.</t>
 
-        <t>However, since the server cannot communicate with its
-        partner in this state, the acknowledged potential valid
-        lifetime will not be updated in any new bindings.  This is
-        likely to eventually cause the actual valid lifetimes to
-        converge to the MCLT (unless this is greater than
-        the desired-client-lease-time).</t>
+	<t>However, since the server cannot communicate with its
+	partner in this state, the acknowledged partner lifetime
+	will not be updated despite continued RENEW message processing.
+	This is likely to eventually cause the actual lifetimes to
+	converge to the MCLT (unless this is greater than the
+	desired-client-lease-time, which would be unusual).</t>
 
         <t>The server should continue to try to establish a connection
         with its partner.</t>
@@ -2857,7 +3582,7 @@ RECOVER-WAIT--------->+------------------+
       <section anchor="transition-out-of-comm-interrrupted-state"
                title="Transition Out of COMMUNICATIONS-INTERRUPTED State">
 
-        <t>If the safe period timer expires while a server is in the
+        <t>If the auto-partner-down timer expires while a server is in the
         COMMUNICATIONS-INTERRUPTED state, it will transition immediately into
         PARTNER-DOWN state.</t>
 
@@ -2894,8 +3619,7 @@ RECOVER-WAIT--------->+------------------+
 
         <!-- this title is too long. That should be a caption field -->
         <figure anchor="state-change-example" title="Transition from NORMAL to
-         COMMUNICATIONS-INTERRUPTED and back (example with 2 prefixes
-         allocated to secondary)">
+         COMMUNICATIONS-INTERRUPTED and back">
           <artwork><![CDATA[
    Primary                                Secondary
     Server                                  Server
@@ -2949,10 +3673,10 @@ RECOVER-WAIT--------->+------------------+
       <t>It is a goal of this protocol to minimize the possibility that
       POTENTIAL-CONFLICT state is ever entered.</t>
 
-      <t>When a primary server enters POTENTIAL-CONFLICT state it should
-      request that the secondary send it all updates of which it is
-      currently unaware by sending an UPDREQ message to the secondary
-      server.</t>
+      <t>When a primary server enters POTENTIAL-CONFLICT state it
+      should request that the secondary send it all updates which
+      the primary server has not yet acknowledged by sending an
+      UPDREQ message to the secondary server.</t>
 
       <t>A secondary server entering POTENTIAL-CONFLICT state will wait for
       the primary to send it an UPDREQ message.</t>
@@ -2960,7 +3684,7 @@ RECOVER-WAIT--------->+------------------+
       <section anchor="operation-in-potential-conflict-state"
                title="Operation in POTENTIAL-CONFLICT State">
         <t>Any server in POTENTIAL-CONFLICT state MUST NOT process any
-        incoming DHCP requests.</t>
+        incoming DHCPv6 requests.</t>
       </section> <!-- operation-in-potential-conflict-state -->
       <section anchor="transition-out-of-potential-conflict-state"
                title="Transition Out of POTENTIAL-CONFLICT State">
@@ -3035,33 +3759,33 @@ CONFLICT-DONE                                  |
       servers are not responsive in POTENTIAL-CONFLICT state, and
       if one server drops out of service while both servers
       are in POTENTIAL-CONFLICT state, the server that remains
-      in service will not be able to process DHCP client requests and
-      there will be no DHCP service available.  The RESOLUTION-INTERRUPTED
+      in service will not be able to process DHCPv6 client requests and
+      there will be no DHCPv6 service available.  The RESOLUTION-INTERRUPTED
       state is the state that a server moves to if its partner
       disappears while it is in POTENTIAL-CONFLICT state.</t>
 
       <t>When a server enters RESOLUTION-INTERRUPTED state it SHOULD raise an
       alarm condition to alert administrative staff of a problem in the
-      DHCP subsystem.</t>
+      DHCPv6 subsystem.</t>
 
       <section anchor="operation-in-resolution-interrupted-state"
                title="Operation in RESOLUTION-INTERRUPTED State">
-        <t>In this state a server MUST respond to all DHCP client
+        <t>In this state a server MUST respond to all DHCPv6 client
         requests. When allocating new resources, each server SHOULD 
         allocate from its own pool (if
         that can be determined), where the primary SHOULD allocate
         only FREE resources, and the secondary SHOULD allocate only
         FREE_BACKUP resources. When responding to renewal requests, each
-        server will allow continued renewal of a DHCP client's current
+        server will allow continued renewal of a DHCPv6 client's current
         lease independent of whether that lease was given out by the
         receiving server or not, although the renewal period MUST NOT
         exceed the maximum client lead time (MCLT) beyond the latest
-        of: 1) the potential valid lifetime already acknowledged by
-        the other server or 2) now or 3) potential valid lifetime 
+        of: 1) the partner lifetime already acknowledged by
+        the other server or 2) now or 3) partner lifetime 
         received from the partner server.</t>
 
         <t>However, since the server cannot communicate with its
-        partner in this state, the acknowledged potential valid
+        partner in this state, the acknowledged partner 
         lifetime will not be updated in any new bindings.</t>
       </section> <!--
         operation-in-resolution-interrupted-state -->
@@ -3089,8 +3813,9 @@ CONFLICT-DONE                                  |
       There is no operational difference between CONFLICT-DONE and
       NORMAL for primary as in both states it responds to all
       clients' requests. The distinction between CONFLICT-DONE and
-      NORMAL states will be more apparent when load balancing 
-      extension will be defined. <!--,
+      NORMAL states will is necessary in the event that a load-balancing
+      extension is ever defined.
+      <!--,
       as opposed to NORMAL state where it would be in a "balanced"
       responsive state, running the load balancing algorithm.--></t>
 
@@ -3123,7 +3848,7 @@ CONFLICT-DONE                                  |
       <section anchor="operation-in-conflict-done-state"
                title="Operation in CONFLICT-DONE State">
         <t>A primary server in CONFLICT-DONE state is fully responsive
-        to all DHCP clients (similar to the situation in
+        to all DHCPv6 clients (similar to the situation in
         COMMUNICATIONS-INTERRUPTED state).</t>
 
         <t>If communications fails, remain in CONFLICT-DONE state.  If
@@ -3142,17 +3867,17 @@ CONFLICT-DONE                                  |
       </section> <!-- transition-out-of-conflict-done-state -->
     </section> <!-- conflict-done state -->
 
-  </section> <!-- endpoint states -->
+</section> <!-- endpoint states -->
 
 
-  <section anchor="DDNS" title="Dynamic DNS Considerations">
+<section anchor="DDNS" title="Dynamic DNS Considerations">
 
-    <t>DHCP servers (and clients) can use DNS Dynamic Updates as
+    <t>DHCPv6 servers (and clients) can use DNS Dynamic Updates as
     described in <xref target="RFC2136">RFC 2136</xref> to maintain
-    DNS name-mappings as they maintain DHCP leases.  Many different
+    DNS name-mappings as they maintain DHCPv6 leases.  Many different
     administrative models for DHCP-DNS integration are possible.
     Descriptions of several of these models, and guidelines that
-    DHCP servers and clients should follow in carrying them out,
+    DHCPv6 servers and clients should follow in carrying them out,
     are laid out in <xref target="RFC4704">RFC 4704</xref>.</t>
 
     <t>The nature of the failover protocol introduces some issues
@@ -3193,8 +3918,8 @@ CONFLICT-DONE                                  |
 
         <t>The failover protocol describes the conditions under
         which each failover server may renew a lease to its current
-        DHCP client, and describes the conditions under which it
-        may grant a lease to a new DHCP client.  An analogous set
+        DHCPv6 client, and describes the conditions under which it
+        may grant a lease to a new DHCPv6 client.  An analogous set
         of conditions determines when a failover server should
         initiate a DDNS update, and when it should attempt to remove
         records from the DNS. The failover protocol's conditions
@@ -3202,9 +3927,9 @@ CONFLICT-DONE                                  |
         address and prefix assignments; allowing clients to continue
         using leases which they obtained from one failover partner
         even if they can only communicate with the other partner;
-        allowing the secondary DHCP server to grant new leases even
+        allowing the secondary DHCPv6 server to grant new leases even
         if it is unable to communicate with the primary server.
-        The desired external DDNS behavior for DHCP failover servers
+        The desired external DDNS behavior for DHCPv6 failover servers
         is similar to that described above for the failover protocol
         itself:</t>
 
@@ -3232,9 +3957,9 @@ CONFLICT-DONE                                  |
             lease binding.</t>
         </list></t>
 
-        <t>While DHCP servers configured for DDNS typically perform
+        <t>While DHCPv6 servers configured for DDNS typically perform
         these operations on both the AAAA and the PTR resource records, 
-        this is not required.  It is entirely possible that a DHCP server
+        this is not required.  It is entirely possible that a DHCPv6 server
         could be configured to only update the DNS with PTR records, and 
         the DHCPv6 clients could be responsible for updating the DNS with
         their own AAAA records.  In this case, the discussions here would
@@ -3302,7 +4027,7 @@ CONFLICT-DONE                                  |
         <t>The FQDN option contains the FQDN that will be associated
         with the AAAA RR (if the server is performing an AAAA RR update
         for the client).  The PTR RR can be generated automatically from
-        the IP address or prefix value. The FQDN may be composed
+        the IPv6 address or prefix value. The FQDN may be composed
         in any of several ways, depending on server configuration
         and the information provided by the client in its DHCP
         messages. The client may supply a hostname which it would
@@ -3312,30 +4037,30 @@ CONFLICT-DONE                                  |
         configured with an FQDN to use for the client, or it may
         be configured to synthesize an FQDN.</t>
 
-        <t>Since the server interacting with the client may not have completed the
-        DDNS update at the time it sends the first BNDUPD about the
-        lease binding, there may be cases where the FQDN in later
-        BNDUPD messages does not match the FQDN included in earlier
-        messages.  For example, the responsive server may be
-        configured to handle situations where two or more DHCP
-        client FQDNs are identical by modifying the most-specific
-        label in the FQDNs of some of the clients in an attempt to
-        generate unique FQDNs for them (a process sometimes called
-        "disambiguation").  Alternatively, at sites which use some
-        or all of the information which clients supply to form the
-        FQDN, it's possible that a client's configuration may be
-        changed so that it begins to supply new data.  The 
-        server interacting with the client may react by removing the DNS records which it
-        originally added for the client, and replacing them with
-        records that refer to the client's new FQDN. In such cases,
-        the server SHOULD include the actual FQDN that
-        was used in subsequent DDNS options in any BNDUPD messages exchanged between
-        the failover partners.  This server
-        SHOULD include relevant information in its BNDUPD messages.
-        This information may be necessary in order to allow the
-        non-responsive partner to detect client configuration changes
-        that change the hostname or FQDN data which the client
-        includes in its DHCP requests.</t>
+	<t>Since the server interacting with the client may not
+	have completed the DDNS update at the time it sends the
+	first BNDUPD about the lease binding, there may be cases
+	where the FQDN in later BNDUPD messages does not match the
+	FQDN included in earlier messages.  For example, the
+	responsive server may be configured to handle situations
+	where two or more DHCP client FQDNs are identical by modifying
+	the most-specific label in the FQDNs of some of the clients
+	in an attempt to generate unique FQDNs for them (a process
+	sometimes called "disambiguation").  Alternatively, at sites
+	which use some or all of the information which clients
+	supply to form the FQDN, it's possible that a client's
+	configuration may be changed so that it begins to supply
+	new data.  The server interacting with the client may react
+	by removing the DNS records which it originally added for
+	the client, and replacing them with records that refer to
+	the client's new FQDN. In such cases, the server SHOULD
+	include the actual FQDN that was used in subsequent DDNS
+	options in any BNDUPD messages exchanged between the failover
+	partners.  This server SHOULD include relevant information
+	in its BNDUPD messages.  This information may be necessary
+	in order to allow the non-responsive partner to detect
+	client configuration changes that change the hostname or
+	FQDN data which the client includes in its DHCPv6 requests.</t>
 
     </section>
 
@@ -3374,7 +4099,7 @@ CONFLICT-DONE                                  |
             DDNS update.  It MAY initiate this update immediately
             upon entry to PARTNER-DOWN state, it may perform this
             in the background, or it MAY initiate this update upon
-            next hearing from the DHCP client.</t>
+            next hearing from the DHCPv6 client.</t>
         </list></t>
 
     </section>
@@ -3387,12 +4112,12 @@ CONFLICT-DONE                                  |
         records were added on behalf of the client.</t>
 
         <t>A server not in PARTNER-DOWN state "makes a resource
-        FREE" when it initiates a BNDUPD with a binding-status of
+        FREE*" when it initiates a BNDUPD with a binding-status of
         FREE, FREE_BACKUP, EXPIRED, or RELEASED.  Its partner
         confirms this status by acking that BNDUPD, and upon receipt
-        of the BNDACK the server has "made the resource FREE".
+        of the BNDACK the server has "made the resource FREE*".
         Conversely, a server in PARTNER-DOWN state "makes a resource
-        FREE" when it sets the binding-status to FREE, since in
+        FREE*" when it sets the binding-status to FREE, since in
         PARTNER-DOWN state no communications is required with the
         partner.</t>
 
@@ -3406,7 +4131,7 @@ CONFLICT-DONE                                  |
 
         <t>The failover protocol ensures that only one of the two
         partner servers will be able to make a resource FREE*. The
-        server making the resource FREE may be doing so while it
+        server making the resource FREE* may be doing so while it
         is in NORMAL communication with its partner, or it may be
         in PARTNER-DOWN state. If a server is in PARTNER-DOWN state,
         it may be performing DDNS deletes for RRs which its partner
@@ -3423,7 +4148,7 @@ CONFLICT-DONE                                  |
     <section anchor="nameassignment"
       title="Name Assignment with No Update of DNS">
 
-        <t>In some cases, a DHCP server is configured to return a name
+        <t>In some cases, a DHCPv6 server is configured to return a name
         to the DHCPv6 client but not enter that name into the DNS.  
         This is typically a name that it has discovered
         or generated from information it has received from the client.
@@ -3434,7 +4159,7 @@ CONFLICT-DONE                                  |
 
     </section>
 
-  </section>
+</section>
 
   <!-- RESERVATIONS  
        This isn't really going to work as written, but it is a whole
@@ -3497,45 +4222,45 @@ CONFLICT-DONE                                  |
     -->
 
 
-  <section title="Security Considerations">
-    <t>DHCPv6 failover is an extension of a standard DHCPv6 protocol, so all
-    security considerations from <xref target="RFC3315" />, Section 23 and
-    <xref target="RFC3633" />, Section 15 related to the server apply.</t>
+<section title="Security Considerations">
 
-    <t>As traffic exchange between clients and server is not encrypted,
-    an attacker that penetrated the network and is able to intercept traffic,
-    will not gain any additional information by also sniffing communication
-    between partners.</t>
+   <t>DHCPv6 failover is an extension of a standard DHCPv6 protocol, so all
+   security considerations from <xref target="RFC3315" />, Section 23 and
+   <xref target="RFC3633" />, Section 15 related to the server apply.</t>
 
-    <t>An attacker that is able to impersonate one partner can efficiently
-    perform a denial of service attack on the remaining uncompromised server.
-    Several techniques may be used: pretending that conflict resolution
-    is required, requesting rebalance, claiming that a valid lease was released
-    or declined etc. For that reason the communication between servers
-    SHOULD support failover connections over TLS, as explained in 
-    <xref target="create-connections" />. Such secure connections SHOULD
-    be optional and configurable by the administrator.</t>
+   <t>
+   The use of TCP introduces some additional concerns.  Attacks that
+   attempt to exhaust the DHCPv6 server's available TCP connection
+   resources can compromise the ability of legitimate partners to
+   receive service.  Malicious requestors who succeed in establishing
+   connections but who then send invalid messages, partial messages, or no
+   messages at all can also exhaust a server's pool of available
+   connections.
+   </t>
 
-    <t>A server MUST NOT operate in PARTNER-DOWN if its partner is up.
-    Network administrators are expected to switch the remaining active server
-    to PARTNER-DOWN state only if they is sure that its partner server
-    is indeed down. Failing to obey this requirement will result in both
-    servers likely assigning duplicate leases to different clients. Implementers
-    should take that into consideration if they decide to implement
-    the auto-partner-down timer-based transition to PARTNER-DOWN state.</t>
+   <t>
+   When operating in secure mode, TLS <xref target="RFC5246"/> is used
+   to secure the connection.  The recommendations in <xref target="RFC7525"/>
+   SHOULD be followed when negotiating a TLS connection.  
+   </t>
 
-    <t>Running a network protected by DHCPv6 failover requires more resources
-    than running without it. In particular some of the resources are
-    allocated to the secondary server and they are not usable in a normal
-    (i.e. non failures) operation immediately, though over time they will
-    be rebalanced and end up on the server that needs them. While limiting 
-    this pool may be preferable from resource utilization perspective, 
-    it must be a reasonably large pool, so the secondary may take over once 
-    the primary becomes unavailable.</t>
+   <t>
+   Servers SHOULD offer configuration parameters to limit the sources
+   of incoming connections through validation and use of the digital
+   certificates presented to create a TLS connection.  They SHOULD
+   also limit the number of accepted connections and limit the period
+   of time during which an idle connection will be left open.  
+   </t>
 
-  </section>
+   <t>
+   Authentication for DHCPv6 messages <xref target="RFC3315"/> MUST NOT be
+   used to attempt to secure transmission of the messages described in
+   this document.
+   </t>
 
-  <section title="IANA Considerations">
+</section>
+
+<section title="IANA Considerations">
 
    <t>
    IANA is requested to assign values for the following new DHCPv6
@@ -3583,8 +4308,8 @@ CONFLICT-DONE                                  |
       <t>OPTION_F_FAILOVER_EXPIRE_TIME (TBD15)</t>
       <t>OPTION_F_MAX_UNACKED_BNDUPD (TBD16)</t>
       <t>OPTION_F_MCLT (TBD17)</t>
-      <t>OPTION_F_NEXT_PARTNER_LIFETIME (TBD18)</t>
-      <t>OPTION_F_NEXT_PARTNER_LIFETIME_SENT (TBD19)</t>
+      <t>OPTION_F_PARTNER_LIFETIME (TBD18)</t>
+      <t>OPTION_F_PARTNER_LIFETIME_SENT (TBD19)</t>
       <t>OPTION_F_PARTNER_DOWN_TIME (TBD20)</t>
       <t>OPTION_F_PARTNER_RAW_CLT_TIME (TBD21)</t>
       <t>OPTION_F_PROTOCOL_VERSION (TBD22)</t>
@@ -3604,20 +4329,23 @@ CONFLICT-DONE                                  |
    Status codes in the registry maintained in 
 http://www.iana.org/assignments/dhcpv6-parameters:
    <list> 
+    <!--
       <t>OneClientDifferentLeases (TBD30)</t>
-      <t>AddressInUseByOtherClient (TBD31)</t>
-      <t>ConfigurationConflict (TBD32)</t>
-      <t>MissingBindingInformation (TBD33)</t>
-      <t>OutdatedBindingInformation (TBD34)</t>
+    -->
+      <t>AddressInUseByOtherClient (TBD30)</t>
+      <t>ConfigurationConflict (TBD31)</t>
+      <t>MissingBindingInformation (TBD32)</t>
+      <t>OutdatedBindingInformation (TBD33)</t>
+      <t>ServerShuttingDown (TBD34)</t>
    </list>
    </t>
 
 
-  </section>
+</section>
 
-  <section title="Acknowledgements">
+<section title="Acknowledgements">
     <t>This document extensively uses concepts, definitions and other
-    parts of <xref target="dhcpv4-failover"/> document.  Authors would
+    parts of an effort to document failover for DHCPv4.  Authors would
     like to thank Shawn Routher, Greg Rabil, Bernie Volz and Marcin Siodelski
     for their significant involvement and contributions. Authors would like to
     thank VithalPrasad Gaitonde, Krzysztof Gierlowski, Krzysztof Nowicki and
@@ -3629,7 +4357,7 @@ http://www.iana.org/assignments/dhcpv6-parameters:
     Education under the European Regional Development Fund, Grant
     No. POIG.01.01.02-00-045/09-00 (Future Internet Engineering
     Project).</t>
-  </section>
+</section>
 
 </middle>
 
@@ -3645,12 +4373,15 @@ http://www.iana.org/assignments/dhcpv6-parameters:
       <?rfc include='reference.RFC.5007'?>
       <?rfc include='reference.RFC.5246'?>
       <?rfc include='reference.RFC.5460'?>
-      <?rfc include='reference.RFC.7031'?>
+      <?rfc include='reference.RFC.7525'?>
+      <?rfc include='reference.RFC.7653'?>
+
     </references>
+
     <references title="Informative References">
-      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-failover-design.xml'?>
-      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-load-balancing.xml'?>
-      <?rfc include='reference.I-D.ietf-dhc-dhcpv6-active-leasequery'?>
+
+      <?rfc include='reference.RFC.7031'?>
+    <!--
       <reference anchor="dhcpv4-failover">
         <front>
           <title>DHCP Failover Protocol</title> <author fullname="Ralph
@@ -3681,6 +4412,7 @@ http://www.iana.org/assignments/dhcpv6-parameters:
         </front> <seriesInfo name="Internet-Draft"
         value="draft-ietf-dhc-failover-12"/>
       </reference> 
+    -->
 
     </references>
   </back>
