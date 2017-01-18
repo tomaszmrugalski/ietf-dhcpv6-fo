@@ -4822,7 +4822,7 @@ http://www.iana.org/assignments/dhcpv6-parameters:
 <section title="Acknowledgements">
     <t>This document extensively uses concepts, definitions and
     other parts of an effort to document failover for DHCPv4.
-    Authors would like to thank Shawn Routher, Greg Rabil, Bernie
+    Authors would like to thank Shawn Routhier, Greg Rabil, Bernie
     Volz and Marcin Siodelski for their significant involvement and
     contributions. In particular, Bernie Volz and Shawn Routher
     provided detailed and substantive technical reviews of the draft.
